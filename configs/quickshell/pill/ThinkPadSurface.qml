@@ -5,12 +5,13 @@ import Quickshell.Io
 import "Singletons"
 
 /**
- * 思 THINKPAD surface. Read-only thermal/LED telemetry plus the input knobs that
- * are safe to write (TrackPoint, double-tap, keyboard backlight).
+ * 思 THINKPAD. Three collapsible groups, in the same rhythm as Look:
+ * Thermal (telemetry plus the thinkfan curve), Lighting (the LEDs that are
+ * writable) and Pointing (TrackPoint and double-tap).
  *
- * The fan is owned by thinkfan on the reference machine, so this surface never
- * writes fan levels. It reports the EC level, RPM and the thinkfan state. Fan
- * preset switching is a separate, validated step in docs/THINKPAD.md.
+ * The fan curve is the only fan write. It replaces the levels block in
+ * /etc/thinkfan.yaml through the helper, which backs the file up and sends
+ * SIGHUP. Raw levels, pwm1_enable and /proc/acpi/ibm/fan are never touched here.
  */
 PillSurface {
     id: root
@@ -31,24 +32,84 @@ PillSurface {
         : (ThinkPad.fanStatus.length > 0 ? "EC " + ThinkPad.fanStatus : "no fan control")
     readonly property string sensorText: {
         var parts = [];
-        if (ThinkPad.tempCpu >= 0) parts.push(ThinkPad.tempCpu + " CPU");
-        if (ThinkPad.tempGpu >= 0) parts.push(ThinkPad.tempGpu + " GPU");
-        if (ThinkPad.tempNvme >= 0) parts.push(ThinkPad.tempNvme + " NVMe");
-        return parts.join("  ·  ");
+        if (ThinkPad.tempCpu >= 0) parts.push(ThinkPad.tempCpu + "°");
+        if (ThinkPad.tempGpu >= 0) parts.push(ThinkPad.tempGpu + "°");
+        if (ThinkPad.tempNvme >= 0) parts.push(ThinkPad.tempNvme + "°");
+        return parts.length > 0 ? parts.join("  ·  ") : "—";
     }
+    readonly property bool hasLighting: ThinkPad.kbd >= 0
+        || ThinkPad.leds.LIDLOGO !== undefined || ThinkPad.leds.VANTAGE !== undefined
+    readonly property bool hasPointing: ThinkPad.tpList.length > 0 || ThinkPad.doubletap >= 0
+    readonly property bool curveReady: ThinkPad.curve.length === 8
+    readonly property string curveSummary: root.curveDirty
+        ? "8 levels · edited"
+        : "8 levels · thinkfan"
     readonly property var kbdOptions: ThinkPad.kbdMax >= 2
         ? [{ label: "Off", value: 0 }, { label: "Dim", value: 1 }, { label: "Full", value: 2 }]
         : [{ label: "Off", value: 0 }, { label: "On", value: 1 }]
-    readonly property var doubletapValue: ThinkPad.doubletap === 1
 
     property bool busy: false
     property string notice: ""
+    property var actionDone: null
+    property var focusRowItem: null
 
-    function run(args) {
+    property bool curveOpen: false
+    property var curveDraft: []
+    property bool curveDirty: false
+
+    function reportRowHover(row, hovered) {
+        if (hovered)
+            focusRowItem = row;
+        else if (focusRowItem === row)
+            focusRowItem = null;
+    }
+
+    function activateRow(row) {}
+
+    function syncCurve(force) {
+        if (!force && curveDirty)
+            return;
+        var next = [];
+        for (var i = 0; i < ThinkPad.curve.length; i++)
+            next.push({
+                level: ThinkPad.curve[i].level,
+                low: ThinkPad.curve[i].low,
+                high: ThinkPad.curve[i].high
+            });
+        curveDraft = next;
+    }
+
+    function setCurve(index, edge, value) {
+        if (index < 0 || index >= curveDraft.length)
+            return;
+        var next = curveDraft.slice();
+        var item = {
+            level: next[index].level,
+            low: next[index].low,
+            high: next[index].high
+        };
+        item[edge] = value;
+        next[index] = item;
+        curveDraft = next;
+        curveDirty = true;
+    }
+
+    function applyCurve() {
+        var parts = [];
+        for (var i = 0; i < curveDraft.length; i++)
+            parts.push(curveDraft[i].level + ":" + curveDraft[i].low + ":" + curveDraft[i].high);
+        root.run(["curve", "set", parts.join(";")], function () {
+            root.curveDirty = false;
+            root.syncCurve(true);
+        });
+    }
+
+    function run(args, done) {
         if (actionProc.running)
             return;
         busy = true;
         notice = "";
+        actionDone = done || null;
         actionProc.command = ["sudo", "-n", root.helper].concat(args);
         actionProc.running = true;
     }
@@ -65,6 +126,10 @@ PillSurface {
         root.run(["led", "kbd", String(value)]);
     }
 
+    function setLed(name, on) {
+        root.run(["led", name, on ? "1" : "0"]);
+    }
+
     function tpLabel(name) {
         switch (name) {
         case "sensitivity": return "Sensitivity";
@@ -77,7 +142,21 @@ PillSurface {
         return name;
     }
 
-    onOpenChanged: if (open) ThinkPad.refresh()
+    onOpenChanged: if (open) {
+        ThinkPad.refresh();
+        if (!curveDirty)
+            syncCurve(true);
+    }
+
+    Component.onCompleted: syncCurve(true)
+
+    Connections {
+        target: ThinkPad
+        function onCurveChanged() {
+            if (!root.curveDirty)
+                root.syncCurve(true);
+        }
+    }
 
     Timer {
         interval: 2000
@@ -93,52 +172,17 @@ PillSurface {
                 root.notice = this.text.trim()
         }
         onExited: (code) => {
+            var done = root.actionDone;
+            root.actionDone = null;
             root.busy = false;
             if (code === 0) {
                 root.notice = "saved";
                 ThinkPad.refresh();
+                if (done)
+                    done();
             } else if (root.notice.length === 0) {
                 root.notice = "helper failed (" + code + ")";
             }
-        }
-    }
-
-    component GroupTitle: Text {
-        color: Theme.faint
-        font.family: Theme.font
-        font.pixelSize: 9 * root.s
-        font.weight: Font.Bold
-        font.letterSpacing: 1.2 * root.s
-        font.capitalization: Font.AllUppercase
-    }
-
-    component ReadRow: Item {
-        property string label: ""
-        property string value: ""
-        width: parent ? parent.width : 0
-        height: 27 * root.s
-
-        Text {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            text: parent.label
-            color: Theme.faint
-            font.family: Theme.font
-            font.pixelSize: 10 * root.s
-            font.weight: Font.Medium
-        }
-
-        Text {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            text: parent.value
-            color: Theme.subtle
-            font.family: Theme.font
-            font.pixelSize: 10 * root.s
-            font.weight: Font.DemiBold
-            elide: Text.ElideRight
-            width: Math.min(implicitWidth, parent.width * 0.62)
-            horizontalAlignment: Text.AlignRight
         }
     }
 
@@ -159,7 +203,8 @@ PillSurface {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 text: ThinkPad.model.length > 0
-                    ? ThinkPad.model.replace("ThinkPad ", "") + (ThinkPad.bios.length > 0 ? " · " + ThinkPad.bios : "")
+                    ? ThinkPad.model.replace("ThinkPad ", "")
+                        + (ThinkPad.bios.length > 0 ? " · " + ThinkPad.bios : "")
                     : ""
                 color: Theme.faint
                 font.family: Theme.font
@@ -171,271 +216,205 @@ PillSurface {
             }
         }
 
-        Item {
-            width: parent.width
-            height: 70 * root.s
+        ThinkPadHero {
+            s: root.s
             visible: ThinkPad.present
-
-            Row {
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10 * root.s
-                spacing: 5 * root.s
-
-                Text {
-                    text: root.fanText
-                    color: Theme.cream
-                    font.family: Theme.font
-                    font.pixelSize: 38 * root.s
-                    font.weight: Font.Bold
-                    font.letterSpacing: -0.5 * root.s
-                    font.features: { "tnum": 1 }
-                }
-
-                Text {
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 4 * root.s
-                    text: "rpm"
-                    color: Theme.subtle
-                    font.family: Theme.font
-                    font.pixelSize: 12 * root.s
-                    font.weight: Font.DemiBold
-                }
-            }
-
-            Text {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.topMargin: 6 * root.s
-                text: root.fanState
-                color: ThinkPad.thinkfan === "active" ? Theme.flameGlow : Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 9 * root.s
-                font.weight: Font.Medium
-            }
-
-            Text {
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 13 * root.s
-                text: root.sensorText
-                color: Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
-                font.weight: Font.Medium
-                elide: Text.ElideRight
-                width: Math.min(implicitWidth, parent.width * 0.55)
-                horizontalAlignment: Text.AlignRight
-            }
+            fanText: root.fanText
+            fanState: root.fanState
+            sensorText: root.sensorText
         }
 
-        Item {
-            width: parent.width
-            height: 118 * root.s
-            visible: !ThinkPad.present
-
-            Text {
-                anchors.centerIn: parent
-                text: "No ThinkPad hardware detected"
-                color: Theme.subtle
-                font.family: Theme.font
-                font.pixelSize: 11 * root.s
-            }
-        }
-
-        Item {
-            width: parent.width
-            height: 88 * root.s
-            visible: ThinkPad.present && !ThinkPad.available
-
-            Text {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 14 * root.s
-                text: ThinkPad.loading ? "Reading ThinkPad status…" : "ThinkPad detected, helper not available"
-                color: Theme.subtle
-                font.family: Theme.font
-                font.pixelSize: 10 * root.s
-            }
-
-            Text {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 34 * root.s
-                text: ThinkPad.error.length > 0
-                    ? ThinkPad.error
-                    : "Run sudo tools/install-extras.sh from the reddot checkout"
-                color: Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 9 * root.s
-                elide: Text.ElideRight
-            }
+        ThinkPadState {
+            s: root.s
+            present: ThinkPad.present
+            available: ThinkPad.available
+            loading: ThinkPad.loading
+            error: ThinkPad.error
         }
 
         Column {
             width: parent.width
             visible: root.showData
-            spacing: 3 * root.s
+            spacing: 0
 
-            Item { width: parent.width; height: 4 * root.s }
-            GroupTitle { text: "Thermal" }
-            ReadRow { label: "Fan"; value: root.fanState }
-            ReadRow { label: "Sensors"; value: root.sensorText }
-            ReadRow {
-                label: "Platform"
-                value: (ThinkPad.platform.length > 0 ? ThinkPad.platform : "unknown") + " · read-only"
-            }
+            ThinkPadGroup {
+                s: root.s
+                title: "Thermal"
+                open: true
 
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: Theme.threadBg
-            }
-
-            GroupTitle { text: "Input" }
-
-            Repeater {
-                model: ThinkPad.tpList
-
-                Item {
-                    required property var modelData
-                    width: parent ? parent.width : 0
-                    height: 31 * root.s
-                    enabled: !root.busy
-
+                SettingsField {
+                    surface: root
+                    label: "Fan"
+                    visible: ThinkPad.fanRpm >= 0 || ThinkPad.thinkfan.length > 0
                     Text {
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: root.tpLabel(parent.modelData.name)
-                        color: Theme.faint
+                        text: root.fanState
+                        color: Theme.subtle
                         font.family: Theme.font
                         font.pixelSize: 10 * root.s
-                        font.weight: Font.Medium
-                    }
-
-                    LinkToggle {
-                        visible: parent.modelData.bool
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        s: root.s
-                        on: parent.modelData.value === 1
-                        onToggled: root.setTp(parent.modelData.name, !on ? 1 : 0)
-                    }
-
-                    ScrubValue {
-                        visible: !parent.modelData.bool
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        s: root.s
-                        value: parent.modelData.value
-                        from: 0
-                        to: parent.modelData.max
-                        step: parent.modelData.name === "drift_time" ? 50 : 4
-                        enabled: !root.busy
-                        onEdited: v => root.setTp(parent.modelData.name, v)
+                        font.weight: Font.DemiBold
                     }
                 }
-            }
 
-            Item {
-                width: parent.width
-                height: ThinkPad.doubletap >= 0 ? 31 * root.s : 0
-                visible: ThinkPad.doubletap >= 0
-                enabled: !root.busy
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Double-tap"
-                    color: Theme.faint
-                    font.family: Theme.font
-                    font.pixelSize: 10 * root.s
-                    font.weight: Font.Medium
+                SettingsField {
+                    surface: root
+                    label: "Sensors"
+                    Text {
+                        text: root.sensorText
+                        color: Theme.subtle
+                        font.family: Theme.font
+                        font.pixelSize: 10 * root.s
+                        font.weight: Font.DemiBold
+                    }
                 }
 
-                LinkToggle {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    s: root.s
-                    on: root.doubletapValue
-                    onToggled: root.setDoubletap(!on)
-                }
-            }
-
-            Item {
-                width: parent.width
-                height: ThinkPad.kbd >= 0 ? 36 * root.s : 0
-                visible: ThinkPad.kbd >= 0
-                enabled: !root.busy
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Keyboard light"
-                    color: Theme.faint
-                    font.family: Theme.font
-                    font.pixelSize: 10 * root.s
-                    font.weight: Font.Medium
-                }
-
-                SettingsSeg {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    s: root.s
-                    options: root.kbdOptions
-                    value: ThinkPad.kbd
-                    enabled: !root.busy
-                    onPicked: (v) => root.setKbd(v)
-                }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: Theme.threadBg
-            }
-
-            GroupTitle { text: "Indicators" }
-
-            Grid {
-                id: ledGrid
-                width: parent.width
-                columns: 2
-                spacing: 4 * root.s
-
-                Repeater {
-                    model: ThinkPad.ledList
+                SettingsField {
+                    surface: root
+                    label: "Fan curve"
+                    visible: root.curveReady
 
                     Row {
-                        required property var modelData
-                        width: ledGrid.width / 2 - ledGrid.spacing
-                        height: 20 * root.s
-                        spacing: 7 * root.s
-
-                        Rectangle {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 5 * root.s
-                            height: 5 * root.s
-                            radius: 2.5 * root.s
-                            color: parent.modelData.value > 0 ? Theme.verm : Theme.threadBg
-                            border.width: 1
-                            border.color: parent.modelData.value > 0 ? Theme.vermLit : Theme.border
-                        }
+                        spacing: 8 * root.s
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: parent.modelData.label
-                            color: parent.modelData.value > 0 ? Theme.subtle : Theme.faint
+                            text: root.curveSummary
+                            color: root.curveDirty ? Theme.flameCore : Theme.faint
                             font.family: Theme.font
                             font.pixelSize: 9.5 * root.s
+                            font.weight: Font.Medium
+                        }
+
+                        ChipButton {
+                            s: root.s
+                            text: root.curveOpen ? "Close" : "Edit"
+                            enabled: !root.busy
+                            onClicked: root.curveOpen = !root.curveOpen
+                        }
+                    }
+                }
+
+                Item {
+                    width: parent.width
+                    height: root.curveOpen ? curveItem.implicitHeight : 0
+                    clip: true
+                    Behavior on height {
+                        NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic }
+                    }
+
+                    ThinkPadCurve {
+                        id: curveItem
+                        visible: root.curveOpen
+                        s: root.s
+                        surface: root
+                        rows: root.curveDraft
+                        busy: root.busy
+                        dirty: root.curveDirty
+                        onEdited: (index, edge, value) => root.setCurve(index, edge, value)
+                        onApplied: root.applyCurve()
+                        onReset: {
+                            root.curveDirty = false;
+                            root.syncCurve(true);
                         }
                     }
                 }
             }
 
-            Item { width: parent.width; height: 7 * root.s }
+            ThinkPadGroup {
+                s: root.s
+                title: "Lighting"
+                open: true
+                visible: root.hasLighting
+
+                SettingsField {
+                    surface: root
+                    label: "Keyboard light"
+                    visible: ThinkPad.kbd >= 0
+
+                    SettingsSeg {
+                        s: root.s
+                        options: root.kbdOptions
+                        value: ThinkPad.kbd
+                        enabled: !root.busy
+                        onPicked: (v) => root.setKbd(v)
+                    }
+                }
+
+                SettingsField {
+                    surface: root
+                    label: "Lid logo"
+                    visible: ThinkPad.leds.LIDLOGO !== undefined
+
+                    LinkToggle {
+                        s: root.s
+                        on: (ThinkPad.leds.LIDLOGO || 0) > 0
+                        enabled: !root.busy
+                        onToggled: root.setLed("lid", !on)
+                    }
+                }
+
+                SettingsField {
+                    surface: root
+                    label: "Vantage"
+                    visible: ThinkPad.leds.VANTAGE !== undefined
+
+                    LinkToggle {
+                        s: root.s
+                        on: (ThinkPad.leds.VANTAGE || 0) > 0
+                        enabled: !root.busy
+                        onToggled: root.setLed("vantage", !on)
+                    }
+                }
+            }
+
+            ThinkPadGroup {
+                s: root.s
+                title: "Pointing"
+                open: false
+                visible: root.hasPointing
+
+                Repeater {
+                    model: ThinkPad.tpList
+
+                    SettingsField {
+                        id: tpRow
+                        required property var modelData
+                        surface: root
+                        label: root.tpLabel(tpRow.modelData.name)
+
+                        LinkToggle {
+                            visible: tpRow.modelData.bool
+                            s: root.s
+                            on: tpRow.modelData.value === 1
+                            enabled: !root.busy
+                            onToggled: root.setTp(tpRow.modelData.name, !on ? 1 : 0)
+                        }
+
+                        ScrubValue {
+                            visible: !tpRow.modelData.bool
+                            s: root.s
+                            value: tpRow.modelData.value
+                            from: 0
+                            to: tpRow.modelData.max
+                            step: tpRow.modelData.name === "drift_time" ? 50 : 4
+                            enabled: !root.busy
+                            onEdited: (v) => root.setTp(tpRow.modelData.name, v)
+                        }
+                    }
+                }
+
+                SettingsField {
+                    surface: root
+                    label: "Double-tap"
+                    visible: ThinkPad.doubletap >= 0
+
+                    LinkToggle {
+                        s: root.s
+                        on: ThinkPad.doubletap === 1
+                        enabled: !root.busy
+                        onToggled: root.setDoubletap(!on)
+                    }
+                }
+            }
 
             Rectangle {
                 width: parent.width
@@ -475,14 +454,25 @@ PillSurface {
                 }
             }
 
-            Text {
+            Item {
                 width: parent.width
-                text: root.notice.length > 0 ? root.notice : "Fan is managed by thinkfan; temperatures only"
-                color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 9 * root.s
-                font.weight: Font.Medium
-                elide: Text.ElideRight
+                height: noticeText.implicitHeight + 10 * root.s
+
+                Text {
+                    id: noticeText
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.topMargin: 6 * root.s
+                    text: root.notice.length > 0
+                        ? root.notice
+                        : "Mic mute, power and battery LEDs follow the hardware."
+                    color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
+                    font.family: Theme.font
+                    font.pixelSize: 9 * root.s
+                    font.weight: Font.Medium
+                    elide: Text.ElideRight
+                }
             }
         }
     }

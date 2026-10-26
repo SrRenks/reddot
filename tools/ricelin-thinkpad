@@ -19,6 +19,7 @@ set -eu
 SYS="${RICELIN_THINKPAD_SYSFS:-/sys}"
 TP="$SYS/devices/platform/thinkpad_acpi"
 PROC="${RICELIN_THINKPAD_PROC:-/proc/acpi/ibm/fan}"
+THINKFAN_CONF="${RICELIN_THINKPAD_THINKFAN:-/etc/thinkfan.yaml}"
 SERIO="${RICELIN_THINKPAD_SERIO:-}"
 LEDS="$SYS/class/leds"
 HWMON="$SYS/class/hwmon"
@@ -110,6 +111,11 @@ cmd_status() {
     [ -r "$SYS/firmware/acpi/platform_profile" ] && \
         echo "PLATFORM=$(cat "$SYS/firmware/acpi/platform_profile" 2>/dev/null)"
 
+    if [ -r "$THINKFAN_CONF" ]; then
+        curve=$(sed -n 's/.*\["level \([0-7]\)",[[:space:]]*\([0-9]\+\),[[:space:]]*\([0-9]\+\)\].*/\1:\2:\3/p' "$THINKFAN_CONF" | paste -sd';' -)
+        [ -n "$curve" ] && echo "CURVE=$curve"
+    fi
+
     for pair in "KBD:tpacpi::kbd_backlight" "MICMUTE:platform::micmute" \
                 "MUTE:platform::mute" "LIDLOGO:tpacpi::lid_logo_dot" \
                 "POWER:tpacpi::power" "STANDBY:tpacpi::standby" \
@@ -164,16 +170,95 @@ cmd_doubletap() {
     printf '%s\n' "$1" > "$TP/doubletap_enable"
 }
 
+cmd_curve() {
+    [ "$#" -eq 2 ] || die "usage: curve set <level:low:high;...>"
+    [ "$1" = "set" ] || die "usage: curve set <level:low:high;...>"
+    spec=$2
+    [ -r "$THINKFAN_CONF" ] || die "thinkfan config not found: $THINKFAN_CONF"
+    command -v systemctl >/dev/null 2>&1 || die "systemctl is required"
+
+    oldifs=$IFS
+    IFS=';'
+    set -- $spec
+    IFS=$oldifs
+    [ "$#" -eq 8 ] || die "curve needs 8 levels"
+
+    i=0
+    oldifs=$IFS
+    IFS=';'
+    for pair in $spec; do
+        level=${pair%%:*}
+        rest=${pair#*:}
+        low=${rest%%:*}
+        high=${rest##*:}
+        case "$level" in 0|1|2|3|4|5|6|7) ;; *) IFS=$oldifs; die "bad level: $level" ;; esac
+        case "$low" in ''|*[!0-9]*) IFS=$oldifs; die "bad low threshold: $low" ;; esac
+        case "$high" in ''|*[!0-9]*) IFS=$oldifs; die "bad high threshold: $high" ;; esac
+        [ "$level" -eq "$i" ] || { IFS=$oldifs; die "levels must be 0..7 in order"; }
+        [ "$low" -ge 0 ] && [ "$low" -le 100 ] || { IFS=$oldifs; die "low must be 0..100"; }
+        [ "$high" -ge 0 ] && [ "$high" -le 100 ] || { IFS=$oldifs; die "high must be 0..100"; }
+        [ "$low" -le "$high" ] || { IFS=$oldifs; die "level $level: low is above high"; }
+        i=$((i + 1))
+    done
+    IFS=$oldifs
+
+    need_root
+    tmp=$(mktemp)
+    trap 'rm -f "$tmp"' EXIT
+    awk '/^levels:[[:space:]]*$/{exit} {print}' "$THINKFAN_CONF" > "$tmp"
+    printf 'levels:\n' >> "$tmp"
+    oldifs=$IFS
+    IFS=';'
+    for pair in $spec; do
+        level=${pair%%:*}
+        rest=${pair#*:}
+        low=${rest%%:*}
+        high=${rest##*:}
+        printf '  - ["level %s", %s, %s]\n' "$level" "$low" "$high" >> "$tmp"
+    done
+    IFS=$oldifs
+
+    backup="$THINKFAN_CONF.ricelin.bak"
+    [ -e "$backup" ] || cp -p "$THINKFAN_CONF" "$backup"
+    cp "$tmp" "$THINKFAN_CONF"
+    chmod 0644 "$THINKFAN_CONF"
+    if ! systemctl reload thinkfan 2>/dev/null; then
+        cp "$backup" "$THINKFAN_CONF"
+        die "thinkfan reload failed; previous curve restored"
+    fi
+}
+
 cmd_led() {
-    [ "$#" -eq 2 ] || die "usage: led kbd 0..max"
-    [ "$1" = "kbd" ] || die "only the keyboard backlight is writable"
+    [ "$#" -eq 2 ] || die "usage: led kbd|lid|vantage <value>"
+    name=$1
     value=$2
     case "$value" in ''|*[!0-9]*) die "value is not a number" ;; esac
-    file="$LEDS/tpacpi::kbd_backlight/brightness"
-    maxfile="$LEDS/tpacpi::kbd_backlight/max_brightness"
-    [ -e "$file" ] || die "keyboard backlight is not exposed"
-    max=$(cat "$maxfile" 2>/dev/null || echo 1)
-    [ "$value" -le "$max" ] || die "backlight must be 0..$max"
+    case "$name" in
+        kbd)
+            file="$LEDS/tpacpi::kbd_backlight/brightness"
+            maxfile="$LEDS/tpacpi::kbd_backlight/max_brightness"
+            [ -e "$file" ] || die "keyboard backlight is not exposed"
+            max=$(cat "$maxfile" 2>/dev/null || echo 1)
+            [ "$value" -le "$max" ] || die "backlight must be 0..$max"
+            ;;
+        lid|lid_logo)
+            file="$LEDS/tpacpi::lid_logo_dot/brightness"
+            maxfile="$LEDS/tpacpi::lid_logo_dot/max_brightness"
+            [ -e "$file" ] || die "lid logo LED is not exposed"
+            [ "$value" -le 1 ] || die "lid logo must be 0 or 1"
+            max=$(cat "$maxfile" 2>/dev/null || echo 1)
+            [ "$value" -eq 1 ] && value=$max
+            ;;
+        vantage|thinkvantage)
+            file="$LEDS/tpacpi::thinkvantage/brightness"
+            maxfile="$LEDS/tpacpi::thinkvantage/max_brightness"
+            [ -e "$file" ] || die "ThinkVantage LED is not exposed"
+            [ "$value" -le 1 ] || die "ThinkVantage must be 0 or 1"
+            max=$(cat "$maxfile" 2>/dev/null || echo 1)
+            [ "$value" -eq 1 ] && value=$max
+            ;;
+        *) die "unsupported LED: $name" ;;
+    esac
     need_root
     printf '%s\n' "$value" > "$file"
 }
@@ -181,11 +266,12 @@ cmd_led() {
 case "${1:-}" in
     status) cmd_status ;;
     trackpoint) shift; cmd_trackpoint "$@" ;;
+    curve) shift; cmd_curve "$@" ;;
     doubletap) shift; cmd_doubletap "$@" ;;
     led) shift; cmd_led "$@" ;;
     *)
         cat >&2 <<'EOF'
-usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|led kbd 0..max}
+usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|curve set <spec>|led kbd|lid|vantage <value>}
 EOF
         exit 2
         ;;

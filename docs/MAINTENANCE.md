@@ -25,7 +25,8 @@ broke.
 - `configs/quickshell/pill/`: auto-hide (`shell.qml`, `Pill.qml`, `Look.qml`,
   `Flags.qml`), 30 s unload (`Pill.qml`), `TlpSurface.qml`, `PowerHistory.qml`,
   battery card changes, edge-driven `Peripherals.qml`, and the optional
-  `ThinkPadSurface.qml` + `Singletons/ThinkPad.qml`.
+  `ThinkPadSurface.qml`, its group/curve/hero/state components and
+  `Singletons/ThinkPad.qml`.
 - `tools/`: all new shell-side tooling, the TLP helper and the ThinkPad helper
   (installed only when a ThinkPad is detected).
 - `configs/hypr/scripts/ricelin-update.py`: `DEFAULT_REMOTE` points at this fork.

@@ -42,7 +42,11 @@ if [ -x "$lint" ]; then
         "$pill/Singletons/Peripherals.qml" \
         "$pill/Singletons/PowerHistory.qml" \
         "$pill/Singletons/ThinkPad.qml" \
-        "$pill/ThinkPadSurface.qml"
+        "$pill/ThinkPadSurface.qml" \
+        "$pill/ThinkPadGroup.qml" \
+        "$pill/ThinkPadCurve.qml" \
+        "$pill/ThinkPadHero.qml" \
+        "$pill/ThinkPadState.qml"
     do
         if [ ! -f "$f" ]; then
             bad "missing $f"

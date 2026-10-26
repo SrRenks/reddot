@@ -32,6 +32,8 @@ mkdir -p "$tmp/sys/devices/platform/thinkpad_acpi" \
     "$tmp/sys/class/hwmon/hwmon1" \
     "$tmp/sys/class/hwmon/hwmon2" \
     "$tmp/sys/class/leds/tpacpi::kbd_backlight" \
+    "$tmp/sys/class/leds/tpacpi::lid_logo_dot" \
+    "$tmp/sys/class/leds/tpacpi::thinkvantage" \
     "$tmp/sys/class/leds/platform::micmute" \
     "$tmp/sys/firmware/acpi" \
     "$tmp/proc" \
@@ -50,9 +52,30 @@ printf '128\n' > "$tmp/sys/devices/platform/i8042/serio1/sensitivity"
 printf '0\n' > "$tmp/sys/devices/platform/i8042/serio1/press_to_select"
 printf '2\n' > "$tmp/sys/class/leds/tpacpi::kbd_backlight/max_brightness"
 printf '0\n' > "$tmp/sys/class/leds/tpacpi::kbd_backlight/brightness"
+printf '255\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/max_brightness"
+printf '0\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/brightness"
+printf '255\n' > "$tmp/sys/class/leds/tpacpi::thinkvantage/max_brightness"
+printf '0\n' > "$tmp/sys/class/leds/tpacpi::thinkvantage/brightness"
 printf '1\n' > "$tmp/sys/class/leds/platform::micmute/brightness"
 printf 'custom\n' > "$tmp/sys/firmware/acpi/platform_profile"
 printf 'status:\t\tenabled\nspeed:\t\t2200\nlevel:\t\t2\n' > "$tmp/proc/fan"
+cat > "$tmp/thinkfan.yaml" <<'YAML'
+sensors:
+  - hwmon: /sys/class/hwmon
+    name: k10temp
+    indices: [1]
+fans:
+  - tpacpi: /proc/acpi/ibm/fan
+levels:
+  - ["level 0",  0, 42]
+  - ["level 1", 39, 48]
+  - ["level 2", 45, 55]
+  - ["level 3", 52, 62]
+  - ["level 4", 59, 68]
+  - ["level 5", 65, 74]
+  - ["level 6", 72, 80]
+  - ["level 7", 77, 84]
+YAML
 printf '#!/bin/sh\nexit 0\n' > "$tmp/bin/systemctl"
 chmod 755 "$tmp/bin/systemctl"
 
@@ -61,6 +84,7 @@ run() {
     RICELIN_THINKPAD_SYSFS="$tmp/sys" \
     RICELIN_THINKPAD_PROC="$tmp/proc/fan" \
     RICELIN_THINKPAD_SERIO="$tmp/sys/devices/platform/i8042/serio1" \
+    RICELIN_THINKPAD_THINKFAN="$tmp/thinkfan.yaml" \
     RICELIN_THINKPAD_TEST=1 \
     sh "$helper" "$@"
 }
@@ -75,6 +99,7 @@ contains "$out" '^TEMP_CPU=50$' "reads the CPU temperature"
 contains "$out" '^TEMP_GPU=47$' "reads the GPU temperature"
 contains "$out" '^LED_KBD_MAX=2$' "reads the backlight maximum"
 contains "$out" '^TP_SENSITIVITY=128$' "reads TrackPoint sensitivity"
+contains "$out" '^CURVE=0:0:42;1:39:48;2:45:55;3:52:62;4:59:68;5:65:74;6:72:80;7:77:84$' "reads the fan curve"
 contains "$out" '^DOUBLETAP=1$' "reads double-tap"
 
 run trackpoint sensitivity 160
@@ -90,6 +115,17 @@ exits 2 "rejects an unknown attribute" run trackpoint foo 1
 exits 2 "rejects an out-of-range sensitivity" run trackpoint sensitivity 300
 exits 2 "rejects an out-of-range backlight" run led kbd 3
 exits 2 "rejects an unknown LED" run led power 1
+
+run led lid 1
+contains "$(cat "$tmp/sys/class/leds/tpacpi::lid_logo_dot/brightness")" '^255$' "writes the lid logo LED"
+run led vantage 1
+contains "$(cat "$tmp/sys/class/leds/tpacpi::thinkvantage/brightness")" '^255$' "writes the ThinkVantage LED"
+
+run curve set '0:0:40;1:38:46;2:44:53;3:51:60;4:58:66;5:64:72;6:70:78;7:75:82'
+contains "$(cat "$tmp/thinkfan.yaml")" 'level 0", 0, 40' "writes the fan curve"
+contains "$(cat "$tmp/thinkfan.yaml")" 'level 7", 75, 82' "writes every curve level"
+exits 2 "rejects an incomplete curve" run curve set '0:0:40;1:38:46'
+exits 2 "rejects low above high" run curve set '0:0:40;1:48:46;2:44:53;3:51:60;4:58:66;5:64:72;6:70:78;7:75:82'
 
 mkdir -p "$tmp/empty"
 out=$(RICELIN_THINKPAD_SYSFS="$tmp/empty" RICELIN_THINKPAD_TEST=1 PATH="$tmp/bin:$PATH" sh "$helper" status)

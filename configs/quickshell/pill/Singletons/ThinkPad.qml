@@ -47,6 +47,7 @@ Singleton {
     property int kbdMax: 1
     property var leds: ({})
     property var tp: ({})
+    property var curve: []
     property int doubletap: -1
 
     readonly property var tpList: {
@@ -99,7 +100,7 @@ Singleton {
         var next = {
             model: "", bios: "", fanRpm: -1, fanLevel: "", fanStatus: "",
             thinkfan: "", tempCpu: -1, tempGpu: -1, tempNvme: -1, tempAcpi: -1,
-            platform: "", kbd: -1, kbdMax: 1, doubletap: -1
+            platform: "", kbd: -1, kbdMax: 1, doubletap: -1, curve: []
         };
 
         for (var i = 0; i < lines.length; i++) {
@@ -122,6 +123,19 @@ Singleton {
             else if (k === "LED_KBD") next.kbd = parseInt(v, 10);
             else if (k === "LED_KBD_MAX") next.kbdMax = parseInt(v, 10) || 1;
             else if (k === "DOUBLETAP") next.doubletap = parseInt(v, 10);
+            else if (k === "CURVE") {
+                var parts = v.split(";");
+                for (var c = 0; c < parts.length; c++) {
+                    var bits = parts[c].split(":");
+                    if (bits.length !== 3)
+                        continue;
+                    next.curve.push({
+                        level: parseInt(bits[0], 10),
+                        low: parseInt(bits[1], 10),
+                        high: parseInt(bits[2], 10)
+                    });
+                }
+            }
             else if (k.indexOf("LED_") === 0) nextLeds[k.substring(4)] = parseInt(v, 10);
             else if (k.indexOf("TP_") === 0)
                 nextTp[k.substring(3).toLowerCase()] = parseInt(v, 10);
@@ -143,6 +157,7 @@ Singleton {
         root.doubletap = next.doubletap;
         root.leds = nextLeds;
         root.tp = nextTp;
+        root.curve = next.curve;
     }
 
     Process {

@@ -102,18 +102,17 @@ Surface width 396. Header glyph `思`, title `THINKPAD`, model on the right.
 |  THERMAL                                         |
 |  Fan            thinkfan · level 2               |
 |  Sensors        49 / 47 / 42 C                   |
-|  Platform       custom · read-only           >   |
+|  Fan curve      8 levels · thinkfan       [Edit] |
 |  ----------------------------------------------  |
-|  INPUT                                           |
-|  TrackPoint sensitivity            [ 128 ]       |
+|  LIGHTING                                        |
+|  Keyboard light        [ Off ][ Dim ][ Full ]    |
+|  Lid logo                          [toggle]      |
+|  Vantage                           [toggle]      |
+|  ----------------------------------------------  |
+|  POINTING                                        |
+|  Sensitivity                       [ 128 ]       |
 |  Press to select                   [toggle]      |
 |  Double-tap                        [toggle]      |
-|  Keyboard backlight        [ Off ][ Dim ][ Full ]|
-|  ----------------------------------------------  |
-|  INDICATORS                                      |
-|  mic mute  o     speaker mute  o                 |
-|  lid logo  o     power         o                 |
-|  standby   o     ThinkVantage  o                 |
 |  ----------------------------------------------  |
 |  Battery and power >             helper: ready   |
 +--------------------------------------------------+
@@ -122,27 +121,27 @@ Surface width 396. Header glyph `思`, title `THINKPAD`, model on the right.
 Why this order:
 
 1. Thermal first: the reason to open the surface is usually fan or temperature.
-2. Input second: TrackPoint and keyboard backlight are the personal settings
-   that survive reboots.
-3. Indicators last and read-only: they explain hardware state, they are not
-   controls.
+2. Lighting and Pointing second and third: they are the personal settings that
+   survive reboots.
+3. Pointing last and collapsed: it is the least frequent edit.
 4. Battery and power is a link to the Power surface, not a duplicate.
 
 Rows that do not apply are hidden, not disabled: no `speed` row on the E14, no
-fan row when the EC telemetry is absent, no platform row when the ACPI file is
-missing. Fan profile switching is not in this build; see phase 3.
+fan row when the EC telemetry is absent. The fan curve editor opens only when
+the helper found eight thinkfan levels.
 
 ## Controls and data flow
 
 | Row | Read | Write | Fallback |
 |---|---|---|---|
 | Fan RPM / level | `/proc/acpi/ibm/fan`, `hwmon5/fan1_input` | none | hide if absent |
+| Fan curve | 8 thinkfan level bands from `/etc/thinkfan.yaml` | `ricelin-thinkpad curve set ...`, backup + SIGHUP | hide without 8 levels |
 | Temperatures | hwmon `k10temp`, `amdgpu`, `nvme`, `acpitz` | none | hide missing sensors |
-| Platform profile | `/sys/firmware/acpi/platform_profile` | none in this surface; link to Power | read-only text |
 | TrackPoint | `serio*/sensitivity`, `press_to_select` | `ricelin-thinkpad trackpoint ...` | detect attrs, hide missing |
 | Double-tap | `thinkpad_acpi/doubletap_enable` | `ricelin-thinkpad doubletap 0|1` | hide if absent |
 | Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `ricelin-thinkpad led kbd 0-2` | hide if absent |
-| Indicators | LED `brightness` values | none | hide missing LEDs |
+| Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `ricelin-thinkpad led lid|vantage 0|1` | hide if absent |
+| Other LEDs | LED `brightness` values | none | read-only footer |
 
 Refresh: one timer every 2 s, `running: surface.open`, one `Process` calling the
 helper's `status` verb. Nothing polls while the surface is closed. This is the
@@ -155,23 +154,26 @@ the helper.
 
 ## What ships now
 
-The surface is implemented as a read-only thermal view plus the input knobs that
-are safe to write.
+The surface is a telemetry view with three collapsible sections: Thermal,
+Lighting and Pointing.
 
 - `configs/quickshell/pill/Singletons/ThinkPad.qml` detects
   `/sys/devices/platform/thinkpad_acpi` with one `test -d` and calls the helper
   only when it exists.
-- `configs/quickshell/pill/ThinkPadSurface.qml` renders the hero, Thermal,
-  Input and Indicators groups, with the battery link back to Power.
+- `ThinkPadSurface.qml` and its `ThinkPadGroup`, `ThinkPadCurve`,
+  `ThinkPadHero` and `ThinkPadState` components render the sections, with the
+  battery link back to Power.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
-- `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap` and
-  `led kbd`; `tools/test-ricelin-thinkpad.sh` covers both success and refusal.
+- `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
+  `curve set` and `led kbd|lid|vantage`. `curve set` backs up
+  `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
+  thinkfan. `tools/test-ricelin-thinkpad.sh` covers success and refusal.
 - `tools/install-extras.sh` installs the helper and its sudoers rule only when
   a ThinkPad is detected.
 
-Fan presets are phase 3. The surface never writes fan levels, `pwm1_enable` or
-`/proc/acpi/ibm/fan`; it reports what thinkfan and the EC are doing.
+The surface never writes raw fan levels, `pwm1_enable` or `/proc/acpi/ibm/fan`.
+It edits the thinkfan curve, which is the policy that owns those levels.
 
 ## Base compatibility
 
@@ -188,30 +190,22 @@ Fan presets are phase 3. The surface never writes fan levels, `pwm1_enable` or
 
 Phase 1, read-only surface: shipped.
 
-Phase 2, writes: shipped, guarded by the helper allowlist and the sudoers rule.
+Phase 2, input and LED writes: shipped, guarded by the helper allowlist and the
+sudoers rule.
 
-Phase 3, fan profiles:
+Phase 3, fan curve editor: shipped. It edits the eight level bands in place and
+leaves sensors and fans untouched.
 
-- `configs/thinkfan/e14g7-balanced.yaml` and `e14g7-cool.yaml`.
-- helper `fan preset` with backup, reload, model guard.
-- only after a thermal test on this machine; no Quiet preset before that.
-
-Phase 4, other ThinkPads: capability detection already hides rows; add per-model
-fan presets only with a confirmed thinkfan config, never a generic curve.
-
-Phase 4, other ThinkPads:
-
-- capability detection already hides rows; add per-model fan presets only with
-  a confirmed thinkfan config, never a generic curve.
+Phase 4, other ThinkPads: capability detection hides rows that do not exist.
+Per-model presets remain out of scope without a confirmed thinkfan config.
 
 ## Open decisions
 
-- Ship `Cool` as the only fan preset, or keep fan read-only until a full thermal
-  test? Current build is read-only.
-- Show the `custom` platform profile at all, or replace the row with a link to
-  the TLP section?
-- Allow a lid-logo LED toggle, or keep every indicator read-only?
-- Put the entry in the Power surface, or also add a chip to the expanded pill?
+- Whether to add named curve presets on top of the editor. The editor itself is
+  shipped; presets would only prefill it.
+- Whether to expose the `custom` platform profile in this surface or keep it in
+  Power.
+- Whether the entry should also get a chip in the expanded pill.
 
 ## Enabling on an existing install
 

@@ -213,6 +213,33 @@ Phase 4, other ThinkPads:
 - Allow a lid-logo LED toggle, or keep every indicator read-only?
 - Put the entry in the Power surface, or also add a chip to the expanded pill?
 
+## Enabling on an existing install
+
+A fresh install from this fork already deploys the files. For a checkout that is
+already running on a ThinkPad, back up the live files, then copy only the new
+and changed ones:
+
+```sh
+cd ~/Projects/reddot
+cp ~/.config/quickshell/pill/Pill.qml ~/.config/quickshell/pill/Pill.qml.bak
+cp ~/.config/quickshell/pill/shell.qml ~/.config/quickshell/pill/shell.qml.bak
+cp ~/.config/quickshell/pill/TlpSurface.qml ~/.config/quickshell/pill/TlpSurface.qml.bak
+
+sudo tools/install-extras.sh
+install -Dm644 configs/quickshell/pill/ThinkPadSurface.qml ~/.config/quickshell/pill/ThinkPadSurface.qml
+install -Dm644 configs/quickshell/pill/Singletons/ThinkPad.qml ~/.config/quickshell/pill/Singletons/ThinkPad.qml
+install -Dm644 configs/quickshell/pill/Singletons/qmldir ~/.config/quickshell/pill/Singletons/qmldir
+install -Dm644 configs/quickshell/pill/Pill.qml ~/.config/quickshell/pill/Pill.qml
+install -Dm644 configs/quickshell/pill/shell.qml ~/.config/quickshell/pill/shell.qml
+install -Dm644 configs/quickshell/pill/TlpSurface.qml ~/.config/quickshell/pill/TlpSurface.qml
+install -Dm644 configs/hypr/modules/binds.lua ~/.config/hypr/modules/binds.lua
+
+~/.config/hypr/scripts/watchdog.sh pill
+```
+
+On a non-ThinkPad, skip `install-extras.sh`: the QML probe hides the entry and
+no helper or sudoers file is needed.
+
 ## Sources
 
 - Linux kernel, thinkpad-acpi: <https://www.kernel.org/doc/html/latest/admin-guide/laptops/thinkpad-acpi.html>

@@ -61,6 +61,7 @@ Item {
     readonly property bool btOpen: surface === "bt"
     readonly property bool batteryOpen: surface === "battery"
     readonly property bool tlpOpen: surface === "tlp"
+    readonly property bool thinkpadOpen: surface === "thinkpad"
     readonly property bool settingsOpen: surface === "settings"
     readonly property bool keybindsOpen: surface === "keybinds"
     readonly property bool workspacesOpen: surface === "workspaces"
@@ -175,6 +176,7 @@ Item {
     readonly property real mediaH: 150 * s
     readonly property real batteryW: 316 * s
     readonly property real tlpW: 336 * s
+    readonly property real thinkpadW: 396 * s
     readonly property real wifiW: 272 * s
     readonly property real soundW: 400 * s
     readonly property real btW: 286 * s
@@ -243,6 +245,7 @@ Item {
         bt:        { size: () => Qt.size(btW, surfaceItem(ldBt).implicitHeight + 26 * s), ame: () => surfaceItem(ldBt) },
         battery:   { size: () => Qt.size(batteryW, surfaceItem(ldBattery).implicitHeight + 26 * s), ame: () => surfaceItem(ldBattery) },
         tlp:       { size: () => Qt.size(tlpW, surfaceItem(ldTlp).implicitHeight + 26 * s), ame: () => surfaceItem(ldTlp) },
+        thinkpad:  { size: () => Qt.size(thinkpadW, surfaceItem(ldThinkpad).implicitHeight + 26 * s), ame: () => surfaceItem(ldThinkpad) },
         settings:  { size: () => Qt.size(settingsW, surfaceItem(ldSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldSettings) },
         keybinds:  { size: () => Qt.size(keybindsW, surfaceItem(ldKeybinds).implicitHeight + 29 * s), ame: () => surfaceItem(ldKeybinds) },
         workspaces: { size: () => Qt.size(workspacesW, surfaceItem(ldWorkspaces).implicitHeight + 29 * s), ame: () => surfaceItem(ldWorkspaces) },
@@ -545,7 +548,7 @@ Item {
         interval: 30000
         onTriggered: {
             const cold = [ldSound, ldCalendar, ldLauncher, ldClip, ldWall, ldPower, ldWifi, ldBt, ldBattery,
-                          ldTlp, ldSettings, ldKeybinds, ldWorkspaces, ldStash, ldSpaceapps, ldRecorder, ldSysmon,
+                          ldTlp, ldThinkpad, ldSettings, ldKeybinds, ldWorkspaces, ldStash, ldSpaceapps, ldRecorder, ldSysmon,
                           ldAppearance, ldUpdates, ldDisplay, ldInput, ldLook, ldIdlelock, ldAnimation, ldFontpicker];
             for (const ld of cold)
                 if (ld.active && !(ld.item && ld.item.busy === true))
@@ -2096,6 +2099,20 @@ Item {
             open: pill.tlpOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldThinkpad
+        active: false
+        anchors.fill: parent
+        sourceComponent: ThinkPadSurface {
+            s: pill.s
+            open: pill.thinkpadOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
         }
     }
 

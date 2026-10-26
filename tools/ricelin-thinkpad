@@ -1,0 +1,192 @@
+#!/bin/sh
+#
+# ricelin-thinkpad — read and adjust the ThinkPad-specific sysfs knobs.
+#
+# Installed only when a ThinkPad is detected. `status` needs no root; the
+# setters need root and are the only verbs covered by the sudoers rule.
+#
+#   status
+#   trackpoint <attr> <value>
+#   doubletap 0|1
+#   led kbd 0..max
+#
+# Fan control is deliberately absent: thinkfan owns /proc/acpi/ibm/fan on the
+# reference machine, and raw writes would either be overwritten or defeat the
+# EC watchdog. See docs/THINKPAD.md.
+
+set -eu
+
+SYS="${RICELIN_THINKPAD_SYSFS:-/sys}"
+TP="$SYS/devices/platform/thinkpad_acpi"
+PROC="${RICELIN_THINKPAD_PROC:-/proc/acpi/ibm/fan}"
+SERIO="${RICELIN_THINKPAD_SERIO:-}"
+LEDS="$SYS/class/leds"
+HWMON="$SYS/class/hwmon"
+TEST="${RICELIN_THINKPAD_TEST:-0}"
+
+die() { echo "$*" >&2; exit 2; }
+need_root() {
+    [ "$TEST" = "1" ] || [ "$(id -u)" -eq 0 ] || die "root required"
+}
+
+read_or() {
+    [ -r "$1" ] && cat "$1" 2>/dev/null || true
+}
+
+trim() {
+    sed 's/^[[:space:]]*//; s/[[:space:]]*$//'
+}
+
+find_serio() {
+    if [ -n "$SERIO" ]; then
+        echo "$SERIO"
+        return 0
+    fi
+    for d in "$SYS"/devices/platform/i8042/serio*; do
+        if [ -e "$d/sensitivity" ]; then
+            echo "$d"
+            return 0
+        fi
+    done
+    return 1
+}
+
+temp_of() {
+    name=$1
+    file=${2:-temp1_input}
+    for d in "$HWMON"/hwmon*; do
+        [ -r "$d/name" ] || continue
+        [ "$(cat "$d/name" 2>/dev/null)" = "$name" ] || continue
+        [ -r "$d/$file" ] || continue
+        v=$(cat "$d/$file" 2>/dev/null)
+        [ -n "$v" ] && echo $((v / 1000))
+        return 0
+    done
+}
+
+led_of() {
+    [ -r "$LEDS/$1/brightness" ] && cat "$LEDS/$1/brightness" 2>/dev/null || true
+}
+
+cmd_status() {
+    if [ ! -d "$TP" ]; then
+        echo "PRESENT=0"
+        exit 0
+    fi
+    echo "PRESENT=1"
+
+    model=$(read_or "$SYS/devices/virtual/dmi/id/product_version" | trim)
+    bios=$(read_or "$SYS/devices/virtual/dmi/id/bios_version" | trim)
+    [ -n "$model" ] && echo "MODEL=$model"
+    [ -n "$bios" ] && echo "BIOS=$bios"
+
+    if [ -r "$PROC" ]; then
+        speed=$(awk -F':[[:space:]]*' '/^speed:/{print $2; exit}' "$PROC" 2>/dev/null || true)
+        level=$(awk -F':[[:space:]]*' '/^level:/{print $2; exit}' "$PROC" 2>/dev/null || true)
+        state=$(awk -F':[[:space:]]*' '/^status:/{print $2; exit}' "$PROC" 2>/dev/null || true)
+        [ -n "$speed" ] && echo "FAN_RPM=$speed"
+        [ -n "$level" ] && echo "FAN_LEVEL=$level"
+        [ -n "$state" ] && echo "FAN_STATUS=$state"
+    fi
+
+    if command -v systemctl >/dev/null 2>&1; then
+        if systemctl is-active --quiet thinkfan 2>/dev/null; then
+            echo "THINKFAN=active"
+        else
+            echo "THINKFAN=inactive"
+        fi
+    fi
+
+    for pair in "CPU:k10temp:temp1_input" "GPU:amdgpu:temp1_input" \
+                "NVME:nvme:temp1_input" "ACPI:acpitz:temp1_input"; do
+        key=${pair%%:*}
+        rest=${pair#*:}
+        chip=${rest%%:*}
+        file=${rest##*:}
+        v=$(temp_of "$chip" "$file" || true)
+        [ -n "$v" ] && echo "TEMP_$key=$v"
+    done
+
+    [ -r "$SYS/firmware/acpi/platform_profile" ] && \
+        echo "PLATFORM=$(cat "$SYS/firmware/acpi/platform_profile" 2>/dev/null)"
+
+    for pair in "KBD:tpacpi::kbd_backlight" "MICMUTE:platform::micmute" \
+                "MUTE:platform::mute" "LIDLOGO:tpacpi::lid_logo_dot" \
+                "POWER:tpacpi::power" "STANDBY:tpacpi::standby" \
+                "VANTAGE:tpacpi::thinkvantage"; do
+        key=${pair%%:*}
+        led=${pair#*:}
+        v=$(led_of "$led")
+        [ -n "$v" ] && echo "LED_$key=$v"
+        if [ "$key" = "KBD" ] && [ -r "$LEDS/$led/max_brightness" ]; then
+            echo "LED_KBD_MAX=$(cat "$LEDS/$led/max_brightness" 2>/dev/null)"
+        fi
+    done
+
+    serio=$(find_serio || true)
+    if [ -n "$serio" ]; then
+        for attr in sensitivity speed press_to_select dragging drift_time inertia; do
+            [ -r "$serio/$attr" ] || continue
+            key=$(printf '%s' "$attr" | tr 'a-z' 'A-Z')
+            echo "TP_$key=$(cat "$serio/$attr" 2>/dev/null)"
+        done
+    fi
+
+    [ -r "$TP/doubletap_enable" ] && \
+        echo "DOUBLETAP=$(cat "$TP/doubletap_enable" 2>/dev/null)"
+}
+
+cmd_trackpoint() {
+    [ "$#" -eq 2 ] || die "usage: trackpoint <attr> <value>"
+    attr=$1
+    value=$2
+    case "$value" in ''|*[!0-9]*) die "value is not a number" ;; esac
+
+    case "$attr" in
+        sensitivity|speed|inertia) max=255 ;;
+        press_to_select|dragging) max=1 ;;
+        drift_time) max=2000 ;;
+        *) die "unsupported TrackPoint attribute: $attr" ;;
+    esac
+    [ "$value" -le "$max" ] || die "$attr must be 0..$max"
+
+    serio=$(find_serio) || die "no TrackPoint serio device"
+    [ -e "$serio/$attr" ] || die "this TrackPoint has no $attr"
+    need_root
+    printf '%s\n' "$value" > "$serio/$attr"
+}
+
+cmd_doubletap() {
+    [ "$#" -eq 1 ] || die "usage: doubletap 0|1"
+    case "$1" in 0|1) ;; *) die "doubletap must be 0 or 1" ;; esac
+    [ -e "$TP/doubletap_enable" ] || die "doubletap is not exposed on this model"
+    need_root
+    printf '%s\n' "$1" > "$TP/doubletap_enable"
+}
+
+cmd_led() {
+    [ "$#" -eq 2 ] || die "usage: led kbd 0..max"
+    [ "$1" = "kbd" ] || die "only the keyboard backlight is writable"
+    value=$2
+    case "$value" in ''|*[!0-9]*) die "value is not a number" ;; esac
+    file="$LEDS/tpacpi::kbd_backlight/brightness"
+    maxfile="$LEDS/tpacpi::kbd_backlight/max_brightness"
+    [ -e "$file" ] || die "keyboard backlight is not exposed"
+    max=$(cat "$maxfile" 2>/dev/null || echo 1)
+    [ "$value" -le "$max" ] || die "backlight must be 0..$max"
+    need_root
+    printf '%s\n' "$value" > "$file"
+}
+
+case "${1:-}" in
+    status) cmd_status ;;
+    trackpoint) shift; cmd_trackpoint "$@" ;;
+    doubletap) shift; cmd_doubletap "$@" ;;
+    led) shift; cmd_led "$@" ;;
+    *)
+        cat >&2 <<'EOF'
+usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|led kbd 0..max}
+EOF
+        exit 2
+        ;;
+esac

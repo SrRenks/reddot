@@ -43,6 +43,19 @@ if command -v tlp >/dev/null 2>&1; then
     echo "  /etc/tlp.d/99-ricelin-acbat.conf"
 fi
 
+# ThinkPad extras are installed only when the hardware is actually present.
+# Non-ThinkPad machines get no extra binary and no extra sudoers rule.
+if [ -d /sys/devices/platform/thinkpad_acpi ] \
+    || grep -q ThinkPad /sys/devices/virtual/dmi/id/product_version 2>/dev/null; then
+    install -m 0755 -o root -g root "$here/ricelin-thinkpad" /usr/local/bin/ricelin-thinkpad
+    printf '%s ALL=(root) NOPASSWD: /usr/local/bin/ricelin-thinkpad\n' "$user" \
+        > /etc/sudoers.d/90-ricelin-thinkpad
+    chmod 0440 /etc/sudoers.d/90-ricelin-thinkpad
+    visudo -cf /etc/sudoers.d/90-ricelin-thinkpad >/dev/null
+    echo "  /usr/local/bin/ricelin-thinkpad"
+    echo "  /etc/sudoers.d/90-ricelin-thinkpad"
+fi
+
 install -d -m 0755 -o "$user" -g "$group" "$home/.local/bin"
 install -m 0755 -o "$user" -g "$group" "$here/ricelin-bench.sh" \
     "$home/.local/bin/ricelin-bench"

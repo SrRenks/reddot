@@ -29,6 +29,8 @@ PillSurface {
 
     implicitHeight: content.implicitHeight
 
+    signal requestSurface(string name)
+
     readonly property string helper: "/usr/local/bin/ricelin-tlp"
     readonly property var profileOptions: [
         { label: "Perf", value: "performance" },
@@ -466,6 +468,46 @@ PillSurface {
                 enabled: !root.busy
                 opacity: enabled ? 1 : 0.45
                 onClicked: root.care("fullcharge")
+            }
+        }
+
+        Item {
+            width: parent.width
+            height: ThinkPad.present ? 34 * root.s : 0
+            visible: ThinkPad.present
+            enabled: !root.busy
+
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: Theme.threadBg
+            }
+
+            Text {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: "ThinkPad"
+                color: Theme.subtle
+                font.family: Theme.font
+                font.pixelSize: 10.5 * root.s
+                font.weight: Font.DemiBold
+            }
+
+            Text {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                text: "fans · LEDs · TrackPoint  ›"
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 9 * root.s
+                font.weight: Font.Medium
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.requestSurface("thinkpad")
             }
         }
 

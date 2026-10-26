@@ -19,12 +19,14 @@ ok()  { printf '  ok    %s\n' "$*"; }
 bad() { printf '  FAIL  %s\n' "$*"; fail=$((fail + 1)); }
 
 echo "== helper tests =="
-if out=$(sh "$here/test-ricelin-tlp.sh" 2>&1); then
-    ok "test-ricelin-tlp.sh"
-else
-    bad "test-ricelin-tlp.sh"
-    printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
-fi
+for test in test-ricelin-tlp.sh test-ricelin-thinkpad.sh; do
+    if out=$(sh "$here/$test" 2>&1); then
+        ok "$test"
+    else
+        bad "$test"
+        printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
+    fi
+done
 
 echo "== qml =="
 lint=$(command -v qmllint 2>/dev/null || true)
@@ -38,7 +40,9 @@ if [ -x "$lint" ]; then
         "$pill/Look.qml" \
         "$pill/Singletons/Flags.qml" \
         "$pill/Singletons/Peripherals.qml" \
-        "$pill/Singletons/PowerHistory.qml"
+        "$pill/Singletons/PowerHistory.qml" \
+        "$pill/Singletons/ThinkPad.qml" \
+        "$pill/ThinkPadSurface.qml"
     do
         if [ ! -f "$f" ]; then
             bad "missing $f"

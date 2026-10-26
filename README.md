@@ -29,9 +29,13 @@ kept close to the original.
   edge-driven peripheral polling.
 - **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
   power and memory measurements.
+- ThinkPad extras (optional): on a ThinkPad only, fan/thermal telemetry,
+  TrackPoint, double-tap, keyboard backlight and LED state. Detection is lazy and
+  the helper is installed only on ThinkPad hardware, so other machines are unchanged.
 
 Install runs the upstream Python installer and then `tools/install-extras.sh`
-for the root helper, sudoers rule, TLP policy and user tools.
+for the root helper, sudoers rule, TLP policy and user tools. On a ThinkPad it
+also installs the optional `ricelin-thinkpad` helper; other machines skip it.
 
 ## Install (this fork)
 

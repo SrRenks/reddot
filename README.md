@@ -139,6 +139,7 @@ background is third-party; see [CREDITS](configs/sddm/themes/torii/CREDITS.md).
 - [Measured memory and reductions](docs/LIGHTWEIGHT.md)
 - [Maintenance and update procedure](docs/MAINTENANCE.md)
 - [Related shells and ideas](docs/FORKS.md)
+- [ThinkPad controls and layout](docs/THINKPAD.md)
 - [Credits and licenses](docs/CREDITS.md)
 
 ## Credits

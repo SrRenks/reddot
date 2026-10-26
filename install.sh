@@ -11,8 +11,8 @@
 
 set -e
 
-REPO_URL="https://github.com/Gakuseei/Ricelin.git"
-DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ricelin"
+REPO_URL="https://github.com/SrRenks/reddot.git"
+DIR="${XDG_DATA_HOME:-$HOME/.local/share}/reddot"
 
 # os-release ID / ID_LIKE tokens per family, mirroring installer/distro.py so the
 # bootstrap picks the same package manager the Python installer expects.
@@ -91,10 +91,10 @@ ensure_deps() {
 fetch() {
 	mkdir -p "$(dirname "$DIR")"
 	if [ -d "$DIR/.git" ]; then
-		step "Updating Ricelin in $DIR"
+		step "Updating Reddot in $DIR"
 		git -C "$DIR" pull --ff-only || say "  could not fast-forward, using the current checkout"
 	else
-		step "Cloning Ricelin into $DIR"
+		step "Cloning Reddot into $DIR"
 		git clone --depth 1 "$REPO_URL" "$DIR"
 	fi
 }
@@ -117,9 +117,9 @@ main() {
 	# always someone looking for "how do I update". --reinstall forces the wizard.
 	if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/.ricelin-managed" ] \
 		&& ! has_flag --reinstall "$@" && ! has_flag --uninstall "$@"; then
-		say "Ricelin is already installed."
+		say "Reddot is already installed."
 		say "  Update:       open Settings > Updates in the pill, or run: ricelin update"
-		say "  Re-install:   curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | sh -s -- --reinstall"
+		say "  Re-install:   curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | sh -s -- --reinstall"
 		say "  Uninstall:    ricelin uninstall"
 		exit 0
 	fi
@@ -133,7 +133,16 @@ main() {
 	ensure_deps "$fam"
 	fetch
 
-	exec python3 "$DIR/installer/ricelin_install.py" --source "$DIR/configs" "$@"
+	python3 "$DIR/installer/ricelin_install.py" --source "$DIR/configs" "$@" || exit $?
+
+	# The Python installer owns ~/.config. The TLP helper, sudoers rule, AC/BAT
+	# policy and the user-level tools live outside it; install them last so a
+	# config-only run never leaves the surface pointing at a missing helper.
+	if ! has_flag --dry-run "$@" && ! has_flag --uninstall "$@" \
+		&& ! has_flag --skip-extras "$@"; then
+		step "Installing Reddot extras"
+		run_root "$DIR/tools/install-extras.sh"
+	fi
 }
 
 main "$@"

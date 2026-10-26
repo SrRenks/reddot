@@ -173,7 +173,7 @@ passwordless rule.
 | Double-tap | `thinkpad_acpi/doubletap_enable` | `ricelin-thinkpad doubletap 0|1` | hide if absent |
 | Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `ricelin-thinkpad led kbd 0-2` | hide if absent |
 | Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `ricelin-thinkpad led lid|vantage 0|1` | hide if absent |
-| Other LEDs | LED `brightness` values | none | read-only footer |
+| Other LEDs | every LED in `/sys/class/leds` | `ricelin-thinkpad led <name> 0..max` | firmware or NIC may take it back |
 
 Refresh: one timer every 2 s, `running: surface.open`, one `Process` calling the
 helper's `status` verb. Nothing polls while the surface is closed. This is the
@@ -218,7 +218,8 @@ Lighting and Pointing.
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
   thinkfan. `tools/test-ricelin-thinkpad.sh` covers success and refusal.
 - `tools/install-extras.sh` installs the shared polkit rule on every machine and
-  the ThinkPad helper only when a ThinkPad is detected.
+  the ThinkPad helper only when a ThinkPad is detected. The same rule covers the
+  TLP helper, so battery writes use the same prompt.
 
 The surface never writes raw fan levels, `pwm1_enable` or `/proc/acpi/ibm/fan`.
 It edits the thinkfan curve, which is the policy that owns those levels.

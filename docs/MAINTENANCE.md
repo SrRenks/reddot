@@ -24,8 +24,10 @@ broke.
   deploys them to a fresh machine.
 - `configs/quickshell/pill/`: auto-hide (`shell.qml`, `Pill.qml`, `Look.qml`,
   `Flags.qml`), 30 s unload (`Pill.qml`), `TlpSurface.qml`, `PowerHistory.qml`,
-  battery card changes, edge-driven `Peripherals.qml`.
-- `tools/`: all new shell-side tooling and the TLP helper.
+  battery card changes, edge-driven `Peripherals.qml`, and the optional
+  `ThinkPadSurface.qml` + `Singletons/ThinkPad.qml`.
+- `tools/`: all new shell-side tooling, the TLP helper and the ThinkPad helper
+  (installed only when a ThinkPad is detected).
 - `configs/hypr/scripts/ricelin-update.py`: `DEFAULT_REMOTE` points at this fork.
 
 ## Update
@@ -57,6 +59,7 @@ ricelin stop && ricelin start
 ```sh
 ~/Projects/reddot/tools/check.sh          # gate: helper, QML, syntax, drift
 ~/Projects/reddot/tools/test-ricelin-tlp.sh
+~/Projects/reddot/tools/test-ricelin-thinkpad.sh
 python3 ~/.config/hypr/scripts/test_ricelin_update.py
 python3 ~/.config/hypr/scripts/test_wallcolors_apps.py
 node ~/.config/quickshell/pill/lib/fuzzy.test.mjs

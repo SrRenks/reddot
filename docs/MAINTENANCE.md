@@ -81,11 +81,12 @@ history of this fork see `git log`; each feature was committed separately.
 - **Auto-hide**: `pillMode=auto`, `pillReserve=false`. If the strip does not
   reveal, any surface keybind makes the pill modal; then **Look → Pill mode →
   Always**, or edit `~/.local/state/ricelin/flags.json`.
-- **TLP helper**: root-owned `/usr/local/bin/ricelin-tlp` plus one NOPASSWD rule.
-  TLP has no unprivileged threshold API; TLPUI escalates the same way.
-- **ThinkPad helper**: `pkexec` plus polkit, not sudoers. The rule returns
-  `AUTH_ADMIN_KEEP` only for `/usr/local/bin/ricelin-thinkpad`; reads do not
-  prompt. This needs a running polkit agent (`hyprpolkitagent` here).
+- **TLP helper**: root-owned `/usr/local/bin/ricelin-tlp`, called through
+  `pkexec`. TLP has no unprivileged threshold API; TLPUI escalates the same way.
+- **ThinkPad helper**: `pkexec` plus polkit, not sudoers. The shared rule returns
+  `AUTH_ADMIN_KEEP` only for `/usr/local/bin/ricelin-thinkpad` and
+  `/usr/local/bin/ricelin-tlp`; reads do not prompt. This needs a running polkit
+  agent (`hyprpolkitagent` here).
 - **Two QuickShell processes** (pill + lock): ~311 MB anon for the whole session
   on the reference machine (`docs/LIGHTWEIGHT.md`).
 

@@ -1,0 +1,11 @@
+// reddot helpers: keep polkit authentication for five minutes.
+// The rule is scoped to the two installed helpers, not to pkexec in general.
+polkit.addRule(function(action, subject) {
+    if (action.id != "org.freedesktop.policykit.exec")
+        return;
+    var program = action.lookup("program");
+    if (program == "/usr/local/bin/ricelin-tlp" ||
+        program == "/usr/local/bin/ricelin-thinkpad") {
+        return polkit.Result.AUTH_ADMIN_KEEP;
+    }
+});

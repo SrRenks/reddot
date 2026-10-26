@@ -36,8 +36,8 @@ kept close to the original.
 
 Install runs the upstream Python installer and then `tools/install-extras.sh`
 for the root helper, polkit rule, TLP policy and user tools. On a ThinkPad it
-also installs the optional `ricelin-thinkpad` helper and its polkit rule; other
-machines skip both.
+also installs the optional `ricelin-thinkpad` helper; the shared polkit rule
+covers both helpers on every machine.
 
 ## Install (this fork)
 

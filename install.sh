@@ -135,9 +135,9 @@ main() {
 
 	python3 "$DIR/installer/ricelin_install.py" --source "$DIR/configs" "$@" || exit $?
 
-	# The Python installer owns ~/.config. The TLP helper, sudoers rule, AC/BAT
-	# policy and the user-level tools live outside it; install them last so a
-	# config-only run never leaves the surface pointing at a missing helper.
+	# The Python installer owns ~/.config. The TLP and ThinkPad helpers, the
+	# polkit rule, the AC/BAT policy and the user-level tools live outside it;
+	# install them last so a config-only run never points at a missing helper.
 	if ! has_flag --dry-run "$@" && ! has_flag --uninstall "$@" \
 		&& ! has_flag --skip-extras "$@"; then
 		step "Installing Reddot extras"

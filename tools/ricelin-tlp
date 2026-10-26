@@ -2,7 +2,7 @@
 #
 # ricelin-tlp — the only privileged command the TLP surface runs.
 #
-# Installed root:root 0755 and covered by a NOPASSWD sudoers rule, so every
+# Installed root:root 0755 and called through pkexec/polkit, so every
 # argument is validated here. `status` needs no root. On machines without TLP
 # the profile falls back to power-profiles-daemon and the charge window to
 # sysfs, so the surface degrades instead of failing.

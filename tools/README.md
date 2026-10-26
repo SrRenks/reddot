@@ -6,7 +6,7 @@
 | `ricelin-thinkpad` | ThinkPad helper: status, TrackPoint, double-tap, fan curve, LEDs |
 | `tlp-acbat.conf` | `/etc/tlp.d` drop-in: AC performance, battery balanced, saver low-power |
 | `install-extras.sh` | installs the helper, polkit rule, TLP policy and user tools |
-| `49-ricelin-thinkpad.rules` | polkit rule: admin auth kept for the helper only |
+| `49-ricelin.rules` | polkit rule: admin auth kept for the TLP and ThinkPad helpers |
 | `test-ricelin-tlp.sh` | 25 assertions with fake sysfs and fake tlp/ppd/systemctl |
 | `test-ricelin-thinkpad.sh` | fake ThinkPad sysfs: status and allowlisted writes |
 | `ricelin-bench.sh` | PSS/CPU + session cgroup anon/file snapshot |

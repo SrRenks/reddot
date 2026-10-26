@@ -1,8 +1,0 @@
-// reddot ThinkPad helper: keep the polkit authentication for five minutes.
-// Without this rule pkexec still works, but asks again for every write.
-polkit.addRule(function(action, subject) {
-    if (action.id == "org.freedesktop.policykit.exec" &&
-        action.lookup("program") == "/usr/local/bin/ricelin-thinkpad") {
-        return polkit.Result.AUTH_ADMIN_KEEP;
-    }
-});

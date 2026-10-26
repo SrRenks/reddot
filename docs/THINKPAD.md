@@ -182,14 +182,14 @@ same model as the Power surface.
 Privilege: a root-owned helper `ricelin-thinkpad`, invoked with
 `pkexec /usr/local/bin/ricelin-thinkpad ...`. Reads work unprivileged; writes ask
 the session polkit agent, `hyprpolkitagent`, for authentication. There is no
-passwordless sudoers rule for the ThinkPad helper.
+passwordless sudoers rule for either helper.
 
 `tools/install-extras.sh` installs
-`/etc/polkit-1/rules.d/49-ricelin-thinkpad.rules`. The rule returns
+`/etc/polkit-1/rules.d/49-ricelin.rules`. The rule returns
 `AUTH_ADMIN_KEEP` only when the pkexec program is
-`/usr/local/bin/ricelin-thinkpad`, so the first write asks for the admin password
-and the next writes inside five minutes reuse it. Every other pkexec call keeps
-the default policy. No shell interpolation, allowlisted attributes, ranges
+`/usr/local/bin/ricelin-thinkpad` or `/usr/local/bin/ricelin-tlp`, so the first
+write asks for the admin password and later writes inside five minutes reuse it.
+Every other pkexec call keeps the default policy. No shell interpolation, allowlisted attributes, ranges
 validated in the helper.
 
 This is the same polkit flow desktop apps and Flatpak use. It requires a running
@@ -217,8 +217,8 @@ Lighting and Pointing.
   `curve set` and `led kbd|lid|vantage`. `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
   thinkfan. `tools/test-ricelin-thinkpad.sh` covers success and refusal.
-- `tools/install-extras.sh` installs the helper and its polkit rule only when
-  a ThinkPad is detected.
+- `tools/install-extras.sh` installs the shared polkit rule on every machine and
+  the ThinkPad helper only when a ThinkPad is detected.
 
 The surface never writes raw fan levels, `pwm1_enable` or `/proc/acpi/ibm/fan`.
 It edits the thinkfan curve, which is the policy that owns those levels.
@@ -226,7 +226,8 @@ It edits the thinkfan curve, which is the policy that owns those levels.
 ## Base compatibility
 
 - On a non-ThinkPad the probe exits non-zero, `present` stays false, the Power
-  row is hidden and no helper or polkit rule is installed.
+  row is hidden and no ThinkPad helper is installed. The shared polkit rule for
+  the TLP helper is still installed.
 - The singleton is constructed only when Power or the ThinkPad surface opens,
   so a normal session does not pay for the probe.
 - The keybind opens the surface on any machine and shows a one-line "No ThinkPad
@@ -279,8 +280,9 @@ install -Dm644 configs/hypr/modules/binds.lua ~/.config/hypr/modules/binds.lua
 ~/.config/hypr/scripts/watchdog.sh pill
 ```
 
-On a non-ThinkPad, skip `install-extras.sh`: the QML probe hides the entry and
-no helper or polkit rule is needed.
+On a non-ThinkPad, skip the ThinkPad helper: the QML probe hides the entry. The
+shared polkit rule still belongs to the TLP helper, so keep running
+`install-extras.sh` for battery control.
 
 ## Sources
 

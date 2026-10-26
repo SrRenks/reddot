@@ -35,6 +35,8 @@ mkdir -p "$tmp/sys/devices/platform/thinkpad_acpi" \
     "$tmp/sys/class/leds/tpacpi::lid_logo_dot" \
     "$tmp/sys/class/leds/tpacpi::thinkvantage" \
     "$tmp/sys/class/leds/platform::micmute" \
+    "$tmp/sys/class/leds/input3::capslock" \
+    "$tmp/sys/class/leds/enp1s0-0::lan" \
     "$tmp/sys/firmware/acpi" \
     "$tmp/proc" \
     "$tmp/bin"
@@ -57,6 +59,10 @@ printf '0\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/brightness"
 printf '255\n' > "$tmp/sys/class/leds/tpacpi::thinkvantage/max_brightness"
 printf '0\n' > "$tmp/sys/class/leds/tpacpi::thinkvantage/brightness"
 printf '1\n' > "$tmp/sys/class/leds/platform::micmute/brightness"
+printf '0\n' > "$tmp/sys/class/leds/input3::capslock/brightness"
+printf '1\n' > "$tmp/sys/class/leds/input3::capslock/max_brightness"
+printf '0\n' > "$tmp/sys/class/leds/enp1s0-0::lan/brightness"
+printf '255\n' > "$tmp/sys/class/leds/enp1s0-0::lan/max_brightness"
 printf 'custom\n' > "$tmp/sys/firmware/acpi/platform_profile"
 printf 'status:\t\tenabled\nspeed:\t\t2200\nlevel:\t\t2\n' > "$tmp/proc/fan"
 cat > "$tmp/thinkfan.yaml" <<'YAML'
@@ -100,6 +106,7 @@ contains "$out" '^TEMP_GPU=47$' "reads the GPU temperature"
 contains "$out" '^LED_KBD_MAX=2$' "reads the backlight maximum"
 contains "$out" '^TP_SENSITIVITY=128$' "reads TrackPoint sensitivity"
 contains "$out" '^CURVE=0:0:42;1:39:48;2:45:55;3:52:62;4:59:68;5:65:74;6:72:80;7:77:84$' "reads the fan curve"
+contains "$out" '^LEDS=.*input3::capslock|0|1;' "lists every LED"
 contains "$out" '^DOUBLETAP=1$' "reads double-tap"
 
 run trackpoint sensitivity 160
@@ -120,6 +127,11 @@ run led lid 1
 contains "$(cat "$tmp/sys/class/leds/tpacpi::lid_logo_dot/brightness")" '^255$' "writes the lid logo LED"
 run led vantage 1
 contains "$(cat "$tmp/sys/class/leds/tpacpi::thinkvantage/brightness")" '^255$' "writes the ThinkVantage LED"
+run led input3::capslock 1
+contains "$(cat "$tmp/sys/class/leds/input3::capslock/brightness")" '^1$' "writes a generic LED"
+run led enp1s0-0::lan 255
+contains "$(cat "$tmp/sys/class/leds/enp1s0-0::lan/brightness")" '^255$' "writes a LAN LED"
+exits 2 "rejects a path LED name" run led ../brightness 1
 
 run curve set '0:0:40;1:38:46;2:44:53;3:51:60;4:58:66;5:64:72;6:70:78;7:75:82'
 contains "$(cat "$tmp/thinkfan.yaml")" 'level 0", 0, 40' "writes the fan curve"

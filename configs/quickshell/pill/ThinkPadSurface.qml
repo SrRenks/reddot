@@ -37,16 +37,11 @@ PillSurface {
         if (ThinkPad.tempNvme >= 0) parts.push(ThinkPad.tempNvme + "°");
         return parts.length > 0 ? parts.join("  ·  ") : "—";
     }
-    readonly property bool hasLighting: ThinkPad.kbd >= 0
-        || ThinkPad.leds.LIDLOGO !== undefined || ThinkPad.leds.VANTAGE !== undefined
     readonly property bool hasPointing: ThinkPad.tpList.length > 0 || ThinkPad.doubletap >= 0
     readonly property bool curveReady: ThinkPad.curve.length === 8
     readonly property string curveSummary: root.curveDirty
         ? "8 levels · edited"
         : "8 levels · thinkfan"
-    readonly property var kbdOptions: ThinkPad.kbdMax >= 2
-        ? [{ label: "Off", value: 0 }, { label: "Dim", value: 1 }, { label: "Full", value: 2 }]
-        : [{ label: "Off", value: 0 }, { label: "On", value: 1 }]
 
     property bool busy: false
     property string notice: ""
@@ -129,6 +124,10 @@ PillSurface {
 
     function setLed(name, on) {
         root.run(["led", name, on ? "1" : "0"]);
+    }
+
+    function setLedRaw(name, value) {
+        root.run(["led", name, String(value)]);
     }
 
     function tpLabel(name) {
@@ -335,51 +334,10 @@ PillSurface {
                 }
             }
 
-            ThinkPadGroup {
+            ThinkPadLighting {
                 s: root.s
-                title: "Lighting"
-                open: true
-                visible: root.hasLighting
-
-                SettingsField {
-                    surface: root
-                    label: "Keyboard light"
-                    visible: ThinkPad.kbd >= 0
-
-                    SettingsSeg {
-                        s: root.s
-                        options: root.kbdOptions
-                        value: ThinkPad.kbd
-                        enabled: !root.busy
-                        onPicked: (v) => root.setKbd(v)
-                    }
-                }
-
-                SettingsField {
-                    surface: root
-                    label: "Lid logo"
-                    visible: ThinkPad.leds.LIDLOGO !== undefined
-
-                    LinkToggle {
-                        s: root.s
-                        on: (ThinkPad.leds.LIDLOGO || 0) > 0
-                        enabled: !root.busy
-                        onToggled: root.setLed("lid", !on)
-                    }
-                }
-
-                SettingsField {
-                    surface: root
-                    label: "Vantage"
-                    visible: ThinkPad.leds.VANTAGE !== undefined
-
-                    LinkToggle {
-                        s: root.s
-                        on: (ThinkPad.leds.VANTAGE || 0) > 0
-                        enabled: !root.busy
-                        onToggled: root.setLed("vantage", !on)
-                    }
-                }
+                surface: root
+                visible: ThinkPad.present
             }
 
             ThinkPadGroup {

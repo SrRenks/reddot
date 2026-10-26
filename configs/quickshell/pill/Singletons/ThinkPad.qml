@@ -48,6 +48,7 @@ Singleton {
     property int kbd: -1
     property int kbdMax: 1
     property var leds: ({})
+    property var ledsAll: []
     property var tp: ({})
     property var curve: []
     property int doubletap: -1
@@ -77,6 +78,17 @@ Singleton {
         return out;
     }
     readonly property bool hasFan: fanRpm >= 0
+    readonly property var primaryLeds: [
+        "tpacpi::kbd_backlight", "tpacpi::lid_logo_dot", "tpacpi::thinkvantage"
+    ]
+    readonly property var ledOther: {
+        var out = [];
+        for (var i = 0; i < ledsAll.length; i++) {
+            if (primaryLeds.indexOf(ledsAll[i].name) < 0)
+                out.push(ledsAll[i]);
+        }
+        return out;
+    }
 
     function hasTp(name) {
         return tp[name] !== undefined;
@@ -98,6 +110,7 @@ Singleton {
     function parseStatus(text) {
         var nextTp = ({});
         var nextLeds = ({});
+        var nextLedsAll = [];
         var lines = text.split("\n");
         var next = {
             model: "", bios: "", fanRpm: -1, fanLevel: "", fanStatus: "",
@@ -138,6 +151,19 @@ Singleton {
                     });
                 }
             }
+            else if (k === "LEDS") {
+                var leds = v.split(";");
+                for (var l = 0; l < leds.length; l++) {
+                    var parts = leds[l].split("|");
+                    if (parts.length !== 3 || parts[0].length === 0)
+                        continue;
+                    nextLedsAll.push({
+                        name: parts[0],
+                        value: parseInt(parts[1], 10),
+                        max: parseInt(parts[2], 10) || 1
+                    });
+                }
+            }
             else if (k.indexOf("LED_") === 0) nextLeds[k.substring(4)] = parseInt(v, 10);
             else if (k.indexOf("TP_") === 0)
                 nextTp[k.substring(3).toLowerCase()] = parseInt(v, 10);
@@ -158,6 +184,7 @@ Singleton {
         root.kbdMax = next.kbdMax;
         root.doubletap = next.doubletap;
         root.leds = nextLeds;
+        root.ledsAll = nextLedsAll;
         root.tp = nextTp;
         root.curve = next.curve;
         root.updated();

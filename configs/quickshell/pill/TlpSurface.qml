@@ -166,8 +166,8 @@ PillSurface {
         if (actionProc.running)
             return;
         root.busy = true;
-        root.notice = "";
-        actionProc.command = ["sudo", "-n", root.helper].concat(args);
+        root.notice = "authentication required…";
+        actionProc.command = ["/usr/bin/pkexec", root.helper].concat(args);
         actionProc.running = true;
     }
     /** Clamp start below stop and hand the pair to the helper. */
@@ -193,7 +193,7 @@ PillSurface {
 
     Process {
         id: statusProc
-        command: ["sudo", "-n", root.helper, "status"]
+        command: [root.helper, "status"]
         stdout: StdioCollector {
             onStreamFinished: root.parseStatus(this.text)
         }
@@ -205,10 +205,8 @@ PillSurface {
             root.busy = false;
             if (code === 0)
                 return;
-            if (root.notice.indexOf("sudo:") >= 0)
-                root.notice = "helper not installed — run sudo ./install.sh";
-            else if (root.notice.length === 0)
-                root.notice = "helper failed (" + code + ")";
+            if (root.notice.length === 0)
+                root.notice = "authentication cancelled or helper failed (" + code + ")";
         }
     }
 

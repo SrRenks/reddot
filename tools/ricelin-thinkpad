@@ -3,7 +3,7 @@
 # ricelin-thinkpad — read and adjust the ThinkPad-specific sysfs knobs.
 #
 # Installed only when a ThinkPad is detected. `status` needs no root; the
-# setters need root and are the only verbs covered by the sudoers rule.
+# setters need root and run through pkexec/polkit.
 #
 #   status
 #   trackpoint <attr> <value>
@@ -129,6 +129,16 @@ cmd_status() {
         fi
     done
 
+    led_spec=""
+    for d in "$LEDS"/*; do
+        [ -r "$d/brightness" ] || continue
+        name=${d##*/}
+        value=$(cat "$d/brightness" 2>/dev/null || true)
+        max=$(cat "$d/max_brightness" 2>/dev/null || echo 1)
+        [ -n "$value" ] && led_spec="${led_spec}${name}|${value}|${max};"
+    done
+    [ -n "$led_spec" ] && echo "LEDS=$led_spec"
+
     serio=$(find_serio || true)
     if [ -n "$serio" ]; then
         for attr in sensitivity speed press_to_select dragging drift_time inertia; do
@@ -229,36 +239,34 @@ cmd_curve() {
 }
 
 cmd_led() {
-    [ "$#" -eq 2 ] || die "usage: led kbd|lid|vantage <value>"
+    [ "$#" -eq 2 ] || die "usage: led <name|kbd|lid|vantage> <value>"
     name=$1
     value=$2
     case "$value" in ''|*[!0-9]*) die "value is not a number" ;; esac
+
     case "$name" in
-        kbd)
-            file="$LEDS/tpacpi::kbd_backlight/brightness"
-            maxfile="$LEDS/tpacpi::kbd_backlight/max_brightness"
-            [ -e "$file" ] || die "keyboard backlight is not exposed"
-            max=$(cat "$maxfile" 2>/dev/null || echo 1)
-            [ "$value" -le "$max" ] || die "backlight must be 0..$max"
-            ;;
-        lid|lid_logo)
-            file="$LEDS/tpacpi::lid_logo_dot/brightness"
-            maxfile="$LEDS/tpacpi::lid_logo_dot/max_brightness"
-            [ -e "$file" ] || die "lid logo LED is not exposed"
-            [ "$value" -le 1 ] || die "lid logo must be 0 or 1"
-            max=$(cat "$maxfile" 2>/dev/null || echo 1)
-            [ "$value" -eq 1 ] && value=$max
-            ;;
-        vantage|thinkvantage)
-            file="$LEDS/tpacpi::thinkvantage/brightness"
-            maxfile="$LEDS/tpacpi::thinkvantage/max_brightness"
-            [ -e "$file" ] || die "ThinkVantage LED is not exposed"
-            [ "$value" -le 1 ] || die "ThinkVantage must be 0 or 1"
-            max=$(cat "$maxfile" 2>/dev/null || echo 1)
-            [ "$value" -eq 1 ] && value=$max
-            ;;
-        *) die "unsupported LED: $name" ;;
+        kbd) name="tpacpi::kbd_backlight" ;;
+        lid|lid_logo) name="tpacpi::lid_logo_dot" ;;
+        vantage|thinkvantage) name="tpacpi::thinkvantage" ;;
     esac
+    case "$name" in
+        ''|*[!A-Za-z0-9:_-]*) die "invalid LED name" ;;
+    esac
+
+    dir="$LEDS/$name"
+    file="$dir/brightness"
+    maxfile="$dir/max_brightness"
+    [ -e "$file" ] || die "LED is not exposed: $name"
+    max=$(cat "$maxfile" 2>/dev/null || echo 1)
+    [ "$value" -le "$max" ] || die "$name must be 0..$max"
+
+    # Aliases keep the old one-bit contract; full names take raw brightness.
+    case "$1" in
+        lid|lid_logo|vantage|thinkvantage)
+            [ "$value" -eq 1 ] && value=$max
+            ;;
+    esac
+
     need_root
     printf '%s\n' "$value" > "$file"
 }
@@ -271,7 +279,7 @@ case "${1:-}" in
     led) shift; cmd_led "$@" ;;
     *)
         cat >&2 <<'EOF'
-usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|curve set <spec>|led kbd|lid|vantage <value>}
+usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|curve set <spec>|led <name> <value>}
 EOF
         exit 2
         ;;

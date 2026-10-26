@@ -149,6 +149,19 @@ Rows that do not apply are hidden, not disabled: no `speed` row on the E14, no
 fan row when the EC telemetry is absent. The fan curve editor opens only when
 the helper found eight thinkfan levels.
 
+## Privileges and polkit
+
+The current desktop has `polkit 128`, `pkexec` and `hyprpolkitagent` active. The
+agent opens a normal "Authentication Required" window; a test launch reached
+that window. The helper is root-owned and allowlisted, so pkexec runs only that
+binary, not a shell.
+
+The alternative would be udev rules that chgrp the sysfs attributes. That works
+for LEDs and TrackPoint on some machines, but it cannot write
+`/etc/thinkfan.yaml` or reload thinkfan, and device permissions vary by kernel
+and distribution. Polkit covers both cases with one policy and no permanent
+passwordless rule.
+
 ## Controls and data flow
 
 | Row | Read | Write | Fallback |
@@ -166,10 +179,22 @@ Refresh: one timer every 2 s, `running: surface.open`, one `Process` calling the
 helper's `status` verb. Nothing polls while the surface is closed. This is the
 same model as the Power surface.
 
-Privilege: a new root-owned helper `ricelin-thinkpad`, one sudoers rule, the
-same pattern as `ricelin-tlp`. Reads work unprivileged; writes use
-`sudo -n`. No shell interpolation, allowlisted attributes, ranges validated in
-the helper.
+Privilege: a root-owned helper `ricelin-thinkpad`, invoked with
+`pkexec /usr/local/bin/ricelin-thinkpad ...`. Reads work unprivileged; writes ask
+the session polkit agent, `hyprpolkitagent`, for authentication. There is no
+passwordless sudoers rule for the ThinkPad helper.
+
+`tools/install-extras.sh` installs
+`/etc/polkit-1/rules.d/49-ricelin-thinkpad.rules`. The rule returns
+`AUTH_ADMIN_KEEP` only when the pkexec program is
+`/usr/local/bin/ricelin-thinkpad`, so the first write asks for the admin password
+and the next writes inside five minutes reuse it. Every other pkexec call keeps
+the default policy. No shell interpolation, allowlisted attributes, ranges
+validated in the helper.
+
+This is the same polkit flow desktop apps and Flatpak use. It requires a running
+agent; without one pkexec fails visibly and the footer reports it. There is no
+silent fallback to sudo.
 
 ## What ships now
 
@@ -180,16 +205,19 @@ Lighting and Pointing.
   `/sys/devices/platform/thinkpad_acpi` with one `test -d` and calls the helper
   only when it exists.
 - `ThinkPadSurface.qml` and its `ThinkPadGroup`, `ThinkPadCurve`,
-  `ThinkPadHero` and `ThinkPadState` components render the sections, with the
-  battery link back to Power. The curve editor shows an eight-bar preview above
-  the threshold table.
+  `ThinkPadHero`, `ThinkPadState` and `ThinkPadThermalGraph` components render
+  the sections, with the battery link back to Power. The curve editor shows an
+  eight-bar preview above the threshold table.
+- The Thermal group keeps a 32-sample CPU graph. Samples are appended only from
+  the 2 s status timer while the surface is open, and cleared on close. There is
+  no Canvas and no extra timer; the bars are plain QML rectangles.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
   `curve set` and `led kbd|lid|vantage`. `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
   thinkfan. `tools/test-ricelin-thinkpad.sh` covers success and refusal.
-- `tools/install-extras.sh` installs the helper and its sudoers rule only when
+- `tools/install-extras.sh` installs the helper and its polkit rule only when
   a ThinkPad is detected.
 
 The surface never writes raw fan levels, `pwm1_enable` or `/proc/acpi/ibm/fan`.
@@ -198,7 +226,7 @@ It edits the thinkfan curve, which is the policy that owns those levels.
 ## Base compatibility
 
 - On a non-ThinkPad the probe exits non-zero, `present` stays false, the Power
-  row is hidden and no helper or sudoers file is installed.
+  row is hidden and no helper or polkit rule is installed.
 - The singleton is constructed only when Power or the ThinkPad surface opens,
   so a normal session does not pay for the probe.
 - The keybind opens the surface on any machine and shows a one-line "No ThinkPad
@@ -211,7 +239,7 @@ It edits the thinkfan curve, which is the policy that owns those levels.
 Phase 1, read-only surface: shipped.
 
 Phase 2, input and LED writes: shipped, guarded by the helper allowlist and the
-sudoers rule.
+polkit rule.
 
 Phase 3, fan curve editor: shipped. It edits the eight level bands in place and
 leaves sensors and fans untouched.
@@ -252,7 +280,7 @@ install -Dm644 configs/hypr/modules/binds.lua ~/.config/hypr/modules/binds.lua
 ```
 
 On a non-ThinkPad, skip `install-extras.sh`: the QML probe hides the entry and
-no helper or sudoers file is needed.
+no helper or polkit rule is needed.
 
 ## Sources
 
@@ -260,4 +288,6 @@ no helper or sudoers file is needed.
 - thinkfan manual: `man thinkfan`; thinkfan.conf: <https://manpages.debian.org/testing/thinkfan/thinkfan.conf.5.en.html>
 - Arch Wiki, Laptop/Lenovo (battery and firmware): <https://wiki.archlinux.org/title/Laptop/Lenovo>
 - TLP platform profile: <https://linrunner.de/tlp/settings/platform.html>
+- Arch Wiki polkit: <https://wiki.archlinux.org/title/Polkit>
+- Hyprland polkit agent: <https://wiki.hypr.land/Hypr-Ecosystem/hyprpolkitagent/>
 - fwupd: <https://fwupd.org/>

@@ -46,8 +46,8 @@ git -C ~/Projects/reddot pull
 sudo ~/Projects/reddot/install.sh --reinstall
 ```
 
-The Python installer only owns `~/.config`. The root helper, sudoers rule, TLP
-policy and user tools are outside it; after a pull that changes `tools/`:
+The Python installer only owns `~/.config`. The ThinkPad helper, polkit rule,
+TLP policy and user tools are outside it; after a pull that changes `tools/`:
 
 ```sh
 sudo ~/.local/share/reddot/tools/install-extras.sh
@@ -82,8 +82,10 @@ history of this fork see `git log`; each feature was committed separately.
   reveal, any surface keybind makes the pill modal; then **Look → Pill mode →
   Always**, or edit `~/.local/state/ricelin/flags.json`.
 - **TLP helper**: root-owned `/usr/local/bin/ricelin-tlp` plus one NOPASSWD rule.
-  TLP has no unprivileged threshold API; TLPUI escalates the same way. On a shared
-  machine, switch the QML call to `pkexec` and drop the sudoers file.
+  TLP has no unprivileged threshold API; TLPUI escalates the same way.
+- **ThinkPad helper**: `pkexec` plus polkit, not sudoers. The rule returns
+  `AUTH_ADMIN_KEEP` only for `/usr/local/bin/ricelin-thinkpad`; reads do not
+  prompt. This needs a running polkit agent (`hyprpolkitagent` here).
 - **Two QuickShell processes** (pill + lock): ~311 MB anon for the whole session
   on the reference machine (`docs/LIGHTWEIGHT.md`).
 

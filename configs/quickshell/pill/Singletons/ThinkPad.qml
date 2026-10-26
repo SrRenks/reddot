@@ -27,6 +27,8 @@ Singleton {
         { key: "VANTAGE", label: "Vantage" }
     ]
 
+    signal updated()
+
     property bool present: false
     property bool helperPresent: false
     property bool available: false
@@ -158,6 +160,7 @@ Singleton {
         root.leds = nextLeds;
         root.tp = nextTp;
         root.curve = next.curve;
+        root.updated();
     }
 
     Process {

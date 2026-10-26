@@ -35,8 +35,9 @@ kept close to the original.
   unchanged.
 
 Install runs the upstream Python installer and then `tools/install-extras.sh`
-for the root helper, sudoers rule, TLP policy and user tools. On a ThinkPad it
-also installs the optional `ricelin-thinkpad` helper; other machines skip it.
+for the root helper, polkit rule, TLP policy and user tools. On a ThinkPad it
+also installs the optional `ricelin-thinkpad` helper and its polkit rule; other
+machines skip both.
 
 ## Install (this fork)
 
@@ -104,7 +105,7 @@ curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | b
 --sddm        also install the torii SDDM login theme
 --no-deps     skip the package step, just deploy the configs
 --dry-run     walk the whole flow and change nothing
---skip-extras skip the TLP helper/sudoers/user tools step
+--skip-extras skip the TLP/ThinkPad helpers and user tools step
 ```
 
 Ricelin is a Hyprland shell. On Niri, Sway or anything else only rishot (the

@@ -56,6 +56,7 @@ PillSurface {
     property bool curveOpen: false
     property var curveDraft: []
     property bool curveDirty: false
+    property var tempHistory: []
 
     function reportRowHover(row, hovered) {
         if (hovered)
@@ -108,9 +109,9 @@ PillSurface {
         if (actionProc.running)
             return;
         busy = true;
-        notice = "";
+        notice = "authentication required…";
         actionDone = done || null;
-        actionProc.command = ["sudo", "-n", root.helper].concat(args);
+        actionProc.command = ["/usr/bin/pkexec", root.helper].concat(args);
         actionProc.running = true;
     }
 
@@ -146,6 +147,8 @@ PillSurface {
         ThinkPad.refresh();
         if (!curveDirty)
             syncCurve(true);
+    } else {
+        tempHistory = [];
     }
 
     Component.onCompleted: syncCurve(true)
@@ -155,6 +158,13 @@ PillSurface {
         function onCurveChanged() {
             if (!root.curveDirty)
                 root.syncCurve(true);
+        }
+        function onUpdated() {
+            if (!root.open || ThinkPad.tempCpu < 0)
+                return;
+            var next = root.tempHistory.slice(-31);
+            next.push(ThinkPad.tempCpu);
+            root.tempHistory = next;
         }
     }
 
@@ -181,7 +191,7 @@ PillSurface {
                 if (done)
                     done();
             } else if (root.notice.length === 0) {
-                root.notice = "helper failed (" + code + ")";
+                root.notice = "authentication cancelled or helper failed (" + code + ")";
             }
         }
     }
@@ -265,6 +275,12 @@ PillSurface {
                         font.pixelSize: 10 * root.s
                         font.weight: Font.DemiBold
                     }
+                }
+
+                ThinkPadThermalGraph {
+                    s: root.s
+                    samples: root.tempHistory
+                    current: ThinkPad.tempCpu
                 }
 
                 SettingsField {
@@ -467,7 +483,7 @@ PillSurface {
                     anchors.topMargin: 6 * root.s
                     text: root.notice.length > 0
                         ? root.notice
-                        : "Mic mute, power and battery LEDs follow the hardware."
+                        : "Changes ask for authentication; mic/power LEDs follow the hardware."
                     color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 9 * root.s

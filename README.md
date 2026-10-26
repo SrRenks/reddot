@@ -1,14 +1,44 @@
 <div align="center">
 
-# Ricelin
+# reddot
 
-**My Hyprland setup on CachyOS. The whole shell is hand-written Quickshell, no copied dotfiles.**
+**A personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), the hand-written Quickshell pill for Hyprland.**
 
-![Ricelin desktop](assets/hero.png)
+Fork point: `df7fd5f`. Everything upstream credits still applies.
+
+![reddot desktop](assets/hero.png)
 
 </div>
 
-I started this a few months into Linux, mostly to learn how things work. It somehow turned into my daily driver.
+reddot is my daily-driver fork: the same one morphing pill, with the changes I
+run on a ThinkPad E14 Gen 7 — auto-hide, a TLP power surface, UPower history in
+the battery card and a few performance fixes. The upstream README is below,
+kept close to the original.
+
+## What this fork adds
+
+- **Auto-hide pill** — retracts to a 10 px top-centre strip and returns on hover;
+  `Pill mode` and `Reserve space` are in **Look → Pill**. Fullscreen still hides it.
+- **Power surface** — charge window, profile and Pause/Resume, with multi-battery
+  and power-profiles-daemon sysfs fallbacks (`Super+Shift+B`).
+- **Battery history** — 24 h discharge bars and 1 h/24 h averages from UPower's
+  own `GetHistory`; `ricelin-power-report` prints the same plus recent packages.
+- **AC/BAT policy** — `/etc/tlp.d/99-ricelin-acbat.conf`: performance on AC,
+  balanced on battery, low-power for the manual saver profile.
+- **Performance** — jemalloc decay in the watchdog, 30 s surface unload,
+  edge-driven peripheral polling.
+- **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
+  power and memory measurements.
+
+Install runs the upstream Python installer and then `tools/install-extras.sh`
+for the root helper, sudoers rule, TLP policy and user tools.
+
+## Install (this fork)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
+```
+
 
 ## The shell
 
@@ -45,12 +75,12 @@ matugen pulls a palette from each wallpaper and recolors the pill, terminal, win
 One line, straight through the pipe:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
 ```
 
 `install.sh` is a thin bootstrap: it detects your distro (Arch, Debian, Fedora,
 openSUSE or Gentoo), makes sure git and python3 are there, clones the rice into
-`~/.local/share/ricelin`, then hands off to the guided Python installer. That part
+`~/.local/share/reddot`, then hands off to the guided Python installer. That part
 walks you through a short wizard, picks the right package names for your distro,
 pulls the deps and copies the configs into `~/.config`, backing up anything it
 replaces. The monitor layout and GPU env are swapped for portable defaults so it
@@ -60,7 +90,7 @@ Then start `Hyprland` from a TTY.
 Skip the wizard with flags, passed straight through the pipe:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | bash -s -- --quickstart
+curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash -s -- --quickstart
 ```
 
 ```
@@ -69,6 +99,7 @@ curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | 
 --sddm        also install the torii SDDM login theme
 --no-deps     skip the package step, just deploy the configs
 --dry-run     walk the whole flow and change nothing
+--skip-extras skip the TLP helper/sudoers/user tools step
 ```
 
 Ricelin is a Hyprland shell. On Niri, Sway or anything else only rishot (the
@@ -79,22 +110,36 @@ screenshot tool) makes sense; grab it from [rishot](https://github.com/Gakuseei/
 | Key | Action |
 |---|---|
 | `Super` + `Return` | terminal |
-| `Super` + `Space` | app launcher |
+| `Super` + `A` | app launcher |
 | `Super` + `V` | clipboard history |
 | `Super` + `C` | wallpaper picker |
 | `Super` + `B` | shuffle wallpaper and retheme |
-| `Super` + `E` | file manager |
+| `Super` + `E` | file manager (yazi) |
 | `Super` + `T` | toggle floating |
 | `Super` + `L` | lock |
+| `Super` + `Shift` + `B` | power surface |
 | `Print` | rishot |
 
 ## Notes
 
-These started as my personal dotfiles, built around my own machine. The installer neutralises the hardware-specific bits, but some paths and choices still lean on how I run things, so read before you borrow.
+These started as personal dotfiles, built around one machine. The installer
+neutralises the hardware-specific monitor/env bits, but the fork still carries
+my keymap, 0-gap/master layout and the TLP helper, so read before you borrow.
 
-## Support
+## License
 
-If Ricelin made your setup nicer, you can [buy me a coffee on Ko-fi](https://ko-fi.com/gakuseei). I build this on my own and it keeps the work going.
+MIT. Upstream code © 2026 [Gakuseei](https://github.com/Gakuseei); my changes
+© 2026 Ricardo Castro (SrRenks). The full text is in [LICENSE](LICENSE).
+Wallpapers are not in the repo; see [WALLPAPERS.md](WALLPAPERS.md). The SDDM
+background is third-party; see [CREDITS](configs/sddm/themes/torii/CREDITS.md).
+
+## Docs
+
+- [Power and energy tooling](docs/POWER.md)
+- [Measured memory and reductions](docs/LIGHTWEIGHT.md)
+- [Maintenance and update procedure](docs/MAINTENANCE.md)
+- [Related shells and ideas](docs/FORKS.md)
+- [Credits and licenses](docs/CREDITS.md)
 
 ## Credits
 

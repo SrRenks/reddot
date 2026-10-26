@@ -25,6 +25,59 @@ Column {
 
     Item {
         width: parent.width
+        height: 40 * curve.s
+
+        Row {
+            id: chart
+            width: parent.width
+            height: parent.height
+            spacing: 4 * curve.s
+
+            Repeater {
+                model: curve.rows
+
+                Item {
+                    id: bar
+                    required property var modelData
+                    width: (chart.width - 7 * 4 * curve.s) / 8
+                    height: chart.height
+
+                    Rectangle {
+                        x: 0
+                        y: 4 * curve.s
+                        width: parent.width
+                        height: 26 * curve.s
+                        radius: 2 * curve.s
+                        color: Theme.frameBg
+                    }
+
+                    Rectangle {
+                        x: 0
+                        y: 4 * curve.s + (100 - bar.modelData.high) / 100 * 26 * curve.s
+                        width: parent.width
+                        height: Math.max(2 * curve.s, (bar.modelData.high - bar.modelData.low) / 100 * 26 * curve.s)
+                        radius: 2 * curve.s
+                        color: Theme.verm
+                        Behavior on y { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
+                    }
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        y: 32 * curve.s
+                        text: bar.modelData.level
+                        color: Theme.faint
+                        font.family: Theme.font
+                        font.pixelSize: 7.5 * curve.s
+                        font.weight: Font.Bold
+                    }
+                }
+            }
+        }
+    }
+
+    Item {
+        width: parent.width
         height: help.implicitHeight + 8 * curve.s
 
         Text {

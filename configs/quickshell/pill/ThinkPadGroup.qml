@@ -10,6 +10,7 @@ Column {
     property real s: 1
     property string title: ""
     property bool open: false
+    property bool accent: false
     default property alias rows: body.data
 
     width: parent ? parent.width : 0
@@ -19,7 +20,22 @@ Column {
         width: parent.width
         height: gl.implicitHeight
 
-        SettingsLabel { id: gl; s: grp.s; text: grp.title }
+        Rectangle {
+            visible: grp.accent
+            x: 0
+            anchors.verticalCenter: gl.verticalCenter
+            width: 5 * grp.s
+            height: 5 * grp.s
+            radius: 2.5 * grp.s
+            color: Theme.verm
+        }
+
+        SettingsLabel {
+            id: gl
+            x: grp.accent ? 9 * grp.s : 0
+            s: grp.s
+            text: grp.title
+        }
 
         GlyphIcon {
             anchors.right: parent.right

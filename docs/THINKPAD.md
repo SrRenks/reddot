@@ -20,6 +20,10 @@ Measured 2026-10-26 on a ThinkPad E14 Gen 7, model `21T1S25T00`, BIOS
 | LEDs | yes | `platform::micmute`, `platform::mute`, `tpacpi::lid_logo_dot`, `tpacpi::power`, `tpacpi::standby`, `tpacpi::thinkvantage`, all 0644 root |
 | TrackPoint | partial | `/sys/devices/platform/i8042/serio1/`: `sensitivity` 128, `press_to_select` 0. No `speed`, `dragging`, `drift_time` or `inertia` here |
 | Double-tap | yes | `/sys/devices/platform/thinkpad_acpi/doubletap_enable` |
+| Keyboard language | yes | `keyboard_lang` lists `be cz da de en es et fr fr-ch hu it jp nl nn pl pt sl sv tr` |
+| Lap mode | yes | `dytc_lapmode` = 0 (desk) |
+| USB-C Security | no | attribute absent on this model |
+| Fn lock | no | attribute absent on this model |
 | Platform profile | inconsistent | `/sys/firmware/acpi/platform_profile` = `custom`; choices `low-power balanced performance`; TLP status says `performance/AC` |
 | Firmware | yes | `fwupd` sees the Lenovo platform, BIOS and camera |
 | Sensors | yes | `lm_sensors`: k10temp, amdgpu, nvme, acpitz, spd5118, BAT0 |
@@ -45,13 +49,28 @@ Two consequences:
 | Other LEDs | mic mute, mute, lid logo, power, standby, ThinkVantage | model and generation dependent |
 | TrackPoint | `sensitivity`, `press_to_select`; some models add `speed`, `dragging`, `drift_time`, `inertia` | detect files, never assume |
 | Double-tap | `thinkpad_acpi/doubletap_enable` | newer models |
-| Fn lock | `thinkpad_acpi/fn_lock` | not present on this E14 |
+| Keyboard language | `thinkpad_acpi/keyboard_lang` | write-only language code; reading returns the list |
+| Lap mode | `thinkpad_acpi/dytc_lapmode` | read-only, model dependent |
+| USB-C Security | `thinkpad_acpi/usb_c_security` | read-only, toggled by Fn+U then Fn+S |
+| Fn lock | `thinkpad_acpi/fn_lock` | model dependent; absent here |
 | Platform profile | low-power, balanced, performance; `custom` possible | ACPI platform profile driver |
 | Battery thresholds | TLP / `charge_control_*` | ThinkPad EC support |
 | Firmware | `fwupd` Lenovo plugin | BIOS/firmware present |
 
 Do not offer a control unless the file or tool is present. Do not assume every
 ThinkPad can control its fan; the module gate and the EC decide that.
+
+Researched but not exposed in this build:
+
+- `keyboard_lang` is write-only. Reading it returns the list of accepted codes,
+  not the active code, so a picker cannot show the current value. A future
+  control needs a separate state file.
+- `dytc_lapmode` is read-only.
+- `usb_c_security` is read-only and absent on the E14; the firmware toggles it
+  with Fn+U then Fn+S.
+- `fn_lock` is absent on the E14. It could become a generic row on models that
+  expose it.
+- `lcdshadow` (PrivacyGuard) exists on older T-series, not here.
 
 ## Safety and ownership
 
@@ -162,7 +181,8 @@ Lighting and Pointing.
   only when it exists.
 - `ThinkPadSurface.qml` and its `ThinkPadGroup`, `ThinkPadCurve`,
   `ThinkPadHero` and `ThinkPadState` components render the sections, with the
-  battery link back to Power.
+  battery link back to Power. The curve editor shows an eight-bar preview above
+  the threshold table.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,

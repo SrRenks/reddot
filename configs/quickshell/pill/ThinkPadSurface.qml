@@ -370,6 +370,7 @@ PillSurface {
                 s: root.s
                 title: "Pointing"
                 open: false
+                accent: true
                 visible: root.hasPointing
 
                 Repeater {

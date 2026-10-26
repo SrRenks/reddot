@@ -1,0 +1,267 @@
+#!/bin/sh
+#
+# ricelin-tlp — the only privileged command the TLP surface runs.
+#
+# Installed root:root 0755 and covered by a NOPASSWD sudoers rule, so every
+# argument is validated here. `status` needs no root. On machines without TLP
+# the profile falls back to power-profiles-daemon and the charge window to
+# sysfs, so the surface degrades instead of failing.
+#
+#   status                        KEY=VALUE + one BATTERY= line per pack
+#   set <bat> <start> <stop>      live + persistent charge window
+#   profile <performance|balanced|power-saver>
+#   pause|resume <bat>            charge_behaviour inhibit-charge / auto
+#   chargeonce|fullcharge <bat>   TLP battery-care one-shots
+#
+# Overrides (tests and ports):
+#   RICELIN_TLP_SYSFS   default /sys/class/power_supply
+#   RICELIN_TLP_CONF    default /etc/tlp.d/99-ricelin.conf
+#   RICELIN_TLP_TEST=1  skip the root check (test harness only)
+
+set -eu
+
+SYS="${RICELIN_TLP_SYSFS:-/sys/class/power_supply}"
+CONF="${RICELIN_TLP_CONF:-/etc/tlp.d/99-ricelin.conf}"
+TEST="${RICELIN_TLP_TEST:-0}"
+
+have() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+die() {
+    echo "$*" >&2
+    exit 2
+}
+
+need_root() {
+    [ "$TEST" = "1" ] || [ "$(id -u)" -eq 0 ] || die "root required"
+}
+
+# Every power supply whose type is Battery. Names vary (BAT0, BAT1, CMB1), so
+# the type file decides, with a name fallback for kernels that omit it.
+batteries() {
+    for dir in "$SYS"/*; do
+        [ -d "$dir" ] || continue
+        name=${dir##*/}
+        if [ -r "$dir/type" ]; then
+            [ "$(cat "$dir/type")" = "Battery" ] || continue
+        else
+            case "$name" in
+                BAT*|BATT*|CMB*) ;;
+                *) continue ;;
+            esac
+        fi
+        echo "$name"
+    done
+}
+
+# Kernels expose either the charge_control_* pair or the older *_threshold
+# pair; the stop side is called end in the newer ABI and stop in the older one.
+threshold_path() {
+    case "$2" in
+        start) names="charge_control_start_threshold charge_start_threshold" ;;
+        stop) names="charge_control_end_threshold charge_stop_threshold" ;;
+        *) return 1 ;;
+    esac
+    for f in $names; do
+        if [ -e "$1/$f" ]; then
+            echo "$1/$f"
+            return 0
+        fi
+    done
+    return 1
+}
+
+is_uint() {
+    case "$1" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    return 0
+}
+
+# Battery names are kernel identifiers (BAT0, CMB1). Reject anything that is
+# not, so a caller cannot walk out of the sysfs tree with a path argument.
+valid_bat() {
+    case "$1" in
+        ''|*[!A-Za-z0-9_-]*) return 1 ;;
+    esac
+    return 0
+}
+
+profile_of() {
+    if have tlp && have tlp-stat; then
+        tlp-stat -s 2>/dev/null | awk -F'=' '/^TLP profile/{
+            gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit }' | cut -d/ -f1
+    elif have powerprofilesctl; then
+        powerprofilesctl get 2>/dev/null || true
+    fi
+}
+
+power_of() {
+    for ac in "$SYS"/AC*/online "$SYS"/ADP*/online; do
+        if [ -r "$ac" ]; then
+            if [ "$(cat "$ac")" = "1" ]; then
+                echo AC
+            else
+                echo BAT
+            fi
+            return 0
+        fi
+    done
+    echo unknown
+}
+
+behaviour_of() {
+    # "auto inhibit-charge force-discharge" with the active one bracketed.
+    raw=$(cat "$1/charge_behaviour" 2>/dev/null | tr -d '[]')
+    current=$(printf '%s' "$raw" | awk '{print $1}')
+    case " $raw " in
+        *" inhibit-charge "*) pause=1 ;;
+        *) pause=0 ;;
+    esac
+    echo "$current|$pause"
+}
+
+cmd_status() {
+    tool=none
+    if have tlp; then
+        tool=tlp
+    elif have powerprofilesctl; then
+        tool=ppd
+    fi
+
+    enabled=0
+    case "$tool" in
+        tlp) systemctl is-active --quiet tlp 2>/dev/null && enabled=1 || true ;;
+        ppd) systemctl is-active --quiet power-profiles-daemon 2>/dev/null && enabled=1 || true ;;
+    esac
+
+    printf 'TOOL=%s\nENABLED=%s\nPOWER=%s\nPROFILE=%s\n' \
+        "$tool" "$enabled" "$(power_of)" "$(profile_of)"
+
+    for bat in $(batteries); do
+        dir="$SYS/$bat"
+        supported=0
+        start=0
+        stop=100
+        sp=$(threshold_path "$dir" start || true)
+        ep=$(threshold_path "$dir" stop || true)
+        if [ -n "$sp" ] && [ -n "$ep" ]; then
+            supported=1
+            start=$(cat "$sp")
+            stop=$(cat "$ep")
+        fi
+
+        cycles=""
+        [ -r "$dir/cycle_count" ] && cycles=$(cat "$dir/cycle_count")
+
+        current=""
+        pause=0
+        if [ -r "$dir/charge_behaviour" ]; then
+            behaviour=$(behaviour_of "$dir")
+            current=${behaviour%%|*}
+            pause=${behaviour##*|}
+        fi
+
+        printf 'BATTERY=%s|%s|%s|%s|%s|%s|%s\n' \
+            "$bat" "$start" "$stop" "$cycles" "$current" "$pause" "$supported"
+    done
+}
+
+write_conf() {
+    bat=$1
+    start=$2
+    stop=$3
+    mkdir -p "$(dirname "$CONF")"
+    tmp="$CONF.tmp.$$"
+
+    # Keep the other packs' keys: a two-battery machine sets each one
+    # separately and a blind overwrite would drop the first entry.
+    if [ -f "$CONF" ]; then
+        grep -v -E "^(START_CHARGE_THRESH_${bat}|STOP_CHARGE_THRESH_${bat})=" "$CONF" > "$tmp" || true
+    else
+        : > "$tmp"
+    fi
+    printf 'START_CHARGE_THRESH_%s=%s\nSTOP_CHARGE_THRESH_%s=%s\n' \
+        "$bat" "$start" "$bat" "$stop" >> "$tmp"
+    mv "$tmp" "$CONF"
+}
+
+cmd_set() {
+    [ "$#" -eq 3 ] || die "usage: set <battery> <start> <stop>"
+    bat=$1
+    start=$2
+    stop=$3
+
+    valid_bat "$bat" || die "invalid battery name"
+    is_uint "$start" || die "start is not a number"
+    is_uint "$stop" || die "stop is not a number"
+    [ "$start" -ge 0 ] && [ "$stop" -le 100 ] && [ "$start" -lt "$stop" ] \
+        || die "thresholds must satisfy 0 <= start < stop <= 100"
+
+    dir="$SYS/$bat"
+    [ -d "$dir" ] || die "no such battery: $bat"
+    sp=$(threshold_path "$dir" start) || die "this battery has no charge control"
+    ep=$(threshold_path "$dir" stop) || die "this battery has no charge control"
+
+    need_root
+    if have tlp; then
+        write_conf "$bat" "$start" "$stop"
+        tlp setcharge "$start" "$stop" "$bat"
+    else
+        printf '%s\n' "$start" > "$sp"
+        printf '%s\n' "$stop" > "$ep"
+    fi
+}
+
+cmd_profile() {
+    case "${1:-}" in
+        performance|balanced|power-saver) ;;
+        *) die "unknown profile: ${1:-}" ;;
+    esac
+    need_root
+    if have tlp; then
+        tlp "$1"
+    elif have powerprofilesctl; then
+        powerprofilesctl set "$1"
+    else
+        die "neither TLP nor power-profiles-daemon is installed"
+    fi
+}
+
+cmd_behaviour() {
+    mode=$1
+    bat=$2
+    valid_bat "$bat" || die "invalid battery name"
+    file="$SYS/$bat/charge_behaviour"
+    [ -e "$file" ] || die "this battery has no charge_behaviour"
+    case "$mode" in
+        pause) value=inhibit-charge ;;
+        resume) value=auto ;;
+        *) die "usage: pause|resume <battery>" ;;
+    esac
+    need_root
+    printf '%s\n' "$value" > "$file"
+}
+
+cmd_care() {
+    verb=$1
+    bat=$2
+    valid_bat "$bat" || die "invalid battery name"
+    have tlp || die "TLP is not installed; ${verb} needs it"
+    [ -d "$SYS/$bat" ] || die "no such battery: $bat"
+    need_root
+    tlp "$verb" "$bat"
+}
+
+case "${1:-}" in
+    status) cmd_status ;;
+    set) shift; cmd_set "$@" ;;
+    profile) cmd_profile "${2:-}" ;;
+    pause|resume) cmd_behaviour "$1" "${2:-}" ;;
+    chargeonce|fullcharge) cmd_care "$1" "${2:-}" ;;
+    *)
+        echo "usage: ricelin-tlp {status|set <bat> <start> <stop>|profile <p>|pause|resume <bat>|chargeonce|fullcharge <bat>}" >&2
+        exit 2
+        ;;
+esac

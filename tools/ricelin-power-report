@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# ricelin-power-report — a read-only snapshot for "why is the battery draining".
+#
+# Combines what the shell shows (UPower charge/rate history) with the context a
+# surface cannot: current state, top CPU, recent package changes and failed
+# units. No root, no writes. For a deeper audit see the commands it prints at
+# the end (powertop/powerstat/turbostat are root-only).
+#
+#   ricelin-power-report
+#   ricelin-power-report > ~/power-2026-10-26.txt
+
+set -eu
+
+path=$(upower -e 2>/dev/null | grep '/battery_' | head -n1 || true)
+if [ -z "$path" ]; then
+    echo "no battery device found" >&2
+    exit 1
+fi
+
+echo "== power report =="
+date
+printf 'kernel : %s\n' "$(uname -r)"
+printf 'device : %s\n' "$path"
+
+echo
+echo "== now =="
+upower -i "$path" | sed -n '/battery/,$p' | grep -E \
+    'state|energy:|energy-rate|percentage|time to|charge-|capacity|voltage:' \
+    | sed 's/^ */  /' || true
+
+echo
+echo "== discharge history (UPower, 5 min resolution) =="
+busctl --system --json=short call org.freedesktop.UPower "$path" \
+    org.freedesktop.UPower.Device GetHistory suu rate 86400 300 \
+    | python3 -c '
+import json, sys, time
+rows = json.load(sys.stdin)["data"][0]
+rows = [(t, v) for t, v, s in rows if s == 2]
+now = time.time()
+
+def avg(sec):
+    xs = [v for t, v in rows if t >= now - sec]
+    return sum(xs) / len(xs) if xs else 0.0
+
+print(f"  samples : {len(rows)}")
+print(f"  1h avg  : {avg(3600):.1f} W")
+print(f"  6h avg  : {avg(21600):.1f} W")
+print(f" 24h avg  : {avg(86400):.1f} W")
+peak = max((v for t, v in rows if t >= now - 86400), default=0.0)
+print(f" 24h peak : {peak:.1f} W")
+'
+
+echo
+echo "== power policy =="
+printf '  governor : %s\n' "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo n/a)"
+printf '  epp      : %s\n' "$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo n/a)"
+printf '  platform : %s\n' "$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo n/a)"
+
+echo
+echo "== top cpu =="
+ps -eo pcpu,pmem,comm --sort=-pcpu | head -n 8 | sed 's/^/  /'
+
+echo
+echo "== recent package activity =="
+grep -E '\[ALPM\] (upgraded|installed|removed)' /var/log/pacman.log 2>/dev/null \
+    | tail -n 12 | sed 's/^/  /' || echo "  pacman log not readable"
+
+echo
+echo "== failed user units =="
+systemctl --user --failed --no-legend 2>/dev/null | sed 's/^/  /' || true
+
+echo
+echo "== next =="
+echo "  compare the 24h average before/after an update; a sustained idle jump over ~2 W is worth a look"
+echo "  wakeups     : sudo powertop --csv=/tmp/powertop.csv --time=30"
+echo "  record      : sudo powertop --csv=/tmp/powertop.csv --time=60 --iteration=1"
+echo "  A/B drain   : sudo powerstat 300 5        (package: powerstat, AUR)"
+echo "  package W   : sudo turbostat --quiet --show PkgWatt,CorWatt --interval 5 --num_iterations 2"
+echo "  HTML report : sudo powertop --html=/tmp/powertop.html --time=30"

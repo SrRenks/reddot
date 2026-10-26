@@ -60,6 +60,7 @@ Item {
     readonly property bool wifiOpen: surface === "wifi"
     readonly property bool btOpen: surface === "bt"
     readonly property bool batteryOpen: surface === "battery"
+    readonly property bool tlpOpen: surface === "tlp"
     readonly property bool settingsOpen: surface === "settings"
     readonly property bool keybindsOpen: surface === "keybinds"
     readonly property bool workspacesOpen: surface === "workspaces"
@@ -173,6 +174,7 @@ Item {
     readonly property real mediaW: (Players.pickable.length > 1 ? 460 : 390) * s
     readonly property real mediaH: 150 * s
     readonly property real batteryW: 316 * s
+    readonly property real tlpW: 336 * s
     readonly property real wifiW: 272 * s
     readonly property real soundW: 400 * s
     readonly property real btW: 286 * s
@@ -240,6 +242,7 @@ Item {
         sound:     { size: () => Qt.size(soundW, surfaceItem(ldSound).implicitHeight + 34 * s), ame: () => surfaceItem(ldSound) },
         bt:        { size: () => Qt.size(btW, surfaceItem(ldBt).implicitHeight + 26 * s), ame: () => surfaceItem(ldBt) },
         battery:   { size: () => Qt.size(batteryW, surfaceItem(ldBattery).implicitHeight + 26 * s), ame: () => surfaceItem(ldBattery) },
+        tlp:       { size: () => Qt.size(tlpW, surfaceItem(ldTlp).implicitHeight + 26 * s), ame: () => surfaceItem(ldTlp) },
         settings:  { size: () => Qt.size(settingsW, surfaceItem(ldSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldSettings) },
         keybinds:  { size: () => Qt.size(keybindsW, surfaceItem(ldKeybinds).implicitHeight + 29 * s), ame: () => surfaceItem(ldKeybinds) },
         workspaces: { size: () => Qt.size(workspacesW, surfaceItem(ldWorkspaces).implicitHeight + 29 * s), ame: () => surfaceItem(ldWorkspaces) },
@@ -532,13 +535,17 @@ Item {
         unloadIdle.restart();
     }
 
-    /** Closed surfaces unload after two idle minutes; the preloaded trio and a busy surface stay. */
+    /**
+     * Closed surfaces unload after a 30 s tail; the preloaded trio and a busy
+     * surface stay. Ported from Ukishima, which holds the tail shorter than the
+     * upstream two minutes so a one-off surface's objects leave the heap sooner.
+     */
     Timer {
         id: unloadIdle
-        interval: 120000
+        interval: 30000
         onTriggered: {
             const cold = [ldSound, ldCalendar, ldLauncher, ldClip, ldWall, ldPower, ldWifi, ldBt, ldBattery,
-                          ldSettings, ldKeybinds, ldWorkspaces, ldStash, ldSpaceapps, ldRecorder, ldSysmon,
+                          ldTlp, ldSettings, ldKeybinds, ldWorkspaces, ldStash, ldSpaceapps, ldRecorder, ldSysmon,
                           ldAppearance, ldUpdates, ldDisplay, ldInput, ldLook, ldIdlelock, ldAnimation, ldFontpicker];
             for (const ld of cold)
                 if (ld.active && !(ld.item && ld.item.busy === true))
@@ -2074,6 +2081,19 @@ Item {
         sourceComponent: BatterySurface {
             s: pill.s
             open: pill.batteryOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldTlp
+        active: false
+        anchors.fill: parent
+        sourceComponent: TlpSurface {
+            s: pill.s
+            open: pill.tlpOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
         }

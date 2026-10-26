@@ -31,6 +31,8 @@ ShellRoot {
     property string openMon: ""
     property string openSurface: ""
     property string peekMon: ""
+    /** Monitor whose pill is currently pulled down from the auto-hide strip. */
+    property string revealMon: ""
 
     function refresh() {
         Hyprland.refreshMonitors();
@@ -158,6 +160,7 @@ ShellRoot {
         function power(mon: string): void { root.toggleSurface(mon, "power"); }
         function link(mon: string): void { root.toggleSurface(mon, "link"); }
         function battery(mon: string): void { root.toggleSurface(mon, "battery"); }
+        function tlp(mon: string): void { root.toggleSurface(mon, "tlp"); }
         function settings(mon: string): void { root.toggleSurface(mon, "settings"); }
         function keybinds(mon: string): void { root.toggleSurface(mon, "keybinds"); }
         function recorder(mon: string): void { root.toggleSurface(mon, "recorder"); }
@@ -230,14 +233,22 @@ ShellRoot {
 
             readonly property real gameBarH: 34 * s
 
+            /**
+             * Auto mode keeps the band at zero even while the pill is revealed:
+             * the strip has to stay reachable and windows must not jump when it
+             * slides in. `pillReserve` is the always-on/off choice.
+             */
+            readonly property bool reserveBand: Flags.pillReserve && Flags.pillMode !== "auto"
+            readonly property real bandH: Flags.gameMode ? gameBarH : (reserveBand ? reservedH : 0)
+
             screen: modelData
             color: "transparent"
             exclusionMode: ExclusionMode.Normal
-            exclusiveZone: Flags.gameMode ? gameBarH : reservedH
+            exclusiveZone: bandH
             aboveWindows: true
 
             anchors { top: true; left: true; right: true }
-            implicitHeight: Flags.gameMode ? gameBarH : reservedH
+            implicitHeight: bandH
 
             mask: emptyReserve
             Region { id: emptyReserve }
@@ -276,9 +287,17 @@ ShellRoot {
             readonly property bool summoned: modal || root.peekMon === modelData.name
             readonly property bool pillHidden: monFullscreen && !summoned
 
+            /** Dash-to-dock style: retracted to a 10 px strip until the pointer touches it. */
+            readonly property bool autoMode: Flags.pillMode === "auto"
+            readonly property bool autoHidden: autoMode && !monFullscreen && !Flags.gameMode
+                && !modal && !pill.pinned && !pill.osdActive && !pill.toastActive
+                && root.peekMon !== modelData.name && root.revealMon !== modelData.name
+            readonly property bool hiddenNow: pillHidden || autoHidden
+
             onMonFullscreenChanged: if (monFullscreen) {
                 if (root.openMon === modelData.name) root.close();
                 if (root.peekMon === modelData.name) root.peekMon = "";
+                if (root.revealMon === modelData.name) root.revealMon = "";
                 pill.pinned = false;
             }
 
@@ -296,7 +315,9 @@ ShellRoot {
             anchors { top: true; left: true; right: true }
             implicitHeight: tall ? modelData.height : bandH
 
-            mask: modal ? fullRegion : (pillHidden ? hiddenRegion : pillRegion)
+            mask: modal ? fullRegion
+                : (pillHidden ? hiddenRegion
+                : (autoMode ? (autoHidden ? revealRegion : revealUnion) : pillRegion))
             Region { id: hiddenRegion }
             Region {
                 id: pillRegion
@@ -305,6 +326,52 @@ ShellRoot {
                 y: slot.y + pill.y
                 width: baseW + pill.inputPadRight
                 height: Math.max(pill.height, pill.targetH)
+            }
+
+            /**
+             * The only live area while the pill is retracted: a thin top-centre
+             * strip, matching Ukishima's auto-hide. It doubles as the reveal
+             * input mask, so nothing invisible below it blocks clicks.
+             */
+            Region {
+                id: revealRegion
+                readonly property real revealW: Math.max(420 * overlay.s, pill.width)
+                x: Math.max(0, overlay.width / 2 - revealW / 2)
+                y: 0
+                width: revealW
+                height: 10 * overlay.s
+            }
+
+            /** Strip + pill while revealed, so the pointer can travel from one to the other without losing hover. */
+            Region {
+                id: revealUnion
+                x: Math.min(revealRegion.x, pillRegion.x)
+                y: Math.min(revealRegion.y, pillRegion.y)
+                width: Math.max(revealRegion.x + revealRegion.width,
+                               pillRegion.x + pillRegion.width) - x
+                height: Math.max(revealRegion.y + revealRegion.height,
+                                pillRegion.y + pillRegion.height) - y
+            }
+
+            HoverHandler {
+                enabled: overlay.autoMode && !overlay.monFullscreen
+                onHoveredChanged: {
+                    if (!enabled)
+                        return;
+                    if (hovered) {
+                        root.revealMon = overlay.modelData.name;
+                        revealHide.stop();
+                    } else if (root.revealMon === overlay.modelData.name) {
+                        revealHide.restart();
+                    }
+                }
+            }
+
+            Timer {
+                id: revealHide
+                interval: 420
+                onTriggered: if (root.revealMon === overlay.modelData.name)
+                    root.revealMon = "";
             }
             Region {
                 id: fullRegion
@@ -478,7 +545,7 @@ ShellRoot {
                     surface: overlay.surface
                     forcePinned: root.peekMon === overlay.modelData.name
 
-                    opacity: overlay.pillHidden ? 0 : pill.swipeFade
+                    opacity: overlay.hiddenNow ? 0 : pill.swipeFade
                     Behavior on opacity {
                         enabled: !slot.swiping
                         NumberAnimation {
@@ -490,7 +557,7 @@ ShellRoot {
                     transform: [
                         Translate { x: pill.swipeX; y: pill.swipeY },
                         Translate {
-                            y: overlay.pillHidden ? -(pill.height + overlay.topGap) : 0
+                            y: overlay.hiddenNow ? -(pill.height + overlay.topGap) : 0
                             Behavior on y {
                                 NumberAnimation {
                                     duration: Motion.morph

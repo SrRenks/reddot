@@ -15,6 +15,11 @@ import "Singletons"
 PillSurface {
     id: root
 
+    /** Opens the TLP surface from the battery-care row at the foot of the card. */
+    signal requestSurface(string name)
+
+    onOpenChanged: if (open) PowerHistory.refresh()
+
     mTop: 16
     mLeft: 19
     mRight: 19
@@ -73,7 +78,7 @@ PillSurface {
 
             Text {
                 id: pctText
-                text: Battery.pct + "%"
+                text: Battery.present ? Battery.pct + "%" : "—"
                 color: Battery.low ? Theme.vermLit : (Battery.charging ? Theme.flameGlow : Theme.cream)
                 font.family: Theme.font
                 font.pixelSize: 46 * root.s
@@ -83,11 +88,13 @@ PillSurface {
             }
 
             Text {
-                readonly property string body: Battery.full
-                    ? "Plugged in"
-                    : (Battery.hasTime
-                        ? Battery.timeStr + (Battery.charging ? " to full" : " remaining")
-                        : "")
+                readonly property string body: !Battery.present
+                    ? "No battery"
+                    : (Battery.full
+                        ? "Plugged in"
+                        : (Battery.hasTime
+                            ? Battery.timeStr + (Battery.charging ? " to full" : " remaining")
+                            : ""))
                 visible: body.length > 0
                 text: body
                 color: Battery.charging ? Theme.flameCore : Theme.subtle
@@ -101,6 +108,7 @@ PillSurface {
             id: meter
             width: parent.width
             height: 3 * root.s
+            visible: Battery.present
             radius: 1.5 * root.s
             color: Theme.threadBg
 
@@ -115,6 +123,53 @@ PillSurface {
                     GradientStop { position: 0.0; color: Battery.charging ? Theme.vermLit : Theme.vermDeep }
                     GradientStop { position: 1.0; color: Battery.charging ? Theme.flameGlow : Theme.vermLit }
                 }
+            }
+        }
+
+        Item {
+            width: parent.width
+            height: PowerHistory.ready ? 56 * root.s : 0
+            visible: PowerHistory.ready
+
+            Row {
+                id: historyBars
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 14 * root.s
+                height: 22 * root.s
+                spacing: 2 * root.s
+
+                Repeater {
+                    model: PowerHistory.hourly
+                    Item {
+                        required property real modelData
+                        width: (historyBars.width - 23 * historyBars.spacing) / 24
+                        height: historyBars.height
+
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            width: parent.width
+                            height: modelData > 0
+                                ? Math.max(2 * root.s, (modelData / Math.max(1, PowerHistory.peak24h)) * parent.height)
+                                : 2 * root.s
+                            radius: 1 * root.s
+                            color: modelData > 0 ? Theme.verm : Theme.threadBg
+                            opacity: modelData > 0 ? 0.55 + 0.45 * (modelData / Math.max(1, PowerHistory.peak24h)) : 0.5
+                        }
+                    }
+                }
+            }
+
+            Text {
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                text: "24h draw · " + PowerHistory.avg24h.toFixed(1)
+                    + " W avg · peak " + PowerHistory.peak24h.toFixed(1) + " W"
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 9.5 * root.s
+                font.weight: Font.Medium
             }
         }
 
@@ -163,6 +218,12 @@ PillSurface {
             }
 
             StatRow {
+                visible: PowerHistory.ready && PowerHistory.avg1h > 0
+                label: "1h avg"
+                value: PowerHistory.avg1h.toFixed(1) + " W"
+            }
+
+            StatRow {
                 visible: Battery.healthSupported
                 label: "Health"
                 value: Battery.health + "%"
@@ -173,6 +234,63 @@ PillSurface {
                 visible: Battery.capacityWh >= 1
                 label: "Capacity"
                 value: Battery.capacityWh.toFixed(1) + " Wh"
+            }
+        }
+
+        Item {
+            width: parent.width
+            height: 12 * root.s
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: Theme.threadBg
+        }
+
+        Item {
+            width: parent.width
+            height: 38 * root.s
+            visible: Battery.present
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.topMargin: 3 * root.s
+                anchors.bottomMargin: 3 * root.s
+                radius: 8 * root.s
+                color: careArea.containsMouse ? Theme.frameBg : "transparent"
+                Behavior on color { ColorAnimation { duration: Motion.fast } }
+            }
+
+            Text {
+                anchors.left: parent.left
+                anchors.leftMargin: 6 * root.s
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Battery care"
+                color: careArea.containsMouse ? Theme.cream : Theme.subtle
+                font.family: Theme.font
+                font.pixelSize: 11 * root.s
+                font.weight: Font.DemiBold
+            }
+
+            Text {
+                anchors.right: parent.right
+                anchors.rightMargin: 6 * root.s
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Power  ›"
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 9.5 * root.s
+                font.weight: Font.Medium
+                font.letterSpacing: 0.8 * root.s
+            }
+
+            MouseArea {
+                id: careArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.requestSurface("tlp")
             }
         }
     }

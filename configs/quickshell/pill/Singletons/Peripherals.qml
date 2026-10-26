@@ -107,12 +107,21 @@ Singleton {
 
     onListChanged: refresh()
 
-    Timer {
-        interval: 30000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refresh()
+    Component.onCompleted: refresh()
+
+    /**
+     * UPower already emits Percentage/State changes; polling every 30 s was a
+     * wakeup that told us nothing new. One Connections per present peripheral
+     * drives the same low-battery latch on the edge instead.
+     */
+    Instantiator {
+        model: root.list
+        delegate: Connections {
+            required property var modelData
+            target: modelData
+            function onPercentageChanged() { root.refresh() }
+            function onStateChanged() { root.refresh() }
+        }
     }
 
     Instantiator {

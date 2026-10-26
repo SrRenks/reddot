@@ -67,6 +67,8 @@ SettingsSurface {
             r.push({ item: opInactRow, kind: "scrub", bump: function (d) { opInactScrub.bump(d); } });
         }
         if (pillGrp.open) {
+            r.push({ item: pillModeRow, kind: "seg", vals: ["always", "auto"], get: function () { return Flags.pillMode; }, set: function (v) { Flags.pillMode = v; } });
+            r.push({ item: pillReserveRow, kind: "toggle", get: function () { return Flags.pillReserve; }, set: function (v) { Flags.pillReserve = v; } });
             r.push({ item: pillGapRow, kind: "scrub", bump: function (d) { pillGapScrub.bump(d); } });
             r.push({ item: appGapRow, kind: "scrub", bump: function (d) { appGapScrub.bump(d); } });
             r.push({ item: pillOpRow, kind: "scrub", bump: function (d) { pillOpScrub.bump(d); } });
@@ -766,6 +768,29 @@ SettingsSurface {
             }
 
             Group { id: pillGrp; title: "Pill"
+
+            FieldRow {
+                id: pillModeRow
+                label: "Pill mode"
+                caption: "Always on screen, or hidden until the top edge is touched"
+                SettingsSeg {
+                    s: root.s
+                    options: [{ label: "Always", value: "always" }, { label: "Auto", value: "auto" }]
+                    value: Flags.pillMode
+                    onPicked: v => Flags.pillMode = v
+                }
+            }
+
+            FieldRow {
+                id: pillReserveRow
+                label: "Reserve space"
+                caption: "Windows start below the pill. Off frees the top edge. Auto mode ignores it."
+                LinkToggle {
+                    s: root.s
+                    on: Flags.pillReserve
+                    onToggled: Flags.pillReserve = !Flags.pillReserve
+                }
+            }
 
             FieldRow {
                 id: pillGapRow

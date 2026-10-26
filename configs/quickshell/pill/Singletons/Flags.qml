@@ -30,6 +30,8 @@ Singleton {
     property alias uiFont: adapter.uiFont
     property alias pillOpacity: adapter.pillOpacity
     property alias pillBlur: adapter.pillBlur
+    property alias pillMode: adapter.pillMode
+    property alias pillReserve: adapter.pillReserve
     property alias topGap: adapter.topGap
     property alias appGap: adapter.appGap
     property alias recordCountdown: adapter.recordCountdown
@@ -91,6 +93,10 @@ Singleton {
             property string uiFont: ""
             property real pillOpacity: 1.0
             property bool pillBlur: false
+            /** "always" rests the pill on screen; "auto" retracts it and reveals it when the pointer touches the top strip. */
+            property string pillMode: "auto"
+            /** Reserve the top band so tiled windows start below the pill. Auto mode ignores it (the strip must stay reachable). */
+            property bool pillReserve: false
             /** Top margin as a fraction of the shipped 8px. 0 sits the pill flush to the screen edge. */
             property real topGap: 1.0
             /** Pill-to-window band as a fraction of the shipped 12px. 0 tucks the windows flush under the pill. */

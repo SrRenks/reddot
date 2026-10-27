@@ -16,12 +16,12 @@ SettingsSurface {
     rows: [
         { item: appearanceRow, kind: "nav", surface: "appearance" },
         { item: lookRow, kind: "nav", surface: "look" },
-        { item: presetsRow, kind: "nav", surface: "presets" },
         { item: displayRow, kind: "nav", surface: "display" },
         { item: inputRow, kind: "nav", surface: "input" },
         { item: animationRow, kind: "nav", surface: "animation" },
         { item: keybindsRow, kind: "nav", surface: "keybinds" },
         { item: workspacesRow, kind: "nav", surface: "workspaces" },
+        { item: presetsRow, kind: "nav", surface: "presets" },
         { item: idleRow, kind: "nav", surface: "idlelock" },
         { item: updatesRow, kind: "nav", surface: "updates" }
     ]
@@ -38,6 +38,8 @@ SettingsSurface {
             glyph: "設"
             title: "SETTINGS"
         }
+
+        SettingsLabel { s: root.s; text: "Desktop" }
 
         SettingsRow {
             id: appearanceRow
@@ -74,23 +76,6 @@ SettingsSurface {
         }
 
         SettingsRow {
-            id: presetsRow
-            surface: root
-            captionOnFocus: true
-            icon: "bolt"
-            name: "Presets"
-            sub: "Desktop, laptop, one switch"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === presetsRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
-        }
-
-        SettingsRow {
             id: displayRow
             surface: root
             captionOnFocus: true
@@ -106,6 +91,8 @@ SettingsSurface {
                 stroke: 2.2
             }
         }
+
+        SettingsLabel { s: root.s; text: "Controls" }
 
         SettingsRow {
             id: inputRow
@@ -171,6 +158,25 @@ SettingsSurface {
                 height: 16 * root.s
                 name: "chevron-right"
                 color: root.focusRowItem === workspacesRow ? Theme.cream : Theme.iconDim
+                stroke: 2.2
+            }
+        }
+
+        SettingsLabel { s: root.s; text: "Power & system" }
+
+        SettingsRow {
+            id: presetsRow
+            surface: root
+            captionOnFocus: true
+            icon: "bolt"
+            name: "Presets"
+            sub: "Desktop, laptop, one switch"
+
+            GlyphIcon {
+                width: 16 * root.s
+                height: 16 * root.s
+                name: "chevron-right"
+                color: root.focusRowItem === presetsRow ? Theme.cream : Theme.iconDim
                 stroke: 2.2
             }
         }

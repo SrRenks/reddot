@@ -106,6 +106,18 @@ SettingsSurface {
         root.notice = enabled ? "Enabled. It runs on the next start." : "Disabled.";
     }
 
+    function moveEntry(entry, delta) {
+        var moved = Autostart.move(root.autostartText, entry.index, delta);
+        if (!moved.ok) {
+            root.notice = moved.reason === "core"
+                ? "Core services keep their place."
+                : "Already at the edge of the list.";
+            return;
+        }
+        root.persist(moved.text);
+        root.notice = "Order saved. It applies on the next start.";
+    }
+
     function removeEdited() {
         if (root.editRow < 0 || root.editRow >= root.entries.length)
             return;
@@ -238,6 +250,20 @@ SettingsSurface {
                         font.weight: Font.Bold
                         font.capitalization: Font.AllUppercase
                         anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    ChipButton {
+                        s: root.s
+                        text: "↑"
+                        visible: !row.modelData.core
+                        onClicked: root.moveEntry(row.modelData, -1)
+                    }
+
+                    ChipButton {
+                        s: root.s
+                        text: "↓"
+                        visible: !row.modelData.core
+                        onClicked: root.moveEntry(row.modelData, 1)
                     }
 
                     LinkToggle {

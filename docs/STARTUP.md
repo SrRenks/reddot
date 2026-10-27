@@ -10,6 +10,9 @@ inside `hl.on("hyprland.start", ...)` in `~/.config/hypr/modules/autostart.lua`.
   the GUI are editable.
 - Disabling an entry comments its line (`-- hl.exec_cmd(...)`), preserving order
   and the rest of the block.
+- Use the ↑/↓ buttons on a user entry to reorder it. Core services keep their
+  positions, so a user command cannot jump across a watchdog, the session target,
+  the polkit agent or the idle daemon.
 - Adding or editing writes one quoted `hl.exec_cmd("…")` line inside the
   autostart block. Editing an existing Lua expression with `$HOME` writes a
   shell-expanded string; Hyprland runs it through the shell.

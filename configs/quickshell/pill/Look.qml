@@ -54,6 +54,7 @@ SettingsSurface {
             }
         }
         if (blurGrp.open) {
+            r.push({ item: uiBlurRow, kind: "toggle", get: function () { return Flags.pillBlur; }, set: function (v) { Flags.pillBlur = v; root.applyPillBlur(v); } });
             r.push({ item: blEnRow, kind: "toggle", get: function () { return root.blurOn; }, set: function (v) { root.blurOn = v; root.writeBlur("enabled", v ? "true" : "false"); } });
             if (root.blurOn) {
                 r.push({ item: blSizeRow, kind: "scrub", bump: function (d) { blSizeScrub.bump(d); } });
@@ -72,7 +73,6 @@ SettingsSurface {
             r.push({ item: pillGapRow, kind: "scrub", bump: function (d) { pillGapScrub.bump(d); } });
             r.push({ item: appGapRow, kind: "scrub", bump: function (d) { appGapScrub.bump(d); } });
             r.push({ item: pillOpRow, kind: "scrub", bump: function (d) { pillOpScrub.bump(d); } });
-            r.push({ item: pillBlurRow, kind: "toggle", get: function () { return Flags.pillBlur; }, set: function (v) { Flags.pillBlur = v; root.applyPillBlur(v); } });
         }
         return r;
     }
@@ -642,9 +642,23 @@ SettingsSurface {
             Group { id: blurGrp; title: "Blur"
 
             FieldRow {
+                id: uiBlurRow
+                label: "Quickshell blur"
+                caption: "Pill and layer surfaces only; terminal blur is left alone. Requires Window blur enabled."
+                LinkToggle {
+                    s: root.s
+                    on: Flags.pillBlur
+                    onToggled: {
+                        Flags.pillBlur = !Flags.pillBlur;
+                        root.applyPillBlur(Flags.pillBlur);
+                    }
+                }
+            }
+
+            FieldRow {
                 id: blEnRow
-                label: "Enabled"
-                caption: "Blur behind transparent windows"
+                label: "Window blur"
+                caption: "Regular windows and terminals; this is the engine behind UI blur too"
                 LinkToggle {
                     s: root.s
                     on: root.blurOn
@@ -831,20 +845,6 @@ SettingsSurface {
                     openValue: root.base.pillOpacity
                     from: 0.55; to: 1.0; step: 0.05; decimals: 2
                     onEdited: v => Flags.pillOpacity = v
-                }
-            }
-
-            FieldRow {
-                id: pillBlurRow
-                label: "Pill blur"
-                caption: "Frosts behind the pill. Needs opacity under 100%."
-                LinkToggle {
-                    s: root.s
-                    on: Flags.pillBlur
-                    onToggled: {
-                        Flags.pillBlur = !Flags.pillBlur;
-                        root.applyPillBlur(Flags.pillBlur);
-                    }
                 }
             }
 

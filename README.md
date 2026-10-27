@@ -35,8 +35,11 @@ kept close to the original.
   fan dials, compact Thermal/Power/Fan groups for every other sensor, and the
   ThinkPad fan curve. No Glances dependency.
 - **Startup hub** — Settings → Power & system → Startup lists the Hyprland
-  autostart stack: KDE Connect is editable, system services are locked. Changes
-  apply on the next Hyprland start.
+  autostart stack: KDE Connect is editable, system services are locked, and
+  ↑/↓ reorder user commands. Changes apply on the next Hyprland start.
+- **UI blur** — Look → Blur separates **Quickshell blur** (pill/layer surfaces)
+  from **Window blur**, so toggling the UI does not touch Ghostty or other
+  terminals.
 - **Conventional keymap** — see `docs/KEYBINDS.md`; screenshots, mic mute and
   window movement are unified and the dangerous hibernate chord is gone.
 - ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and

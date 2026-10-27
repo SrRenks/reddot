@@ -121,6 +121,29 @@ function remove(text, index) {
     return rows.join("\n");
 }
 
+function move(text, lineIndex, delta) {
+    var entries = parse(text);
+    var pos = -1;
+    for (var i = 0; i < entries.length; i++) {
+        if (entries[i].index === lineIndex) {
+            pos = i;
+            break;
+        }
+    }
+    var target = pos + delta;
+    if (pos < 0 || target < 0 || target >= entries.length)
+        return { text: text, ok: false, reason: "edge" };
+    if (entries[pos].core || entries[target].core)
+        return { text: text, ok: false, reason: "core" };
+    var rows = lines(text);
+    var a = entries[pos].index;
+    var b = entries[target].index;
+    var swap = rows[a];
+    rows[a] = rows[b];
+    rows[b] = swap;
+    return { text: rows.join("\n"), ok: true };
+}
+
 function add(text, command) {
     var rows = lines(text);
     var start = -1;

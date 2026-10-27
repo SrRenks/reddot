@@ -55,7 +55,7 @@ SettingsSurface {
         }
         if (blurGrp.open) {
             r.push({ item: uiBlurRow, kind: "toggle", get: function () { return UiBlur.enabled; }, set: function (v) { UiBlur.setEnabled(v); } });
-            r.push({ item: blEnRow, kind: "toggle", get: function () { return root.blurOn; }, set: function (v) { root.blurOn = v; root.writeBlur("enabled", v ? "true" : "false"); } });
+            r.push({ item: blEnRow, kind: "toggle", get: function () { return WindowBlur.enabled; }, set: function (v) { WindowBlur.setEnabled(v); } });
             if (root.blurOn) {
                 r.push({ item: blSizeRow, kind: "scrub", bump: function (d) { blSizeScrub.bump(d); } });
                 r.push({ item: blPassRow, kind: "scrub", bump: function (d) { blPassScrub.bump(d); } });
@@ -88,7 +88,7 @@ SettingsSurface {
     property int borderSize: 2
     property bool resizeOnBorder: true
     property string layout: "dwindle"
-    property bool blurOn: true
+    readonly property bool blurOn: WindowBlur.enabled
     property int blurSize: 8
     property int blurPasses: 3
     property real blurVibrancy: 0.17
@@ -143,7 +143,6 @@ SettingsSurface {
         var lo = SetDeco.getField(t, "layout");
         root.layout = lo.length > 0 ? lo : "dwindle";
 
-        root.blurOn = SetDeco.getBlockField(t, "blur", "enabled") === "true";
         var bz = parseInt(SetDeco.getBlockField(t, "blur", "size"), 10);
         root.blurSize = isNaN(bz) ? 8 : bz;
         var bp = parseInt(SetDeco.getBlockField(t, "blur", "passes"), 10);
@@ -633,11 +632,8 @@ SettingsSurface {
                 caption: "Regular windows and terminals; this is the engine behind UI blur too"
                 LinkToggle {
                     s: root.s
-                    on: root.blurOn
-                    onToggled: {
-                        root.blurOn = !root.blurOn;
-                        root.writeBlur("enabled", root.blurOn ? "true" : "false");
-                    }
+                    on: WindowBlur.enabled
+                    onToggled: WindowBlur.setEnabled(!WindowBlur.enabled)
                 }
             }
 

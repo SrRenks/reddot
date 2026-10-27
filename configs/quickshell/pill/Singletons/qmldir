@@ -25,3 +25,4 @@ singleton Sound Sound.qml
 singleton PresetStore PresetStore.qml
 singleton Sensors Sensors.qml
 singleton UiBlur UiBlur.qml
+singleton WindowBlur WindowBlur.qml

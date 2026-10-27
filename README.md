@@ -39,7 +39,8 @@ kept close to the original.
   ↑/↓ reorder user commands. Changes apply on the next Hyprland start.
 - **UI blur** — Look → Blur separates **Quickshell blur** (pill/layer surfaces)
   from **Window blur**, so toggling the UI does not touch Ghostty or other
-  terminals. `Super+Shift+F` toggles the Quickshell blur directly.
+  terminals. `Super+Shift+F` toggles the general window blur (the same
+  `Window blur` switch) without rewriting any terminal config.
 - **Conventional keymap** — see `docs/KEYBINDS.md`; screenshots, mic mute and
   window movement are unified and the dangerous hibernate chord is gone.
 - ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and

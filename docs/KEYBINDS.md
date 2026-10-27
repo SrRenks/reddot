@@ -31,7 +31,7 @@ same file so the Settings → Keybinds editor can see them; the old
 | `Super+Shift+R` | record |
 | `Super+Shift+C` | color picker |
 | `Super+Shift+E` | EasyEffects bypass |
-| `Super+Shift+F` | toggle Quickshell UI blur |
+| `Super+Shift+F` | toggle general window blur |
 | `Super+Shift+B` | TLP surface |
 | `Super+Shift+T` | ThinkPad surface |
 | `Super+G` | game mode |

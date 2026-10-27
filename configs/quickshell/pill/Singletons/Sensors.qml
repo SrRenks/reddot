@@ -68,7 +68,7 @@ Singleton {
                 root.cpuLabel = item.label;
             } else if ((label === "IGPU" || label === "GPU") && item.type === "temperature_core") {
                 next.gpu = Math.round(value);
-                root.gpuLabel = item.label;
+                root.gpuLabel = "IGPU";
             }
             else if ((label === "SSD0" || label === "NVME") && item.type === "temperature_core")
                 next.nvme = Math.round(value);
@@ -111,9 +111,7 @@ Singleton {
             onStreamFinished: root.parse(this.text)
         }
         stderr: StdioCollector {}
-        onExited: (code) => {
-            if (code !== 0)
-                root.available = false;
-        }
+        // Keep the last complete snapshot if a transient Glances run fails;
+        // clearing it makes the whole sensor block disappear and reappear.
     }
 }

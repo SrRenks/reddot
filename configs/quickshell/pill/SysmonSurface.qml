@@ -6,15 +6,15 @@ import "Singletons"
 /**
  * 系 SYSTEM surface: a flat washi card of live machine vitals fed by the Sysmon
  * singleton. The header carries the kanji, label and uptime. Below it sit flame
- * dials for CPU, GPU and memory load, each a 270deg arc stroked with the mixer's
+ * dials for CPU, IGPU and memory load, each a 270deg arc stroked with the mixer's
  * vermLit-to-vermBurn gradient on a thread track and rounded caps, the sweep
  * eased over the value change; the centre shows the value, a unit and a sub line
- * (memory total). A second dial row reads CPU/GPU temperature and fan RPM from
- * the Glances Sensors tab; a hairline strip carries NVMe, RAM and package power.
- * A fan-curve group and a hairline stripe with network, disk, swap and VRAM
- * follow. On a machine with no discrete GPU the GPU dial and VRAM cell drop and
- * the remaining dials recentre. System polling lives in the singleton and only
- * runs while this surface is open.
+ * (memory total). A second dial row reads CPU/IGPU temperature and fan RPM from
+ * the Glances Sensors tab. Thermal, Power and Fan groups list every remaining
+ * Glances sensor, followed by the network/disk/swap/VRAM stripe. A fan-curve
+ * group closes the card. On a machine with no IGPU telemetry the IGPU dial and
+ * VRAM cell drop and the remaining dials recentre. System polling lives in the
+ * singleton and only runs while this surface is open.
  */
 PillSurface {
     id: root
@@ -54,8 +54,7 @@ PillSurface {
             const label = String(item.label || "").toUpperCase();
             const type = String(item.type || "");
             if (type === "temperature_core"
-                    && (label === Sensors.cpuLabel.toUpperCase()
-                        || label === Sensors.gpuLabel.toUpperCase()))
+                    && (label === "CPU" || label === "GPU" || label === "IGPU"))
                 continue;
             if ((type === "fan_speed" || type === "fan_level") && Sensors.fanRpm >= 0)
                 continue;
@@ -117,7 +116,7 @@ PillSurface {
 
     function sensorSub(key) {
         if (key === "fan")
-            return "level " + Sensors.fanLevel;
+            return "LEVEL " + Sensors.fanLevel;
         return "TEMP";
     }
 
@@ -135,7 +134,7 @@ PillSurface {
      * the bead its flame, hovering just above the glyph with its wick rising into
      * it. Anchored to the header rather than the dial row so the ember sits in the
      * same deliberate spot whether three dials or two are shown (the header never
-     * changes with GPU presence). With glyphs off the kanji is hidden, so the
+     * changes with IGPU presence). With glyphs off the kanji is hidden, so the
      * anchor falls back to the SYSTEM label's left edge, vertically centred on the
      * header, and never floats. Mapped into surface-local space so the host can
      * offset it by the surface origin.
@@ -344,7 +343,7 @@ PillSurface {
                     big: key === "mem" ? Sysmon.memUsedGb.toFixed(1) : "" + val
                     unit: key === "mem" ? "" : "%"
                     shrink: key !== "mem" && val >= 100
-                    label: key
+                    label: key === "gpu" ? "IGPU" : key
                     sub: key === "mem" ? "/ " + Sysmon.memTotalGb.toFixed(0) + " GB" : ""
                 }
             }
@@ -371,7 +370,7 @@ PillSurface {
 
                     arc: root.sensorArc(key)
                     big: root.sensorBig(key)
-                    unit: key === "fan" ? "RPM" : "°"
+                    unit: key === "fan" ? "RPM" : "°C"
                     shrink: false
                     label: root.sensorLabel(key)
                     sub: root.sensorSub(key)

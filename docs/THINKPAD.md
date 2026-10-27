@@ -146,7 +146,7 @@ Surface width 396. Header glyph `思`, title `THINKPAD`, model on the right.
 ```
 
 Fan RPM, temperatures, Glances sensor gauges and the fan curve live in
-**System**, not here. Keeping them next to CPU/GPU/memory avoids a second
+**System**, not here. Keeping them next to CPU/IGPU/memory avoids a second
 telemetry stack and removes the duplicate temperature readout.
 
 Why this order:

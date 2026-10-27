@@ -30,12 +30,16 @@ Singleton {
     property int powerTrend: 0
     property var list: []
 
+    signal refreshing()
+    signal refreshed()
+
     readonly property int fanMax: 5000
     readonly property int refreshMs: 2000
 
     function refresh() {
         if (sensorProc.running)
             return;
+        refreshing();
         sensorProc.running = true;
     }
 
@@ -129,6 +133,7 @@ Singleton {
             onStreamFinished: root.parse(this.text)
         }
         stderr: StdioCollector {}
+        onExited: root.refreshed()
         // Keep the last complete snapshot if a transient sensor scan fails;
         // clearing it makes the whole sensor block disappear and reappear.
     }

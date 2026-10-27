@@ -107,8 +107,70 @@ PillSurface {
 
     property var focusRowItem: null
 
-    /** Open sensor groups survive the 2 s sensor refresh that rebuilds the Repeater. */
+    /** Open sensor groups survive the 2 s sensor refresh. */
     property var sensorGroupOpen: ({})
+
+    property var sensorGroupTitles: []
+
+    function refreshGroupTitles() {
+        var next = [];
+        for (var i = 0; i < sensorGroups.length; i++)
+            next.push(sensorGroups[i].title);
+        if (next.length === sensorGroupTitles.length) {
+            var same = true;
+            for (var j = 0; j < next.length; j++) {
+                if (next[j] !== sensorGroupTitles[j]) {
+                    same = false;
+                    break;
+                }
+            }
+            if (same)
+                return;
+        }
+        sensorGroupTitles = next;
+    }
+    onSensorGroupsChanged: refreshGroupTitles()
+    Component.onCompleted: refreshGroupTitles()
+
+    function sensorItemsFor(title) {
+        for (var i = 0; i < sensorGroups.length; i++) {
+            if (sensorGroups[i].title === title)
+                return sensorGroups[i].items;
+        }
+        return [];
+    }
+
+    /** Keep the reading position while a sensor scan replaces the cell values. */
+    property real sensorScrollTarget: 0
+    property bool sensorScrollHold: false
+
+    Connections {
+        target: Sensors
+        function onRefreshing() {
+            if (!root.sensorScrollHold) {
+                root.sensorScrollTarget = root.contentY;
+                root.sensorScrollHold = true;
+            }
+        }
+        function onRefreshed() {
+            if (!root.sensorScrollHold)
+                return;
+            scrollRestore.restart();
+        }
+    }
+
+    Timer {
+        id: scrollRestore
+        interval: 16
+        repeat: false
+        onTriggered: {
+            if (!root.sensorScrollHold)
+                return;
+            root.contentY = Math.min(root.sensorScrollTarget,
+                Math.max(0, root.contentHeight - root.height));
+            root.sensorScrollHold = false;
+        }
+    }
 
     function reportRowHover(row, hovered) {
         if (hovered)
@@ -746,18 +808,18 @@ PillSurface {
                 visible: Sensors.available
 
                 Repeater {
-                    model: root.sensorGroups
+                    model: root.sensorGroupTitles
 
                     SensorGroup {
                         id: sensorGroup
                         required property var modelData
                         width: parent.width
-                        title: modelData.title
-                        items: modelData.items
-                        initialOpen: root.sensorGroupOpen[modelData.title] === true
+                        title: modelData
+                        items: root.sensorItemsFor(modelData)
+                        initialOpen: root.sensorGroupOpen[modelData] === true
                         onOpenChanged: {
-                            if (root.sensorGroupOpen[modelData.title] !== open)
-                                root.sensorGroupOpen[modelData.title] = open;
+                            if (root.sensorGroupOpen[modelData] !== open)
+                                root.sensorGroupOpen[modelData] = open;
                         }
                     }
                 }

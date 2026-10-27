@@ -43,6 +43,15 @@ PillSurface {
         ? "8 levels · edited"
         : "8 levels · thinkfan"
 
+    FileView {
+        path: "/run/ricelin-led-event"
+        watchChanges: root.open
+        blockLoading: true
+        printErrors: false
+        onFileChanged: if (root.open && ThinkPad.present)
+            ThinkPad.refresh()
+    }
+
     property bool busy: false
     property string notice: ""
     property var actionDone: null
@@ -51,7 +60,6 @@ PillSurface {
     property bool curveOpen: false
     property var curveDraft: []
     property bool curveDirty: false
-    property var tempHistory: []
 
     function reportRowHover(row, hovered) {
         if (hovered)
@@ -150,8 +158,6 @@ PillSurface {
         ThinkPad.refresh();
         if (!curveDirty)
             syncCurve(true);
-    } else {
-        tempHistory = [];
     }
 
     Component.onCompleted: syncCurve(true)
@@ -162,20 +168,6 @@ PillSurface {
             if (!root.curveDirty)
                 root.syncCurve(true);
         }
-        function onUpdated() {
-            if (!root.open || ThinkPad.tempCpu < 0)
-                return;
-            var next = root.tempHistory.slice(-31);
-            next.push(ThinkPad.tempCpu);
-            root.tempHistory = next;
-        }
-    }
-
-    Timer {
-        interval: 2000
-        running: root.open && ThinkPad.present && ThinkPad.available
-        repeat: true
-        onTriggered: ThinkPad.refresh()
     }
 
     Process {
@@ -278,12 +270,6 @@ PillSurface {
                         font.pixelSize: 10 * root.s
                         font.weight: Font.DemiBold
                     }
-                }
-
-                ThinkPadThermalGraph {
-                    s: root.s
-                    samples: root.tempHistory
-                    current: ThinkPad.tempCpu
                 }
 
                 SettingsField {

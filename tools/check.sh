@@ -48,7 +48,6 @@ if [ -x "$lint" ]; then
         "$pill/ThinkPadGroup.qml" \
         "$pill/ThinkPadCurve.qml" \
         "$pill/ThinkPadLighting.qml" \
-        "$pill/ThinkPadThermalGraph.qml" \
         "$pill/ThinkPadHero.qml" \
         "$pill/ThinkPadState.qml"
     do

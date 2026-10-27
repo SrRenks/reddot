@@ -216,12 +216,15 @@ Lighting and Pointing.
   `/sys/devices/platform/thinkpad_acpi` with one `test -d` and calls the helper
   only when it exists.
 - `ThinkPadSurface.qml` and its `ThinkPadGroup`, `ThinkPadCurve`,
-  `ThinkPadHero`, `ThinkPadState` and `ThinkPadThermalGraph` components render
-  the sections, with the battery link back to Power. The curve editor shows an
-  eight-bar preview above the threshold table.
-- The Thermal group keeps a 32-sample CPU graph. Samples are appended only from
-  the 2 s status timer while the surface is open, and cleared on close. There is
-  no Canvas and no extra timer; the bars are plain QML rectangles.
+  `ThinkPadHero` and `ThinkPadState` components render the sections, with the
+  battery link back to Power. The curve editor shows an eight-bar preview above
+  the threshold table.
+- The surface reads one status snapshot when it opens and after a write. While
+  it is open, a `FileView` watches `/run/ricelin-led-event`; udev touches that
+  file on any LED change, which triggers one refresh. There is no timer, graph
+  history or background poll, and the watcher stops when the surface closes.
+  A keyboard-driven Caps Lock or mute change updates the panel while it is open,
+  and the hardware value always wins over the panel's last view.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
@@ -274,9 +277,15 @@ muting ALSA changed the audio while the LEDs stayed off.
 `tools/99-ricelin-leds.rules` selects the triggers at boot:
 
 ```udev
-ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
-ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"
+ACTION=="add|change", SUBSYSTEM=="leds", RUN+="/usr/bin/touch /run/ricelin-led-event"
 ```
+
+The first version used `add|change` for the trigger. That caused a feedback
+loop and the LEDs blinked, because every trigger write generated another
+`change` event. The trigger lines are now `add` only; only the harmless event
+file touch runs on `change`.
 
 Verified by toggling `wpctl set-mute` on the default sink and source:
 

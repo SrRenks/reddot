@@ -1,3 +1,8 @@
 # ThinkPad mute LEDs: let the kernel audio triggers follow ALSA automatically.
-ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
-ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"
+# The `add` action only: writing a trigger on every `change` caused a feedback
+# loop, because the trigger itself emits change events.
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"
+
+# Tell the open panel that a LED changed. This is a file touch, not a daemon.
+ACTION=="add|change", SUBSYSTEM=="leds", RUN+="/usr/bin/touch /run/ricelin-led-event"

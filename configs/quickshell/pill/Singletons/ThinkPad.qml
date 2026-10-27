@@ -31,6 +31,7 @@ Singleton {
 
     property bool present: false
     property bool helperPresent: false
+    property bool sawPresent: false
     property bool available: false
     property bool loading: false
     property string error: ""
@@ -104,6 +105,7 @@ Singleton {
             return;
         }
         loading = true;
+        sawPresent = false;
         error = "";
         statusProc.running = true;
     }
@@ -125,7 +127,8 @@ Singleton {
                 continue;
             var k = lines[i].substring(0, eq).trim();
             var v = lines[i].substring(eq + 1).trim();
-            if (k === "MODEL") next.model = v;
+            if (k === "PRESENT") root.sawPresent = v === "1";
+            else if (k === "MODEL") next.model = v;
             else if (k === "BIOS") next.bios = v;
             else if (k === "FAN_RPM") next.fanRpm = parseInt(v, 10);
             else if (k === "FAN_LEVEL") next.fanLevel = v;
@@ -234,8 +237,9 @@ Singleton {
         }
         onExited: (code) => {
             root.loading = false;
-            root.available = code === 0;
-            if (code !== 0 && root.error.length === 0)
+            const ok = code === 0 || root.sawPresent;
+            root.available = ok;
+            if (!ok && root.error.length === 0)
                 root.error = "ThinkPad helper missing or failed (" + code + ")";
         }
     }

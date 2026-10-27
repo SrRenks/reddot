@@ -22,3 +22,4 @@ singleton NightLight NightLight.qml
 singleton GameMode GameMode.qml
 singleton Peripherals Peripherals.qml
 singleton Sound Sound.qml
+singleton PresetStore PresetStore.qml

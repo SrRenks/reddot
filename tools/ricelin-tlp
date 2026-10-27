@@ -229,6 +229,30 @@ cmd_profile() {
     fi
 }
 
+cmd_apply() {
+    [ "$#" -eq 3 ] || die "usage: apply <profile> <start> <stop>"
+    profile=$1
+    start=$2
+    stop=$3
+    case "$profile" in
+        performance|balanced|power-saver) ;;
+        *) die "unknown profile: $profile" ;;
+    esac
+    is_uint "$start" || die "start is not a number"
+    is_uint "$stop" || die "stop is not a number"
+    [ "$start" -ge 0 ] && [ "$stop" -le 100 ] && [ "$start" -lt "$stop" ] \
+        || die "thresholds must satisfy 0 <= start < stop <= 100"
+
+    need_root
+    for bat in $(batteries); do
+        dir="$SYS/$bat"
+        threshold_path "$dir" start >/dev/null 2>&1 || continue
+        threshold_path "$dir" stop >/dev/null 2>&1 || continue
+        cmd_set "$bat" "$start" "$stop"
+    done
+    cmd_profile "$profile"
+}
+
 cmd_behaviour() {
     mode=$1
     bat=$2
@@ -258,10 +282,11 @@ case "${1:-}" in
     status) cmd_status ;;
     set) shift; cmd_set "$@" ;;
     profile) cmd_profile "${2:-}" ;;
+    apply) shift; cmd_apply "$@" ;;
     pause|resume) cmd_behaviour "$1" "${2:-}" ;;
     chargeonce|fullcharge) cmd_care "$1" "${2:-}" ;;
     *)
-        echo "usage: ricelin-tlp {status|set <bat> <start> <stop>|profile <p>|pause|resume <bat>|chargeonce|fullcharge <bat>}" >&2
+        echo "usage: ricelin-tlp {status|set <bat> <start> <stop>|apply <profile> <start> <stop>|profile <p>|pause|resume <bat>|chargeonce|fullcharge <bat>}" >&2
         exit 2
         ;;
 esac

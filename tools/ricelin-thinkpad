@@ -150,7 +150,9 @@ cmd_status() {
 
     [ -r "$TP/doubletap_enable" ] && \
         echo "DOUBLETAP=$(cat "$TP/doubletap_enable" 2>/dev/null)"
-    [ -r "$TP/fn_lock" ] && echo "FN_LOCK=$(cat "$TP/fn_lock" 2>/dev/null)"
+    if [ -r "$TP/fn_lock" ]; then
+        echo "FN_LOCK=$(cat "$TP/fn_lock" 2>/dev/null)"
+    fi
 }
 
 cmd_trackpoint() {

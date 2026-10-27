@@ -120,12 +120,25 @@ assert_contains "$conf" 'START_CHARGE_THRESH_BAT0=45' "second set keeps BAT0 sta
 assert_contains "$conf" 'START_CHARGE_THRESH_BAT1=50' "second set adds BAT1 start"
 assert_contains "$conf" 'STOP_CHARGE_THRESH_BAT1=90' "second set adds BAT1 stop"
 
+# --- apply (profile + all battery windows, one command) -------------------
+run apply balanced 95 100
+conf=$(cat "$tmp/tlp.d/99-ricelin.conf")
+assert_contains "$conf" 'START_CHARGE_THRESH_BAT0=95' "apply writes BAT0 start"
+assert_contains "$conf" 'STOP_CHARGE_THRESH_BAT0=100' "apply writes BAT0 stop"
+assert_contains "$conf" 'START_CHARGE_THRESH_BAT1=95' "apply writes BAT1 start"
+assert_contains "$conf" 'STOP_CHARGE_THRESH_BAT1=100' "apply writes BAT1 stop"
+assert_contains "$(cat "$tmp/tlp.log")" 'setcharge 95 100 BAT0' "apply sets BAT0"
+assert_contains "$(cat "$tmp/tlp.log")" 'setcharge 95 100 BAT1' "apply sets BAT1"
+assert_contains "$(cat "$tmp/tlp.log")" '^balanced$' "apply switches the TLP profile"
+
 # --- validation -----------------------------------------------------------
 assert_exit 2 "rejects start >= stop" run set BAT0 90 80
 assert_exit 2 "rejects a non-numeric start" run set BAT0 abc 80
 assert_exit 2 "rejects an unknown battery" run set BAT9 40 80
 assert_exit 2 "rejects a path as a battery" run set ../etc 40 80
 assert_exit 2 "rejects an unknown profile" run profile turbo
+assert_exit 2 "rejects an invalid apply window" run apply balanced 90 80
+assert_exit 2 "rejects an invalid apply profile" run apply turbo 50 80
 
 # --- pause / resume -------------------------------------------------------
 run pause BAT0

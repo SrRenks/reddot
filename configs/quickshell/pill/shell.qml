@@ -163,6 +163,7 @@ ShellRoot {
         function tlp(mon: string): void { root.toggleSurface(mon, "tlp"); }
         function thinkpad(mon: string): void { root.toggleSurface(mon, "thinkpad"); }
         function settings(mon: string): void { root.toggleSurface(mon, "settings"); }
+        function presets(mon: string): void { root.toggleSurface(mon, "presets"); }
         function keybinds(mon: string): void { root.toggleSurface(mon, "keybinds"); }
         function recorder(mon: string): void { root.toggleSurface(mon, "recorder"); }
 

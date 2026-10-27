@@ -25,6 +25,8 @@ kept close to the original.
   own `GetHistory`; `ricelin-power-report` prints the same plus recent packages.
 - **AC/BAT policy** — `/etc/tlp.d/99-ricelin-acbat.conf`: performance on AC,
   balanced on battery, low-power for the manual saver profile.
+- **Power presets** — named TLP profile + charge snapshots in **Settings →
+  Presets**; Desktop and Laptop ship as defaults.
 - **Performance** — jemalloc decay in the watchdog, 30 s surface unload,
   edge-driven peripheral polling.
 - **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
@@ -146,6 +148,7 @@ background is third-party; see [CREDITS](configs/sddm/themes/torii/CREDITS.md).
 - [Maintenance and update procedure](docs/MAINTENANCE.md)
 - [Related shells and ideas](docs/FORKS.md)
 - [ThinkPad controls and layout](docs/THINKPAD.md)
+- [Power presets](docs/PRESETS.md)
 - [Credits and licenses](docs/CREDITS.md)
 
 ## Credits

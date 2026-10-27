@@ -16,3 +16,5 @@
 
 `install.sh` runs `install-extras.sh` after the Python installer unless
 `--skip-extras` is passed.
+
+| `ricelin-sensors.rs` | one-shot native hwmon/power_supply reader for the System surface |

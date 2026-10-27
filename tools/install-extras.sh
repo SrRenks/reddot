@@ -30,6 +30,20 @@ fi
 home=$(getent passwd "$user" | cut -d: -f6)
 group=$(id -gn "$user")
 
+if command -v rustc >/dev/null 2>&1; then
+    sensor_tmp=$(mktemp)
+    if rustc --edition=2021 -O -C strip=symbols "$here/ricelin-sensors.rs" -o "$sensor_tmp"; then
+        install -d -m 0755 -o "$user" -g "$group" "$home/.local/bin"
+        install -m 0755 -o "$user" -g "$group" "$sensor_tmp" "$home/.local/bin/ricelin-sensors"
+        echo "  $home/.local/bin/ricelin-sensors"
+    else
+        echo "warning: could not build ricelin-sensors" >&2
+    fi
+    rm -f "$sensor_tmp"
+else
+    echo "warning: rustc not found; System sensor helper not installed" >&2
+fi
+
 install -m 0755 -o root -g root "$here/ricelin-tlp" /usr/local/bin/ricelin-tlp
 install -Dm644 "$here/49-ricelin.rules" \
     /etc/polkit-1/rules.d/49-ricelin.rules

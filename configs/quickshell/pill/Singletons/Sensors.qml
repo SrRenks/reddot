@@ -14,7 +14,7 @@ Singleton {
 
     property bool open: false
     property bool available: false
-    readonly property string reader: Quickshell.env("HOME") + "/.config/quickshell/pill/ricelin-sensors.py"
+    readonly property string reader: Quickshell.env("HOME") + "/.local/bin/ricelin-sensors"
     property string cpuLabel: "CPU"
     property string gpuLabel: "IGPU"
     property int cpuTemp: -1
@@ -106,7 +106,7 @@ Singleton {
 
     Process {
         id: sensorProc
-        command: ["python3", root.reader]
+        command: [root.reader]
         stdout: StdioCollector {
             onStreamFinished: root.parse(this.text)
         }

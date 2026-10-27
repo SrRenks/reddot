@@ -47,7 +47,6 @@ Item {
     function syncBacklightPolling() {
         Backlight.polling = flashing && kind === "brightness";
     }
-    onFlashingChanged: syncBacklightPolling()
     onKindChanged: syncBacklightPolling()
 
     readonly property var sink: Pipewire.defaultAudioSink
@@ -132,7 +131,11 @@ Item {
     }
 
     /** A track announce that lost to live hardware feedback replays once the bar clears. */
-    onFlashingChanged: if (!flashing && dirty) tryShow()
+    onFlashingChanged: {
+        syncBacklightPolling();
+        if (!flashing && dirty)
+            tryShow();
+    }
 
     Timer {
         interval: 1500

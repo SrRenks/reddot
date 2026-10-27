@@ -68,10 +68,10 @@ else
 fi
 
 echo "== sensors =="
-if python3 -c 'import ast, sys; ast.parse(open(sys.argv[1]).read())' "$pill/ricelin-sensors.py" 2>/dev/null; then
-    ok "ricelin-sensors.py"
+if [ -x $HOME/.local/bin/ricelin-sensors ]; then
+    ok "ricelin-sensors"
 else
-    bad "ricelin-sensors.py"
+    bad "ricelin-sensors (run tools/install-extras.sh)"
 fi
 
 echo "== shell =="

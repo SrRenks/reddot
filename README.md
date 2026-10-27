@@ -38,6 +38,11 @@ kept close to the original.
   writable LEDs. Detection is lazy and the helper is installed only on ThinkPad
   hardware, so other machines are unchanged.
 
+The System sensor snapshot is a small Rust binary built by
+`tools/install-extras.sh` from `tools/ricelin-sensors.rs`; it has no runtime
+crate dependency and runs only while System is open. If `rustc` is absent, the
+sensor block is omitted instead of falling back to a Python process.
+
 Install runs the upstream Python installer and then `tools/install-extras.sh`
 for the root helper, polkit rule, TLP policy and user tools. On a ThinkPad it
 also installs the optional `ricelin-thinkpad` helper; the shared polkit rule

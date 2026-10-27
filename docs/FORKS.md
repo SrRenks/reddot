@@ -1,9 +1,9 @@
-# Fork research — Ricelin and neighbours
+# Fork research — upstream and neighbours
 
 What exists, what each one does better, and what is worth taking into a fork.
 Links checked 2026-10-26.
 
-## The Ricelin lineage
+## The upstream lineage
 
 | Project | Relation | What it adds / changes |
 |---|---|---|
@@ -19,7 +19,7 @@ Everything else is a re-skin, and most are months behind upstream.
 
 ## Neighbours worth studying
 
-| Project | Stack | What it does that Ricelin does not |
+| Project | Stack | What it does that the upstream does not |
 |---|---|---|
 | [Impasto](https://github.com/andreumassanet/impasto) | Quickshell, **GPL-3** | liquid-glass materials, desktop widgets, per-screen bars, notes/tasks/games as island panels, full dotfiles takeover |
 | [Tide Island](https://github.com/enhaoswen/Tide-island) | Quickshell + C++/Qt | native `BackgroundEffect` blur, lyrics, config app, niri support; old repo unmaintained, rewrite in progress |
@@ -59,7 +59,7 @@ Everything else is a re-skin, and most are months behind upstream.
    `layer_rule … blur=true` in `decoration.lua`. Measure before switching.
 6. **Video wallpaper that pauses when occluded** (k4). Their measurement: a
    1080p60 loop costs ~1.5 % of a 12-core CPU while visible, near zero when no
-   window shows it. Ricelin's static `awww` pipeline has no equivalent.
+   window shows it. The upstream static `awww` pipeline has no equivalent.
 
 **P2 — only if the fork grows**
 
@@ -68,14 +68,14 @@ Everything else is a re-skin, and most are months behind upstream.
    already branches per screen.
 8. **Dock** (Ukishima). Auto-hiding, magnification, window previews. Nice, but
    it contradicts the one-pill minimalism and adds a second band.
-9. **GUI config app** (Tide/ChillPill). Ricelin already has a settings surface;
+9. **GUI config app** (Tide/ChillPill). The upstream already has a settings surface;
    a separate app is only worth it if non-QML users are a goal.
 
 ## Performance notes
 
 - **Allocator**: jemalloc decay is what moves a Quickshell shell from
   "RSS at the session peak" to "RSS at the working set". Ukishima's
-  `launch.sh` and Ricelin's `watchdog.sh` now both set it.
+  `launch.sh` and the upstream `watchdog.sh` now both set it.
 - **Surface tail**: 120 s (upstream) vs 30 s (fork). Shorter tail returns
   objects sooner; reopening rebuilds synchronously.
 - **The big idle item is still the resident lock** (`qs -c lock`), followed by
@@ -86,12 +86,12 @@ Everything else is a re-skin, and most are months behind upstream.
 
 ## Upstream strategy
 
-- Keep the machine-local pieces in `local.lua` and in files Ricelin does not
+- Keep the machine-local pieces in `local.lua` and in files the upstream does not
   track; an update replaces `shell.qml`, `Pill.qml`, `BatterySurface.qml`,
   `binds.lua` and `watchdog.sh`.
 - Two patches are general enough to send upstream: `MALLOC_CONF` in
   `watchdog.sh`, and this TLP surface (multi-battery + PPD is useful to anyone
   outside the ThinkPad/CachyOS bubble).
-- Licence check before copying code: Ricelin and Ukishima are MIT, k4 is MIT,
+- Licence check before copying code: the upstream Ricelin and Ukishima are MIT, k4 is MIT,
   Impasto and ChillPill are GPL-3. Copying GPL code into an MIT fork changes the
   fork's licence.

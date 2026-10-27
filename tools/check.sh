@@ -44,6 +44,7 @@ if [ -x "$lint" ]; then
         "$pill/Singletons/ThinkPad.qml" \
         "$pill/Singletons/PresetStore.qml" \
         "$pill/PresetsSurface.qml" \
+        "$pill/StartupSurface.qml" \
         "$pill/ThinkPadSurface.qml" \
         "$pill/ThinkPadGroup.qml" \
         "$pill/ThinkPadCurve.qml" \

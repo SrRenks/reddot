@@ -34,6 +34,9 @@ kept close to the original.
 - **System** — live CPU/IGPU/memory dials, native CPU/IGPU temperature and
   fan dials, compact Thermal/Power/Fan groups for every other sensor, and the
   ThinkPad fan curve. No Glances dependency.
+- **Startup hub** — Settings → Power & system → Startup lists the Hyprland
+  autostart stack: KDE Connect is editable, system services are locked. Changes
+  apply on the next Hyprland start.
 - ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and
   writable LEDs. Detection is lazy and the helper is installed only on ThinkPad
   hardware, so other machines are unchanged.

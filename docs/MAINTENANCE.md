@@ -26,8 +26,9 @@ broke.
   `Flags.qml`), 30 s unload (`Pill.qml`), `TlpSurface.qml`, `PowerHistory.qml`,
   battery card changes, edge-driven `Peripherals.qml`, and the optional
   `ThinkPadSurface.qml`, its group/curve/lighting/graph components,
-  `Singletons/ThinkPad.qml`, `PresetsSurface.qml` and
-  `Singletons/PresetStore.qml`.
+  `Singletons/ThinkPad.qml`, `PresetsSurface.qml`,
+  `Singletons/PresetStore.qml`, `StartupSurface.qml` and
+  `lib/autostart.js`.
 - `tools/`: all new shell-side tooling, the TLP helper and the ThinkPad helper
   (installed only when a ThinkPad is detected).
 - `configs/hypr/scripts/reddot-update.py`: `DEFAULT_REMOTE` points at this fork.

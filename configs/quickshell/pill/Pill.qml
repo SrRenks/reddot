@@ -65,6 +65,7 @@ Item {
     readonly property bool settingsOpen: surface === "settings"
     readonly property bool keybindsOpen: surface === "keybinds"
     readonly property bool workspacesOpen: surface === "workspaces"
+    readonly property bool startupOpen: surface === "startup"
     readonly property bool stashOpen: surface === "stash"
     readonly property bool spaceappsOpen: surface === "spaceapps"
     readonly property bool recorderOpen: surface === "recorder"
@@ -79,7 +80,7 @@ Item {
     readonly property bool animationOpen: surface === "animation"
     readonly property bool fontpickerOpen: surface === "fontpicker"
     readonly property bool settingsLike: settingsOpen || appearanceOpen || updatesOpen
-        || lookOpen || presetsOpen || inputOpen || displayOpen || animationOpen || idlelockOpen || fontpickerOpen
+        || lookOpen || presetsOpen || startupOpen || inputOpen || displayOpen || animationOpen || idlelockOpen || fontpickerOpen
     readonly property bool hasMedia: Players.list.length > 0
 
     readonly property var netDevices: (typeof Networking !== "undefined" && Networking && Networking.devices) ? Networking.devices.values : []
@@ -184,6 +185,7 @@ Item {
     readonly property real settingsW: 392 * s
     readonly property real keybindsW: 460 * s
     readonly property real workspacesW: 392 * s
+    readonly property real startupW: 392 * s
     readonly property real stashW: 392 * s
     readonly property real spaceappsW: 392 * s
     readonly property real recorderW: 384 * s
@@ -251,6 +253,7 @@ Item {
         settings:  { size: () => Qt.size(settingsW, surfaceItem(ldSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldSettings) },
         keybinds:  { size: () => Qt.size(keybindsW, surfaceItem(ldKeybinds).implicitHeight + 29 * s), ame: () => surfaceItem(ldKeybinds) },
         workspaces: { size: () => Qt.size(workspacesW, surfaceItem(ldWorkspaces).implicitHeight + 29 * s), ame: () => surfaceItem(ldWorkspaces) },
+        startup:  { size: () => Qt.size(startupW, surfaceItem(ldStartup).implicitHeight + 29 * s), ame: () => surfaceItem(ldStartup) },
         stash:     { size: () => Qt.size(stashW, surfaceItem(ldStash).implicitHeight + 29 * s), ame: () => surfaceItem(ldStash) },
         spaceapps: { size: () => Qt.size(spaceappsW, surfaceItem(ldSpaceapps).implicitHeight + 29 * s), ame: () => surfaceItem(ldSpaceapps) },
         recorder:  { size: () => Qt.size(recorderW, surfaceItem(ldRecorder).implicitHeight + 33 * s), ame: () => surfaceItem(ldRecorder) },
@@ -325,6 +328,8 @@ Item {
             return ldLook.item;
         if (pill.presetsOpen)
             return ldPresets.item;
+        if (pill.startupOpen)
+            return ldStartup.item;
         if (pill.inputOpen)
             return ldInput.item;
         if (pill.displayOpen)
@@ -455,7 +460,7 @@ Item {
             ldWorkspaces.item.closeForm();
             return;
         }
-        if (pill.appearanceOpen || pill.updatesOpen || pill.displayOpen || pill.inputOpen || pill.lookOpen || pill.presetsOpen || pill.idlelockOpen || pill.animationOpen || pill.workspacesOpen) {
+        if (pill.appearanceOpen || pill.updatesOpen || pill.displayOpen || pill.inputOpen || pill.lookOpen || pill.presetsOpen || pill.startupOpen || pill.idlelockOpen || pill.animationOpen || pill.workspacesOpen) {
             pill.requestSurface("settings");
             return;
         }
@@ -554,7 +559,7 @@ Item {
         onTriggered: {
             const cold = [ldSound, ldCalendar, ldLauncher, ldClip, ldWall, ldPower, ldWifi, ldBt, ldBattery,
                           ldTlp, ldThinkpad, ldSettings, ldKeybinds, ldWorkspaces, ldStash, ldSpaceapps, ldRecorder, ldSysmon,
-                          ldAppearance, ldUpdates, ldDisplay, ldInput, ldLook, ldPresets, ldIdlelock, ldAnimation, ldFontpicker];
+                          ldAppearance, ldUpdates, ldDisplay, ldInput, ldLook, ldPresets, ldStartup, ldIdlelock, ldAnimation, ldFontpicker];
             for (const ld of cold)
                 if (ld.active && !(ld.item && ld.item.busy === true))
                     ld.active = false;
@@ -2318,6 +2323,19 @@ Item {
         sourceComponent: PresetsSurface {
             s: pill.s
             open: pill.presetsOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldStartup
+        active: false
+        anchors.fill: parent
+        sourceComponent: StartupSurface {
+            s: pill.s
+            open: pill.startupOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)

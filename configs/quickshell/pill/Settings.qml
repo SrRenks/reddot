@@ -21,6 +21,7 @@ SettingsSurface {
         { item: animationRow, kind: "nav", surface: "animation" },
         { item: keybindsRow, kind: "nav", surface: "keybinds" },
         { item: workspacesRow, kind: "nav", surface: "workspaces" },
+        { item: startupRow, kind: "nav", surface: "startup" },
         { item: presetsRow, kind: "nav", surface: "presets" },
         { item: idleRow, kind: "nav", surface: "idlelock" },
         { item: updatesRow, kind: "nav", surface: "updates" }
@@ -163,6 +164,23 @@ SettingsSurface {
         }
 
         SettingsLabel { s: root.s; text: "Power & system" }
+
+        SettingsRow {
+            id: startupRow
+            surface: root
+            captionOnFocus: true
+            icon: "play"
+            name: "Startup"
+            sub: "KDE Connect and session commands"
+
+            GlyphIcon {
+                width: 16 * root.s
+                height: 16 * root.s
+                name: "chevron-right"
+                color: root.focusRowItem === startupRow ? Theme.cream : Theme.iconDim
+                stroke: 2.2
+            }
+        }
 
         SettingsRow {
             id: presetsRow

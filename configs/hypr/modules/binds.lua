@@ -50,7 +50,7 @@ hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hy
 hl.bind(mod .. " + SHIFT + C",  hl.dsp.exec_cmd("hyprpicker -a"))
 hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/record.sh")) -- Record
 hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("easyeffects --bypass-toggle")) -- EasyEffects bypass
-hl.bind(mod .. " + SHIFT + F",  hl.dsp.exec_cmd("qs -c pill ipc call pill blur")) -- Toggle general window blur
+hl.bind(mod .. " + SHIFT + F",  hl.dsp.exec_cmd("qs -c pill ipc call pill blur")) -- Toggle blur + window transparency
 
 hl.bind(mod .. " + A",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh launcher")) -- Open Apps
 hl.bind(mod .. " + W",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh wallpaper")) -- Wallpaper Picker
@@ -73,6 +73,7 @@ hl.bind("XF86AudioPlay",        hl.dsp.global("quickshell:mediaToggle"),        
 hl.bind("XF86AudioNext",        hl.dsp.global("quickshell:mediaNext"),                             { locked = true })
 hl.bind("XF86AudioPrev",        hl.dsp.global("quickshell:mediaPrev"),                             { locked = true })
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd("hyprctl switchxkblayout all next")) -- Toggle Keyboard Layout
+hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("qs -c pill ipc call pill toggle \"\"")) -- Open/close pill, last surface
 hl.bind(mod .. " + Up",   hl.dsp.focus({ direction = "u" })) -- Focus Up Window
 hl.bind(mod .. " + Down", hl.dsp.focus({ direction = "d" })) -- Focus Below Window
 hl.bind(mod .. " + SHIFT + Left",  hl.dsp.window.move({ direction = "l" })) -- Move Window Left
@@ -80,6 +81,13 @@ hl.bind(mod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "r" })) -- M
 hl.bind(mod .. " + SHIFT + Up",    hl.dsp.window.move({ direction = "u" })) -- Move Window Up
 hl.bind(mod .. " + SHIFT + Down",  hl.dsp.window.move({ direction = "d" })) -- Move Window Down
 
--- Screenshots: Print is the full/region flow, Shift+Print targets a monitor.
-hl.bind("Print", hl.dsp.exec_cmd("rishot"))
-hl.bind("SHIFT + Print", hl.dsp.exec_cmd("rishot monitor"))
+-- Screenshots: Print or SUPER+F9 starts rishot normally; Shift+Print or
+-- SUPER+SHIFT+Print jumps straight to the focused monitor. rishot is installed
+-- in ~/.local/bin, which is not on the compositor's exec PATH.
+local rishot_region = os.getenv("HOME") .. "/.local/bin/rishot"
+local rishot_current = os.getenv("HOME") .. "/.config/hypr/scripts/reddot-shot-current.sh"
+
+hl.bind("Print", hl.dsp.exec_cmd(rishot_region))
+hl.bind("SUPER + F9", hl.dsp.exec_cmd(rishot_region))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(rishot_current))
+hl.bind("SUPER + SHIFT + Print", hl.dsp.exec_cmd(rishot_current))

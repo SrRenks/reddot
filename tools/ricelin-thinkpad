@@ -150,6 +150,7 @@ cmd_status() {
 
     [ -r "$TP/doubletap_enable" ] && \
         echo "DOUBLETAP=$(cat "$TP/doubletap_enable" 2>/dev/null)"
+    [ -r "$TP/fn_lock" ] && echo "FN_LOCK=$(cat "$TP/fn_lock" 2>/dev/null)"
 }
 
 cmd_trackpoint() {
@@ -238,6 +239,14 @@ cmd_curve() {
     fi
 }
 
+cmd_fnlock() {
+    [ "$#" -eq 1 ] || die "usage: fnlock 0|1"
+    case "$1" in 0|1) ;; *) die "fnlock must be 0 or 1" ;; esac
+    [ -e "$TP/fn_lock" ] || die "fn_lock is not exposed on this model"
+    need_root
+    printf '%s\n' "$1" > "$TP/fn_lock"
+}
+
 cmd_led() {
     [ "$#" -eq 2 ] || die "usage: led <name|kbd|lid|vantage> <value>"
     name=$1
@@ -276,10 +285,11 @@ case "${1:-}" in
     trackpoint) shift; cmd_trackpoint "$@" ;;
     curve) shift; cmd_curve "$@" ;;
     doubletap) shift; cmd_doubletap "$@" ;;
+    fnlock) shift; cmd_fnlock "$@" ;;
     led) shift; cmd_led "$@" ;;
     *)
         cat >&2 <<'EOF'
-usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|curve set <spec>|led <name> <value>}
+usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|fnlock 0|1|curve set <spec>|led <name> <value>}
 EOF
         exit 2
         ;;

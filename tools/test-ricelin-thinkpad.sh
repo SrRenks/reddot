@@ -44,6 +44,7 @@ mkdir -p "$tmp/sys/devices/platform/thinkpad_acpi" \
 printf 'ThinkPad E14 Gen 7\n' > "$tmp/sys/devices/virtual/dmi/id/product_version"
 printf 'R2ZET38W (1.27 )\n' > "$tmp/sys/devices/virtual/dmi/id/bios_version"
 printf '1\n' > "$tmp/sys/devices/platform/thinkpad_acpi/doubletap_enable"
+printf '0\n' > "$tmp/sys/devices/platform/thinkpad_acpi/fn_lock"
 printf 'k10temp\n' > "$tmp/sys/class/hwmon/hwmon0/name"
 printf '50000\n' > "$tmp/sys/class/hwmon/hwmon0/temp1_input"
 printf 'amdgpu\n' > "$tmp/sys/class/hwmon/hwmon1/name"
@@ -108,6 +109,7 @@ contains "$out" '^TP_SENSITIVITY=128$' "reads TrackPoint sensitivity"
 contains "$out" '^CURVE=0:0:42;1:39:48;2:45:55;3:52:62;4:59:68;5:65:74;6:72:80;7:77:84$' "reads the fan curve"
 contains "$out" '^LEDS=.*input3::capslock|0|1;' "lists every LED"
 contains "$out" '^DOUBLETAP=1$' "reads double-tap"
+contains "$out" '^FN_LOCK=0$' "reads Fn lock state"
 
 run trackpoint sensitivity 160
 contains "$(cat "$tmp/sys/devices/platform/i8042/serio1/sensitivity")" '^160$' "writes sensitivity"
@@ -115,6 +117,8 @@ run trackpoint press_to_select 1
 contains "$(cat "$tmp/sys/devices/platform/i8042/serio1/press_to_select")" '^1$' "writes press-to-select"
 run doubletap 0
 contains "$(cat "$tmp/sys/devices/platform/thinkpad_acpi/doubletap_enable")" '^0$' "writes double-tap"
+run fnlock 1
+contains "$(cat "$tmp/sys/devices/platform/thinkpad_acpi/fn_lock")" '^1$' "writes Fn lock"
 run led kbd 2
 contains "$(cat "$tmp/sys/class/leds/tpacpi::kbd_backlight/brightness")" '^2$' "writes the backlight"
 

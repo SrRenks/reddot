@@ -801,6 +801,8 @@ Item {
             return mixerIcon.mapToItem(pill, mixerIcon.width / 2, mixerIcon.height + drop * 0.55);
         if (soulTarget === "sound")
             return soundIcon.mapToItem(pill, soundIcon.width / 2, soundIcon.height + drop * 0.55);
+        if (soulTarget === "thinkpad")
+            return thinkpadIcon.mapToItem(pill, thinkpadIcon.width / 2, thinkpadIcon.height + drop * 0.55);
         if (soulTarget === "power")
             return powerIcon.mapToItem(pill, powerIcon.width / 2, powerIcon.height + drop * 0.55);
         if (soulTarget === "settings")
@@ -1795,6 +1797,43 @@ Item {
                 }
 
                 Item {
+                    id: thinkpadIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: ThinkPad.present
+                    width: visible ? 17 * pill.s : 0
+                    height: 17 * pill.s
+
+                    GlyphIcon {
+                        anchors.fill: parent
+                        name: "laptop"
+                        color: thinkpadArea.containsMouse ? Theme.cream : Theme.iconDim
+                        stroke: 1.7
+                    }
+
+                    Rectangle {
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.topMargin: -1 * pill.s
+                        visible: ThinkPad.present
+                        width: 4 * pill.s
+                        height: 4 * pill.s
+                        radius: width / 2
+                        color: Theme.verm
+                    }
+
+                    MouseArea {
+                        id: thinkpadArea
+                        anchors.fill: parent
+                        anchors.margins: -6 * pill.s
+                        hoverEnabled: true
+                        enabled: hover.live
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: pill.requestSurface("thinkpad")
+                        onContainsMouseChanged: if (containsMouse) pill.soulTarget = "thinkpad"
+                    }
+                }
+
+                Item {
                     id: sysmonIcon
                     anchors.verticalCenter: parent.verticalCenter
                     width: 17 * pill.s
@@ -2099,7 +2138,6 @@ Item {
             open: pill.tlpOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
-            onRequestSurface: (name) => pill.requestSurface(name)
         }
     }
 

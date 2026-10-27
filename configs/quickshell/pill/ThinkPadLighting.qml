@@ -109,6 +109,8 @@ ThinkPadGroup {
         case "input3::capslock": return "Caps Lock";
         case "input3::numlock": return "Num Lock";
         case "input3::scrolllock": return "Scroll Lock";
+        case "tpacpi::fnlock": return "Fn lock";
+        case "platform::fnlock": return "Fn lock";
         }
         if (name.indexOf("::lan") >= 0)
             return "LAN " + name.replace("enp1s0-", "").replace("::lan", "");

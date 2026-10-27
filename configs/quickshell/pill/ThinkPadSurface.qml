@@ -118,6 +118,10 @@ PillSurface {
         root.run(["doubletap", value ? "1" : "0"]);
     }
 
+    function setFnLock(value) {
+        root.run(["fnlock", value ? "1" : "0"]);
+    }
+
     function setKbd(value) {
         root.run(["led", "kbd", String(value)]);
     }
@@ -387,6 +391,19 @@ PillSurface {
                         on: ThinkPad.doubletap === 1
                         enabled: !root.busy
                         onToggled: root.setDoubletap(!on)
+                    }
+                }
+
+                SettingsField {
+                    surface: root
+                    label: "Fn lock"
+                    visible: ThinkPad.fnLock >= 0
+
+                    LinkToggle {
+                        s: root.s
+                        on: ThinkPad.fnLock === 1
+                        enabled: !root.busy
+                        onToggled: root.setFnLock(!on)
                     }
                 }
             }

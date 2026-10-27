@@ -70,6 +70,17 @@ Researched but not exposed in this build:
   with Fn+U then Fn+S.
 - `fn_lock` is absent on the E14. It could become a generic row on models that
   expose it.
+
+## Why there is no Fn lock LED
+
+The E14 Gen 7 exposes neither `/sys/devices/platform/thinkpad_acpi/fn_lock` nor
+a `fnlock` entry under `/sys/class/leds`. A filesystem search for `fnlock` is
+empty. The Fn lock is handled inside the EC/keyboard firmware; the OS has no
+attribute to read, so the helper cannot infer a state or drive a LED.
+
+The helper and surface do implement `fn_lock` and `tpacpi::fnlock` when a model
+exposes them. On this machine the row stays hidden instead of showing a guessed
+"off" state.
 - `lcdshadow` (PrivacyGuard) exists on older T-series, not here.
 
 ## Safety and ownership
@@ -104,10 +115,10 @@ would hide the fan temperature while changing a TrackPoint value.
 
 Entry points:
 
-- A row at the foot of the Power surface: `ThinkPad · fans, LEDs, TrackPoint`.
+- A laptop icon in the expanded pill, next to Mixer and Sound. It is visible only
+  when ThinkPad hardware is detected, and carries a small vermilion status dot.
 - `Super+Shift+T`.
 - IPC `qs -c pill ipc call pill thinkpad ""`.
-- Optional later: a small `TP` chip in the expanded pill's right cluster.
 
 Surface width 396. Header glyph `思`, title `THINKPAD`, model on the right.
 
@@ -226,15 +237,33 @@ It edits the thinkfan curve, which is the policy that owns those levels.
 
 ## Base compatibility
 
-- On a non-ThinkPad the probe exits non-zero, `present` stays false, the Power
-  row is hidden and no ThinkPad helper is installed. The shared polkit rule for
+- On a non-ThinkPad the probe exits non-zero, `present` stays false, the pill
+  icon is hidden and no ThinkPad helper is installed. The shared polkit rule for
   the TLP helper is still installed.
-- The singleton is constructed only when Power or the ThinkPad surface opens,
-  so a normal session does not pay for the probe.
+- The singleton runs one `test -d` at startup for that icon; it does not call
+  the helper, start a timer or read sysfs until the surface opens.
 - The keybind opens the surface on any machine and shows a one-line "No ThinkPad
   hardware detected" state; nothing else changes.
 - No package is added to the base installer. thinkfan remains the fan owner and
   is not required by the QML.
+
+## LED write check
+
+Every LED in `/sys/class/leds` was set to `max_brightness`, read back and
+restored on 2026-10-27:
+
+| LED | write |
+|---|---|
+| `enp1s0-0::lan`, `enp1s0-1::lan`, `enp1s0-2::lan` | accepted |
+| `input3::capslock`, `input3::numlock`, `input3::scrolllock` | accepted |
+| `platform::micmute`, `platform::mute` | accepted |
+| `tpacpi::kbd_backlight` | accepted |
+| `tpacpi::lid_logo_dot` | accepted; it was already at 255 |
+| `tpacpi::power`, `tpacpi::standby`, `tpacpi::thinkvantage` | accepted |
+
+This proves the sysfs path accepts the write. It does not promise that the NIC,
+keyboard controller or EC will keep the value; the UI reads the value back after
+each write. Lock LEDs do not change the actual lock state.
 
 ## Implementation phases
 
@@ -255,7 +284,8 @@ Per-model presets remain out of scope without a confirmed thinkfan config.
   shipped; presets would only prefill it.
 - Whether to expose the `custom` platform profile in this surface or keep it in
   Power.
-- Whether the entry should also get a chip in the expanded pill.
+- Whether the pill icon should also show the current fan level when the pill is
+  in hover mode.
 
 ## Enabling on an existing install
 

@@ -43,15 +43,6 @@ PillSurface {
         ? "8 levels · edited"
         : "8 levels · thinkfan"
 
-    FileView {
-        path: "/run/ricelin-led-event"
-        watchChanges: root.open
-        blockLoading: true
-        printErrors: false
-        onFileChanged: if (root.open && ThinkPad.present)
-            ThinkPad.refresh()
-    }
-
     property bool busy: false
     property string notice: ""
     property var actionDone: null

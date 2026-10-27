@@ -50,8 +50,6 @@ if [ -d /sys/devices/platform/thinkpad_acpi ] \
     install -Dm644 "$here/99-ricelin-leds.rules" /etc/udev/rules.d/99-ricelin-leds.rules
     udevadm control --reload-rules 2>/dev/null || true
     udevadm trigger --subsystem-match=leds --action=change 2>/dev/null || true
-    touch /run/ricelin-led-event 2>/dev/null || true
-    chmod 0644 /run/ricelin-led-event 2>/dev/null || true
     # The udev rule handles boot; apply the current session too.
     printf 'audio-mute\n' > /sys/class/leds/platform::mute/trigger 2>/dev/null || true
     printf 'audio-micmute\n' > /sys/class/leds/platform::micmute/trigger 2>/dev/null || true

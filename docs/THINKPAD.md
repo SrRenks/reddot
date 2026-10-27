@@ -219,12 +219,10 @@ Lighting and Pointing.
   `ThinkPadHero` and `ThinkPadState` components render the sections, with the
   battery link back to Power. The curve editor shows an eight-bar preview above
   the threshold table.
-- The surface reads one status snapshot when it opens and after a write. While
-  it is open, a `FileView` watches `/run/ricelin-led-event`; udev touches that
-  file on any LED change, which triggers one refresh. There is no timer, graph
-  history or background poll, and the watcher stops when the surface closes.
-  A keyboard-driven Caps Lock or mute change updates the panel while it is open,
-  and the hardware value always wins over the panel's last view.
+- The surface reads one status snapshot when it opens and after a write. There
+  is no timer, graph history, watcher or background poll. A keyboard-driven LED
+  change is reflected on the next open; the hardware value always wins over the
+  panel's last view.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
@@ -279,13 +277,15 @@ muting ALSA changed the audio while the LEDs stayed off.
 ```udev
 ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
 ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"
-ACTION=="add|change", SUBSYSTEM=="leds", RUN+="/usr/bin/touch /run/ricelin-led-event"
 ```
+
+Linux does not emit a udev change event for LED brightness changes, so there is
+no event file or watcher in the panel.
 
 The first version used `add|change` for the trigger. That caused a feedback
 loop and the LEDs blinked, because every trigger write generated another
-`change` event. The trigger lines are now `add` only; only the harmless event
-file touch runs on `change`.
+`change` event. The trigger lines are now `add` only; no udev rule runs on LED
+brightness changes.
 
 Verified by toggling `wpctl set-mute` on the default sink and source:
 

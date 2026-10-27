@@ -104,8 +104,8 @@ Fan control is the delicate part.
 
 TrackPoint and LED writes are low risk. Keep the helper allowlist narrow:
 `sensitivity` 0-255, `press_to_select` 0/1, `kbd_backlight` 0-2, `doubletap` 0/1.
-Do not write `tpacpi::power`, `tpacpi::standby`, or the mic-mute LED; those
-reflect firmware state.
+`tpacpi::power` and `tpacpi::standby` reflect firmware state. The mute LEDs are
+writable; writing one clears its kernel trigger, which is the manual override.
 
 ## Layout proposal
 
@@ -184,11 +184,11 @@ passwordless rule.
 | Double-tap | `thinkpad_acpi/doubletap_enable` | `ricelin-thinkpad doubletap 0|1` | hide if absent |
 | Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `ricelin-thinkpad led kbd 0-2` | hide if absent |
 | Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `ricelin-thinkpad led lid|vantage 0|1` | hide if absent |
-| Other LEDs | every LED in `/sys/class/leds` | `ricelin-thinkpad led <name> 0..max` | firmware or NIC may take it back |
+| Every LED | every LED in `/sys/class/leds` | `ricelin-thinkpad led <name> 0..max` | firmware or NIC may take it back |
 
-Refresh: one timer every 2 s, `running: surface.open`, one `Process` calling the
-helper's `status` verb. Nothing polls while the surface is closed. This is the
-same model as the Power surface.
+Refresh: one `status` read when the surface opens, and one after a write. There
+is no timer, watcher or background poll. The Power and Presets surfaces follow
+the same model.
 
 Privilege: a root-owned helper `ricelin-thinkpad`, invoked with
 `pkexec /usr/local/bin/ricelin-thinkpad ...`. Reads work unprivileged; writes ask
@@ -295,10 +295,12 @@ Verified by toggling `wpctl set-mute` on the default sink and source:
 | both live | 0 | 0 |
 | muted again | 1 | 1 |
 
-No daemon, no polling and no polkit prompt runs on mute changes. The two LEDs
-are followers in the UI, not manual toggles: writing brightness directly would
-fight the kernel trigger and desync the indicator. The other 11 LEDs stay
-directly editable.
+No daemon, no polling and no polkit prompt runs on mute changes. The trigger
+lights the LED on a mute edge. Writing brightness directly clears the trigger,
+which is why the panel exposes the mute LEDs as manual toggles: you can mute the
+microphone and still turn its LED off. After a manual write the trigger stays
+off until the next boot/install re-arms it; the hardware mute function itself is
+never blocked.
 
 ## Implementation phases
 

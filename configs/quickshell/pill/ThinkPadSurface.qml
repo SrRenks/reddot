@@ -32,9 +32,9 @@ PillSurface {
         : (ThinkPad.fanStatus.length > 0 ? "EC " + ThinkPad.fanStatus : "no fan control")
     readonly property string sensorText: {
         var parts = [];
-        if (ThinkPad.tempCpu >= 0) parts.push(ThinkPad.tempCpu + "°");
-        if (ThinkPad.tempGpu >= 0) parts.push(ThinkPad.tempGpu + "°");
-        if (ThinkPad.tempNvme >= 0) parts.push(ThinkPad.tempNvme + "°");
+        if (ThinkPad.tempCpu >= 0) parts.push("CPU " + ThinkPad.tempCpu + "°");
+        if (ThinkPad.tempGpu >= 0) parts.push("GPU " + ThinkPad.tempGpu + "°");
+        if (ThinkPad.tempNvme >= 0) parts.push("NVMe " + ThinkPad.tempNvme + "°");
         return parts.length > 0 ? parts.join("  ·  ") : "—";
     }
     readonly property bool hasPointing: ThinkPad.tpList.length > 0 || ThinkPad.doubletap >= 0
@@ -237,31 +237,6 @@ PillSurface {
                 s: root.s
                 title: "Thermal"
                 open: true
-
-                SettingsField {
-                    surface: root
-                    label: "Fan"
-                    visible: ThinkPad.fanRpm >= 0 || ThinkPad.thinkfan.length > 0
-                    Text {
-                        text: root.fanState
-                        color: Theme.subtle
-                        font.family: Theme.font
-                        font.pixelSize: 10 * root.s
-                        font.weight: Font.DemiBold
-                    }
-                }
-
-                SettingsField {
-                    surface: root
-                    label: "Sensors"
-                    Text {
-                        text: root.sensorText
-                        color: Theme.subtle
-                        font.family: Theme.font
-                        font.pixelSize: 10 * root.s
-                        font.weight: Font.DemiBold
-                    }
-                }
 
                 SettingsField {
                     surface: root

@@ -30,6 +30,36 @@ ThinkPadGroup {
 
     SettingsField {
         surface: lighting.surface
+        label: "Mic mute"
+        caption: "Audio capture mute, independent from the LED"
+        visible: Sound.source !== null && Sound.source.audio !== null
+
+        LinkToggle {
+            s: lighting.s
+            on: Sound.source && Sound.source.audio ? Sound.source.audio.muted : false
+            enabled: !lighting.surface.busy
+            onToggled: if (Sound.source && Sound.source.audio)
+                Sound.source.audio.muted = !on
+        }
+    }
+
+    SettingsField {
+        surface: lighting.surface
+        label: "Speaker mute"
+        caption: "Audio output mute, independent from the LED"
+        visible: Sound.sink !== null && Sound.sink.audio !== null
+
+        LinkToggle {
+            s: lighting.s
+            on: Sound.sink && Sound.sink.audio ? Sound.sink.audio.muted : false
+            enabled: !lighting.surface.busy
+            onToggled: if (Sound.sink && Sound.sink.audio)
+                Sound.sink.audio.muted = !on
+        }
+    }
+
+    SettingsField {
+        surface: lighting.surface
         label: "Lid logo"
         visible: ThinkPad.leds.LIDLOGO !== undefined
 
@@ -51,22 +81,6 @@ ThinkPadGroup {
             on: (ThinkPad.leds.VANTAGE || 0) > 0
             enabled: !lighting.surface.busy
             onToggled: lighting.surface.setLed("vantage", !on)
-        }
-    }
-
-    SettingsField {
-        surface: lighting.surface
-        label: "Mute LEDs"
-        caption: "Follows the system mute state"
-        visible: ThinkPad.leds.MUTE !== undefined || ThinkPad.leds.MICMUTE !== undefined
-
-        Text {
-            text: (ThinkPad.leds.MICMUTE > 0 ? "mic muted" : "mic live")
-                + "  ·  " + (ThinkPad.leds.MUTE > 0 ? "speaker muted" : "speaker live")
-            color: Theme.subtle
-            font.family: Theme.font
-            font.pixelSize: 9.5 * lighting.s
-            font.weight: Font.Medium
         }
     }
 
@@ -100,7 +114,7 @@ ThinkPadGroup {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.topMargin: 2 * lighting.s
-            text: "Firmware or the NIC can take these indicators back; the write still confirms the current state."
+            text: "Mute LEDs follow the kernel trigger until you override them here; firmware or the NIC can also take an indicator back."
             color: Theme.faint
             font.family: Theme.font
             font.pixelSize: 8.5 * lighting.s
@@ -111,6 +125,8 @@ ThinkPadGroup {
 
     function ledLabel(name) {
         switch (name) {
+        case "platform::micmute": return "Mic mute LED";
+        case "platform::mute": return "Speaker mute LED";
         case "tpacpi::power": return "Power LED";
         case "tpacpi::standby": return "Standby LED";
         case "input3::capslock": return "Caps Lock";

@@ -107,6 +107,9 @@ PillSurface {
 
     property var focusRowItem: null
 
+    /** Open sensor groups survive the 2 s sensor refresh that rebuilds the Repeater. */
+    property var sensorGroupOpen: ({})
+
     function reportRowHover(row, hovered) {
         if (hovered)
             focusRowItem = row;
@@ -310,7 +313,9 @@ PillSurface {
         property string title: ""
         property var items: []
         property bool open: false
+        property bool initialOpen: false
 
+        Component.onCompleted: if (initialOpen) open = true
         width: parent ? parent.width : 0
         height: head.height + (open ? flow.implicitHeight + 6 * root.s : 0)
         clip: true
@@ -744,11 +749,16 @@ PillSurface {
                     model: root.sensorGroups
 
                     SensorGroup {
+                        id: sensorGroup
                         required property var modelData
                         width: parent.width
                         title: modelData.title
                         items: modelData.items
-                        open: false
+                        initialOpen: root.sensorGroupOpen[modelData.title] === true
+                        onOpenChanged: {
+                            if (root.sensorGroupOpen[modelData.title] !== open)
+                                root.sensorGroupOpen[modelData.title] = open;
+                        }
                     }
                 }
             }

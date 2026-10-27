@@ -4,8 +4,8 @@ polkit.addRule(function(action, subject) {
     if (action.id != "org.freedesktop.policykit.exec")
         return;
     var program = action.lookup("program");
-    if (program == "/usr/local/bin/ricelin-tlp" ||
-        program == "/usr/local/bin/ricelin-thinkpad") {
+    if (program == "/usr/local/bin/reddot-tlp" ||
+        program == "/usr/local/bin/reddot-thinkpad") {
         return polkit.Result.AUTH_ADMIN_KEEP;
     }
 });

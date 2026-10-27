@@ -20,7 +20,7 @@ Singleton {
 
     readonly property string conf: Quickshell.env("HOME") + "/.config/hypr/sound/eq.conf"
     readonly property string micConf: Quickshell.env("HOME") + "/.config/hypr/sound/mic.conf"
-    readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/ricelin"
+    readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/reddot"
 
     property bool eq: false
     property bool denoise: false
@@ -39,7 +39,7 @@ Singleton {
     readonly property var filterNode: {
         const all = Pipewire.nodes.values;
         for (let i = 0; i < all.length; i++) {
-            if (all[i] && all[i].name === "ricelin_eq")
+            if (all[i] && all[i].name === "reddot_eq")
                 return all[i];
         }
         return null;
@@ -54,7 +54,7 @@ Singleton {
         const all = Pipewire.nodes.values;
         for (let i = 0; i < all.length; i++) {
             const n = all[i];
-            if (n && n.isStream && n.isSink && n.audio && n.name !== "ricelin_eq.out" && !/^output\.pw-loopback/.test(n.name || ""))
+            if (n && n.isStream && n.isSink && n.audio && n.name !== "reddot_eq.out" && !/^output\.pw-loopback/.test(n.name || ""))
                 out.push(n);
         }
         return out;
@@ -242,7 +242,7 @@ Singleton {
         for (let i = 0; i < groups.length; i++) {
             const g = groups[i];
             if (g && g.source === stream && g.target)
-                return g.target.name === "ricelin_eq" ? root.sink : g.target;
+                return g.target.name === "reddot_eq" ? root.sink : g.target;
         }
         return null;
     }
@@ -345,7 +345,7 @@ Singleton {
         return "{ params = [ " + p.join(" ") + " ] }";
     }
 
-    /** Fetch the AutoEQ index once a month into ~/.cache/ricelin/autoeq and parse its 8000-odd headphone entries. */
+    /** Fetch the AutoEQ index once a month into ~/.cache/reddot/autoeq and parse its 8000-odd headphone entries. */
     function loadAeqIndex() {
         if (root.aeqIndex.length || root.aeqLoading)
             return;
@@ -394,7 +394,7 @@ Singleton {
 
     Process {
         id: aeqIndexProc
-        command: ["sh", "-c", 'd="${XDG_CACHE_HOME:-$HOME/.cache}/ricelin/autoeq"; f="$d/INDEX.md"; mkdir -p "$d"; '
+        command: ["sh", "-c", 'd="${XDG_CACHE_HOME:-$HOME/.cache}/reddot/autoeq"; f="$d/INDEX.md"; mkdir -p "$d"; '
             + 'if [ ! -s "$f" ] || [ -n "$(find "$f" -mtime +30)" ]; then '
             + 'curl -fsSL --max-time 20 -o "$f.tmp" https://raw.githubusercontent.com/jaakkopasanen/AutoEq/master/results/INDEX.md && mv "$f.tmp" "$f"; fi; '
             + 'cat "$f"']
@@ -488,7 +488,7 @@ Singleton {
             + '    systemctl --user is-active --quiet "$u" || systemd-run --user --unit="$u" --collect --quiet pipewire -c "$c"; '
             + '  else pgrep -f "pipewire -c $c" >/dev/null || setsid -f pipewire -c "$c"; fi; '
             + 'else systemctl --user stop "$u" 2>/dev/null; pkill -f "pipewire -c $c" 2>/dev/null; fi; }; '
-            + 'run ricelin-eq "$1" "$2"; run ricelin-mic "$3" "$4"; true',
+            + 'run reddot-eq "$1" "$2"; run reddot-mic "$3" "$4"; true',
             "sh", root.conf, root.eq ? "1" : "0", root.micConf, root.denoise && root.denoiseAvailable ? "1" : "0"];
         engineProc.running = true;
     }

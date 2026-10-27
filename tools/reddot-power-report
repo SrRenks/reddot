@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# ricelin-power-report — a read-only snapshot for "why is the battery draining".
+# reddot-power-report — a read-only snapshot for "why is the battery draining".
 #
 # Combines what the shell shows (UPower charge/rate history) with the context a
 # surface cannot: current state, top CPU, recent package changes and failed
 # units. No root, no writes. For a deeper audit see the commands it prints at
 # the end (powertop/powerstat/turbostat are root-only).
 #
-#   ricelin-power-report
-#   ricelin-power-report > ~/power-2026-10-26.txt
+#   reddot-power-report
+#   reddot-power-report > ~/power-2026-10-26.txt
 
 set -eu
 

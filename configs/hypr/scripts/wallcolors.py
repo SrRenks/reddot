@@ -21,19 +21,61 @@ import sys
 import time
 from pathlib import Path
 
-CACHE = Path.home() / ".cache" / "ricelin"
-STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state") / "ricelin"
+CACHE = Path.home() / ".cache" / "reddot"
+STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state") / "reddot"
 GTK4 = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "gtk-4.0"
 GTK3 = GTK4.parent / "gtk-3.0"
 THEMES = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share") / "themes"
 OVERRIDES = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share") / "flatpak" / "overrides" / "global"
 FLATPAK_FS = ["xdg-config/gtk-4.0:ro", "xdg-data/themes:ro"]
 IFACE = "org.gnome.desktop.interface"
-MARK = "/** Ricelin app theme, turn it off in Settings > Appearance */\n"
-RICELIN_THEMES = ["Ricelin-a", "Ricelin-b", "Ricelin-base", "Ricelin-base-dark"]
-STATIC = {"surface": "#211711", "surface_container_low": "#221813", "surface_container": "#2c2118",
-          "surface_container_high": "#2e231b", "outline_variant": "#3a2a22", "primary": "#e0563b",
-          "cream": "#e6d6cb", "bright": "#fff6f0"}
+MARK = "/** reddot app theme, turn it off in Settings > Appearance */\n"
+REDDOT_THEMES = ["reddot-a", "reddot-b", "reddot-base", "reddot-base-dark"]
+STATIC = {"surface": "#0b0b0b", "surface_container_low": "#0d0d0d", "surface_container": "#151515",
+          "surface_container_high": "#181818", "outline_variant": "#2a2a2a", "primary": "#e60012",
+          "cream": "#f2f2f2", "bright": "#ffffff"}
+STATIC_FULL = {
+    "surface": "#0b0b0b",
+    "surface_container_low": "#0d0d0d",
+    "surface_container": "#151515",
+    "surface_container_high": "#181818",
+    "surface_container_highest": "#222222",
+    "outline_variant": "#2a2a2a",
+    "primary": "#e60012",
+    "primary_container": "#7a0010",
+    "on_primary_container": "#ffdada",
+    "outline": "#3a3a3a",
+    "cream": "#f2f2f2",
+    "bright": "#ffffff",
+    "subtle": "#b8b8b8",
+    "dim": "#8a8a8a",
+    "faint": "#707070",
+    "icon_dim": "#d0d0d0",
+    "tick_rest": "#c8c8c8",
+}
+STATIC_GHOSTTY = (
+    "background = #0b0b0b\nforeground = #f2f2f2\ncursor-color = #e60012\n"
+    "selection-background = #303030\nselection-foreground = #ffffff\n"
+    + "".join(f"palette = {i}={c}\n" for i, c in enumerate([
+        "#151515", "#e60012", "#8a9a5b", "#d89a5b",
+        "#6f8da0", "#b06a78", "#7fa89a", "#f2f2f2",
+        "#303030", "#ff3344", "#a8b56e", "#f0b85e",
+        "#8fa9bb", "#d08a96", "#9fc3b4", "#ffffff",
+    ]))
+)
+
+
+def write_static():
+    """Write the curated black/red theme to every non-QML consumer."""
+    CACHE.mkdir(parents=True, exist_ok=True)
+    pill = dict(STATIC_FULL)
+    (CACHE / "colors.json").write_text(json.dumps(pill, indent=2) + "\n")
+    render_fastfetch(pill)
+    if flags().get("appTheme"):
+        sync_apps(pill, need_flag=True)
+    (CACHE / "hypr-colors.lua").write_text(
+        'return {\n    active = "#e60012",\n    inactive = "#2a2a2a",\n}\n')
+    (CACHE / "ghostty-colors").write_text(STATIC_GHOSTTY)
 
 SURF_NAMES = ["surface", "surface_container_low", "surface_container",
               "surface_container_high", "surface_container_highest", "outline_variant"]
@@ -106,7 +148,7 @@ def render_fastfetch(pill):
     tmpl = ff / "config.jsonc.in"
     if not tmpl.is_file():
         print("wallcolors: config.jsonc.in missing in ~/.config/fastfetch, skipping "
-              "fastfetch recolour (apply the Ricelin update or re-run the installer)",
+              "fastfetch recolour (apply the reddot update or re-run the installer)",
               file=sys.stderr)
         return
     seq = lambda h: "%d;%d;%d" % tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
@@ -136,7 +178,7 @@ def flags():
 
 
 def palette_mode():
-    return os.environ.get("RICELIN_PALETTE") or flags().get("paletteMode", "static")
+    return os.environ.get("REDDOT_PALETTE") or flags().get("paletteMode", "static")
 
 
 def gget(key):
@@ -162,7 +204,7 @@ def notify(summary, body):
     return subprocess.run(["gdbus", "call", "--session", "--dest", "org.freedesktop.Notifications",
                            "--object-path", "/org/freedesktop/Notifications",
                            "--method", "org.freedesktop.Notifications.Notify",
-                           "Ricelin", "0", "", summary, body, "[]", "{}", "8000"],
+                           "reddot", "0", "", summary, body, "[]", "{}", "8000"],
                           capture_output=True).returncode == 0
 
 
@@ -231,7 +273,7 @@ def base_theme(light):
     src = find_theme("adw-gtk3" if light else "adw-gtk3-dark")
     if not src:
         return None
-    dst = THEMES / ("Ricelin-base" if light else "Ricelin-base-dark")
+    dst = THEMES / ("reddot-base" if light else "reddot-base-dark")
     css = dst / "gtk-3.0" / "gtk.css"
     if not css.is_file() or (src / "gtk-3.0" / "gtk.css").stat().st_mtime > css.stat().st_mtime:
         shutil.rmtree(dst, ignore_errors=True)
@@ -272,26 +314,26 @@ def remind_backups():
 
 
 def apply_apps(p):
-    """Theme GTK3 and GTK4 apps from the pill palette; the alternating Ricelin-a/b name makes running GTK3 apps reload."""
+    """Theme GTK3 and GTK4 apps from the pill palette; the alternating reddot-a/b name makes running GTK3 apps reload."""
     if not (STATE / "apptheme.json").is_file():
         enable_apps()
     r, g, b = (int(p["surface"][i:i + 2], 16) / 255 for i in (1, 3, 5))
     light = colorsys.rgb_to_hls(r, g, b)[1] > 0.5
     colors = gtk_colors(p, light)
     root = ":root { --accent-bg-color: @accent_bg_color; --accent-fg-color: @accent_fg_color; --accent-color: %s; }\n"
-    changed = write_if_changed(GTK4 / "ricelin.css", colors + root % p["primary"])
+    changed = write_if_changed(GTK4 / "reddot.css", colors + root % p["primary"])
     if not (GTK4 / "gtk.css").exists():
-        write_if_changed(GTK4 / "gtk.css", MARK + '@import url("ricelin.css");\n')
+        write_if_changed(GTK4 / "gtk.css", MARK + '@import url("reddot.css");\n')
     base = base_theme(light)
     if base:
         css3 = MARK + f'@import url("../../{base}/gtk-3.0/gtk.css");\n' + colors
         current = gget("gtk-theme")
         try:
-            same = current in RICELIN_THEMES[:2] and (THEMES / current / "gtk-3.0" / "gtk.css").read_text() == css3
+            same = current in REDDOT_THEMES[:2] and (THEMES / current / "gtk-3.0" / "gtk.css").read_text() == css3
         except OSError:
             same = False
         if not same:
-            target = "Ricelin-b" if current == "Ricelin-a" else "Ricelin-a"
+            target = "reddot-b" if current == "reddot-a" else "reddot-a"
             write_if_changed(THEMES / target / "gtk-3.0" / "gtk.css", css3)
             write_if_changed(THEMES / target / "gtk-4.0" / "gtk.css", f'@import url("../../{base}/gtk-4.0/gtk.css");\n')
             gset("gtk-theme", target)
@@ -309,20 +351,20 @@ def disable_apps():
     css = GTK4 / "gtk.css"
     if css.is_file() and css.read_text(errors="ignore").startswith(MARK):
         css.unlink()
-    (GTK4 / "ricelin.css").unlink(missing_ok=True)
-    if state is None and gget("gtk-theme") not in RICELIN_THEMES:
+    (GTK4 / "reddot.css").unlink(missing_ok=True)
+    if state is None and gget("gtk-theme") not in REDDOT_THEMES:
         return
     state = state or {}
     for bak in map(Path, state.get("backups", [])):
         if bak.is_file() and not (bak.parent / "gtk.css").exists():
             bak.rename(bak.parent / "gtk.css")
     theme = state.get("gtk-theme", "")
-    if theme in ("", "Adwaita", *RICELIN_THEMES):
+    if theme in ("", "Adwaita", *REDDOT_THEMES):
         theme = "adw-gtk3-dark" if find_theme("adw-gtk3-dark") else "Adwaita-dark"
     gset("gtk-theme", theme)
     scheme = state.get("color-scheme", "")
     set_scheme("prefer-dark" if scheme in ("", "default") else scheme, True)
-    for name in RICELIN_THEMES:
+    for name in REDDOT_THEMES:
         shutil.rmtree(THEMES / name, ignore_errors=True)
     if state.get("flatpak"):
         try:
@@ -367,6 +409,9 @@ def main():
         except (OSError, ValueError):
             pill = STATIC
         sync_apps(pill)
+        return 0
+    if sys.argv[1] == "--static":
+        write_static()
         return 0
     if sys.argv[1] == "--hue":
         hue = (float(sys.argv[2]) % 360) / 360.0

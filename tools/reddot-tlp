@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# ricelin-tlp — the only privileged command the TLP surface runs.
+# reddot-tlp — the only privileged command the TLP surface runs.
 #
 # Installed root:root 0755 and called through pkexec/polkit, so every
 # argument is validated here. `status` needs no root. On machines without TLP
@@ -14,15 +14,15 @@
 #   chargeonce|fullcharge <bat>   TLP battery-care one-shots
 #
 # Overrides (tests and ports):
-#   RICELIN_TLP_SYSFS   default /sys/class/power_supply
-#   RICELIN_TLP_CONF    default /etc/tlp.d/99-ricelin.conf
-#   RICELIN_TLP_TEST=1  skip the root check (test harness only)
+#   REDDOT_TLP_SYSFS   default /sys/class/power_supply
+#   REDDOT_TLP_CONF    default /etc/tlp.d/99-reddot.conf
+#   REDDOT_TLP_TEST=1  skip the root check (test harness only)
 
 set -eu
 
-SYS="${RICELIN_TLP_SYSFS:-/sys/class/power_supply}"
-CONF="${RICELIN_TLP_CONF:-/etc/tlp.d/99-ricelin.conf}"
-TEST="${RICELIN_TLP_TEST:-0}"
+SYS="${REDDOT_TLP_SYSFS:-/sys/class/power_supply}"
+CONF="${REDDOT_TLP_CONF:-/etc/tlp.d/99-reddot.conf}"
+TEST="${REDDOT_TLP_TEST:-0}"
 
 have() {
     command -v "$1" >/dev/null 2>&1
@@ -286,7 +286,7 @@ case "${1:-}" in
     pause|resume) cmd_behaviour "$1" "${2:-}" ;;
     chargeonce|fullcharge) cmd_care "$1" "${2:-}" ;;
     *)
-        echo "usage: ricelin-tlp {status|set <bat> <start> <stop>|apply <profile> <start> <stop>|profile <p>|pause|resume <bat>|chargeonce|fullcharge <bat>}" >&2
+        echo "usage: reddot-tlp {status|set <bat> <start> <stop>|apply <profile> <start> <stop>|profile <p>|pause|resume <bat>|chargeonce|fullcharge <bat>}" >&2
         exit 2
         ;;
 esac

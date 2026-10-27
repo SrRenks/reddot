@@ -16,7 +16,7 @@ Singleton {
     readonly property string dim: adapter.dim
 
     FileView {
-        path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/ricelin/colors.json"
+        path: (Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/reddot/colors.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -25,10 +25,10 @@ Singleton {
 
         JsonAdapter {
             id: adapter
-            property string primary: "#f5bd6f"
-            property string cream: "#e6d6cb"
-            property string bright: "#fff6f0"
-            property string dim: "#8a7d74"
+            property string primary: "#e60012"
+            property string cream: "#f2f2f2"
+            property string bright: "#ffffff"
+            property string dim: "#8a8a8a"
         }
     }
 }

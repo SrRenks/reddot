@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-flags_file="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin/flags.json"
+flags_file="${XDG_STATE_HOME:-$HOME/.local/state}/reddot/flags.json"
 WPDIR=$(jq -r '.wallpaperDir // ""' "$flags_file" 2>/dev/null || echo "")
 if [ -z "$WPDIR" ]; then
     # No explicit folder set: adopt an existing collection in the usual spots.
@@ -12,17 +12,17 @@ if [ -z "$WPDIR" ]; then
         n=$(find "$cand" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' -o -iname '*.mov' \) | head -2 | wc -l)
         if [ "$n" -ge 2 ]; then WPDIR="$cand"; break; fi
     done
-    [ -n "$WPDIR" ] || WPDIR="$HOME/Ricelin/wallpapers"
+    [ -n "$WPDIR" ] || WPDIR="$HOME/reddot/wallpapers"
 fi
-RESOLVED="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper-dir"
+RESOLVED="${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-dir"
 printf '%s\n' "$WPDIR" > "$RESOLVED"
 # No-op mode for the QML side: re-resolve the folder and exit before touching any daemon state.
 [ "${1:-}" = "resolve" ] && exit 0
-STATE="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper"
-MAP="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper-map"
-BAG="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper-bag"
-STILL="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper-still.png"
-WLOG="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin/wallcolors.log"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper"
+MAP="${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-map"
+BAG="${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-bag"
+STILL="${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-still.png"
+WLOG="${XDG_STATE_HOME:-$HOME/.local/state}/reddot/wallcolors.log"
 
 is_video() {
     case "${1##*.}" in
@@ -213,6 +213,8 @@ palette_update() {
         md=$(jq -r 'if .manualDark == false then "light" else "dark" end' "$flags_file" 2>/dev/null || echo dark)
         ms=$(jq -r '.manualSat // 0.5' "$flags_file" 2>/dev/null || echo 0.5)
         python3 "$(dirname "$0")/wallcolors.py" --hue "$mh" "$md" "$ms" >>"$WLOG" 2>&1 || true
+    elif [ "$pmode" = "static" ]; then
+        python3 "$(dirname "$0")/wallcolors.py" --static >>"$WLOG" 2>&1 || true
     else
         python3 "$(dirname "$0")/wallcolors.py" "$show" >>"$WLOG" 2>&1 || true
     fi

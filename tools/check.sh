@@ -19,7 +19,7 @@ ok()  { printf '  ok    %s\n' "$*"; }
 bad() { printf '  FAIL  %s\n' "$*"; fail=$((fail + 1)); }
 
 echo "== helper tests =="
-for test in test-ricelin-tlp.sh test-ricelin-thinkpad.sh; do
+for test in test-reddot-tlp.sh test-reddot-thinkpad.sh; do
     if out=$(sh "$here/$test" 2>&1); then
         ok "$test"
     else
@@ -68,15 +68,15 @@ else
 fi
 
 echo "== sensors =="
-if [ -x $HOME/.local/bin/ricelin-sensors ]; then
-    ok "ricelin-sensors"
+if [ -x $HOME/.local/bin/reddot-sensors ]; then
+    ok "reddot-sensors"
 else
-    bad "ricelin-sensors (run tools/install-extras.sh)"
+    bad "reddot-sensors (run tools/install-extras.sh)"
 fi
 
 echo "== shell =="
 before=$fail
-for f in "$cfg"/hypr/scripts/*.sh "$cfg"/hypr/scripts/ricelin; do
+for f in "$cfg"/hypr/scripts/*.sh "$cfg"/hypr/scripts/reddot; do
     [ -f "$f" ] || continue
     sh -n "$f" 2>/dev/null || bad "sh -n $(basename "$f")"
 done
@@ -104,20 +104,20 @@ cmp -s "$repo/configs/quickshell/pill/TlpSurface.qml" "$pill/TlpSurface.qml" \
 cmp -s "$repo/configs/quickshell/pill/Singletons/PowerHistory.qml" \
        "$pill/Singletons/PowerHistory.qml" \
     && ok "PowerHistory.qml" || bad "PowerHistory.qml differs from checkout"
-cmp -s "$here/ricelin-bench.sh" "$HOME/.local/bin/ricelin-bench" \
-    && ok "ricelin-bench" || bad "ricelin-bench not synced"
-cmp -s "$here/ricelin-power-report" "$HOME/.local/bin/ricelin-power-report" \
-    && ok "ricelin-power-report" || bad "ricelin-power-report not synced"
+cmp -s "$here/reddot-bench.sh" "$HOME/.local/bin/reddot-bench" \
+    && ok "reddot-bench" || bad "reddot-bench not synced"
+cmp -s "$here/reddot-power-report" "$HOME/.local/bin/reddot-power-report" \
+    && ok "reddot-power-report" || bad "reddot-power-report not synced"
 
 echo "== helper =="
-if [ -x /usr/local/bin/ricelin-tlp ]; then
-    if /usr/local/bin/ricelin-tlp status >/dev/null 2>&1; then
-        ok "ricelin-tlp status"
+if [ -x /usr/local/bin/reddot-tlp ]; then
+    if /usr/local/bin/reddot-tlp status >/dev/null 2>&1; then
+        ok "reddot-tlp status"
     else
-        bad "ricelin-tlp status"
+        bad "reddot-tlp status"
     fi
 else
-    bad "/usr/local/bin/ricelin-tlp not installed"
+    bad "/usr/local/bin/reddot-tlp not installed"
 fi
 
 echo

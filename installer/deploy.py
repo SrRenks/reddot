@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ricelin config deploy layer.
+reddot config deploy layer.
 
 Copies the rice into ~/.config, drops an ownership marker so uninstall knows
 what is safe to pull, makes the deployed copies portable (neutralize), and
@@ -19,7 +19,7 @@ import shutil
 import sys
 from pathlib import Path
 
-MARKER = ".ricelin-managed"
+MARKER = ".reddot-managed"
 
 # Repo root is the parent of this installer/ dir; the deployable configs sit
 # under configs/ next to it.
@@ -43,12 +43,12 @@ DEPLOY_SET = [
 # Personal bootloader entries that never deploy. A generic grub-theme installer
 # comes later; these three are tied to Erik's disks and machine, so the deploy
 # set leaves them out on purpose.
-GRUB_EXCLUDED = ["grub/install-torii.sh", "grub/probe-sda4.sh", "grub/10_ricelin"]
+GRUB_EXCLUDED = ["grub/install-torii.sh", "grub/probe-sda4.sh", "grub/10_reddot"]
 
 COPY_IGNORE = ("test_*.py", "__pycache__", "*.pyc", "hypridle.conf")
 
 # User-owned config files a re-run must never reset: the same protected set the
-# update engine three-way merges (hand-mirrored from ricelin-update.py, which
+# update engine three-way merges (hand-mirrored from reddot-update.py, which
 # ships standalone and cannot be imported from here). On a managed re-deploy
 # these are carried across the replace instead of reverting to the repo copy,
 # so a curl|sh re-run stops undoing Settings (idle timeouts, keybinds, layout).
@@ -94,18 +94,18 @@ hl.env("__GL_GSYNC_ALLOWED",        "0")
 hl.env("__GL_VRR_ALLOWED",          "0")
 """
 
-# Warm fallback palette for the first fastfetch render, before any wallpaper is
-# picked. Matches the baked warm ghostty default. The live wallcolors.py
+# Static black-and-red fallback palette for the first fastfetch render, before any
+# wallpaper is picked. Matches the baked ghostty default. The live wallcolors.py
 # overwrites config.jsonc from the wallpaper palette on every change after.
-WARM_DEFAULT = {
-    "primary": "#e0563b",
-    "dim": "#7a6453",
-    "on_primary_container": "#f0b85e",
-    "surface_container": "#2e231b",
-    "surface_container_high": "#3a2c22",
-    "subtle": "#b89a86",
-    "outline": "#594636",
-    "bright": "#fff6f0",
+STATIC_PALETTE = {
+    "primary": "#e60012",
+    "dim": "#8a8a8a",
+    "on_primary_container": "#ff8090",
+    "surface_container": "#181818",
+    "surface_container_high": "#222222",
+    "subtle": "#b8b8b8",
+    "outline": "#303030",
+    "bright": "#ffffff",
 }
 
 
@@ -184,7 +184,7 @@ def _has_nvidia(sys_root="/sys"):
 def detect_existing(config_root=CONFIG_ROOT):
     """
     Look at each deploy-set item in ~/.config and report whether it is there
-    and, if so, whether Ricelin put it there (carries our marker) or it is a
+    and, if so, whether reddot put it there (carries our marker) or it is a
     foreign config we would back up before replacing. Returns a dict keyed by
     item name with the path, exists, managed and a plain status word.
     """
@@ -309,17 +309,17 @@ def _fastfetch_palette():
     so a fresh box (or a corrupt colors.json) still renders instead of aborting
     the whole neutralize.
     """
-    cache = Path.home() / ".cache" / "ricelin" / "colors.json"
+    cache = Path.home() / ".cache" / "reddot" / "colors.json"
     if cache.is_file():
         try:
             data = json.loads(cache.read_text())
-            if all(k in data for k in WARM_DEFAULT):
-                for k in WARM_DEFAULT:
+            if all(k in data for k in STATIC_PALETTE):
+                for k in STATIC_PALETTE:
                     _seq(data[k])  # prove every hex parses before trusting it
                 return data, "cache"
         except (OSError, ValueError, TypeError):
             pass
-    return WARM_DEFAULT, "default"
+    return STATIC_PALETTE, "default"
 
 
 def _render_fastfetch(ff_dir, palette, apply):
@@ -446,7 +446,7 @@ def neutralize(config_root=CONFIG_ROOT, apply=False, src=CONFIGS):
 
 def uninstall(config_root=CONFIG_ROOT, apply=False):
     """
-    Remove every Ricelin-managed item from ~/.config and put its pristine .bak
+    Remove every reddot-managed item from ~/.config and put its pristine .bak
     back. A dest without our marker is the user's own config, left untouched.
     Returns the action list; nothing is removed unless apply is set.
     """
@@ -460,7 +460,7 @@ def uninstall(config_root=CONFIG_ROOT, apply=False):
         is_dir = dest.is_dir() and not dest.is_symlink()
         if not _is_managed(dest, is_dir):
             actions.append({"item": name, "action": "skip",
-                            "reason": "not Ricelin-managed", "dest": str(dest)})
+                            "reason": "not reddot-managed", "dest": str(dest)})
             continue
         bak = dest.with_name(dest.name + ".bak")
         restore = str(bak) if (bak.exists() or bak.is_symlink()) else None
@@ -558,7 +558,7 @@ def _selftest():
         check(env_txt == ENV_BASE + (ENV_NVIDIA if nvidia else ""),
               f"env.lua matches base{' + nvidia' if nvidia else ' (nvidia dropped)'}")
         gh = (root / "ghostty" / "config").read_text()
-        check("?~/.cache/ricelin/ghostty-colors" in gh,
+        check("?~/.cache/reddot/ghostty-colors" in gh,
               "ghostty config-file uses the home-relative colors include")
         idletxt = (root / "hypr" / "hypridle.conf").read_text()
         check(str(Path.home()) + "/.config/hypr/scripts/lock.sh" in idletxt,
@@ -676,7 +676,7 @@ def _selftest():
     # paths, so the selftest holds them byte-equal.
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "_ricelin_update", REPO_ROOT / "configs" / "hypr" / "scripts" / "ricelin-update.py")
+        "_reddot_update", REPO_ROOT / "configs" / "hypr" / "scripts" / "reddot-update.py")
     engine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(engine)
     check(PRESERVED == engine.PROTECTED,

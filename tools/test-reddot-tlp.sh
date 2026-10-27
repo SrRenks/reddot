@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# Tests for ricelin-tlp. No root, no battery, no TLP: a fake sysfs tree and
+# Tests for reddot-tlp. No root, no battery, no TLP: a fake sysfs tree and
 # fake tlp/tlp-stat/systemctl/powerprofilesctl scripts stand in for the host.
 #
-#   sh test-ricelin-tlp.sh
+#   sh test-reddot-tlp.sh
 
 set -eu
 
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-helper="$here/ricelin-tlp"
+helper="$here/reddot-tlp"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
@@ -93,9 +93,9 @@ chmod 755 "$tmp/bin/tlp" "$tmp/bin/tlp-stat" "$tmp/bin/systemctl"
 
 run() {
     PATH="$tmp/bin:$PATH" \
-    RICELIN_TLP_SYSFS="$tmp/sys" \
-    RICELIN_TLP_CONF="$tmp/tlp.d/99-ricelin.conf" \
-    RICELIN_TLP_TEST=1 \
+    REDDOT_TLP_SYSFS="$tmp/sys" \
+    REDDOT_TLP_CONF="$tmp/tlp.d/99-reddot.conf" \
+    REDDOT_TLP_TEST=1 \
     sh "$helper" "$@"
 }
 
@@ -110,19 +110,19 @@ assert_contains "$out" '^BATTERY=BAT1|0|100|43|auto|1|1$' "BAT1 legacy *_thresho
 
 # --- set (TLP path, persisted, merged) ------------------------------------
 run set BAT0 45 85
-assert_contains "$(cat "$tmp/tlp.d/99-ricelin.conf")" 'START_CHARGE_THRESH_BAT0=45' "set writes the BAT0 start key"
-assert_contains "$(cat "$tmp/tlp.d/99-ricelin.conf")" 'STOP_CHARGE_THRESH_BAT0=85' "set writes the BAT0 stop key"
+assert_contains "$(cat "$tmp/tlp.d/99-reddot.conf")" 'START_CHARGE_THRESH_BAT0=45' "set writes the BAT0 start key"
+assert_contains "$(cat "$tmp/tlp.d/99-reddot.conf")" 'STOP_CHARGE_THRESH_BAT0=85' "set writes the BAT0 stop key"
 assert_contains "$(cat "$tmp/tlp.log")" 'setcharge 45 85 BAT0' "set calls tlp setcharge"
 
 run set BAT1 50 90
-conf=$(cat "$tmp/tlp.d/99-ricelin.conf")
+conf=$(cat "$tmp/tlp.d/99-reddot.conf")
 assert_contains "$conf" 'START_CHARGE_THRESH_BAT0=45' "second set keeps BAT0 start"
 assert_contains "$conf" 'START_CHARGE_THRESH_BAT1=50' "second set adds BAT1 start"
 assert_contains "$conf" 'STOP_CHARGE_THRESH_BAT1=90' "second set adds BAT1 stop"
 
 # --- apply (profile + all battery windows, one command) -------------------
 run apply balanced 95 100
-conf=$(cat "$tmp/tlp.d/99-ricelin.conf")
+conf=$(cat "$tmp/tlp.d/99-reddot.conf")
 assert_contains "$conf" 'START_CHARGE_THRESH_BAT0=95' "apply writes BAT0 start"
 assert_contains "$conf" 'STOP_CHARGE_THRESH_BAT0=100' "apply writes BAT0 stop"
 assert_contains "$conf" 'START_CHARGE_THRESH_BAT1=95' "apply writes BAT1 start"
@@ -163,11 +163,11 @@ exit 0
 EOF
 chmod 755 "$pbin/powerprofilesctl" "$pbin/systemctl"
 
-out=$(PATH="$pbin" RICELIN_TLP_SYSFS="$tmp/sys" RICELIN_TLP_CONF="$tmp/ppd.conf" RICELIN_TLP_TEST=1 /bin/sh "$helper" status)
+out=$(PATH="$pbin" REDDOT_TLP_SYSFS="$tmp/sys" REDDOT_TLP_CONF="$tmp/ppd.conf" REDDOT_TLP_TEST=1 /bin/sh "$helper" status)
 assert_contains "$out" '^TOOL=ppd$' "status falls back to power-profiles-daemon"
 assert_contains "$out" '^PROFILE=balanced$' "PPD profile is read"
 
-PATH="$pbin" RICELIN_TLP_SYSFS="$tmp/sys" RICELIN_TLP_CONF="$tmp/ppd.conf" RICELIN_TLP_TEST=1 /bin/sh "$helper" profile power-saver
+PATH="$pbin" REDDOT_TLP_SYSFS="$tmp/sys" REDDOT_TLP_CONF="$tmp/ppd.conf" REDDOT_TLP_TEST=1 /bin/sh "$helper" profile power-saver
 assert_contains "$(cat "$tmp/ppd.log")" 'set power-saver' "profile falls back to powerprofilesctl set"
 
 # --- sysfs-only set (no TLP, no PPD) --------------------------------------
@@ -176,13 +176,13 @@ for tool in cat awk grep cut tr id dirname mkdir mv rm printf; do
     path=$(command -v "$tool" || true)
     [ -n "$path" ] && ln -sf "$path" "$tmp/plain/$tool"
 done
-PATH="$tmp/plain" RICELIN_TLP_SYSFS="$tmp/sys" RICELIN_TLP_CONF="$tmp/plain.conf" RICELIN_TLP_TEST=1 /bin/sh "$helper" set BAT0 55 88
+PATH="$tmp/plain" REDDOT_TLP_SYSFS="$tmp/sys" REDDOT_TLP_CONF="$tmp/plain.conf" REDDOT_TLP_TEST=1 /bin/sh "$helper" set BAT0 55 88
 assert_contains "$(cat "$tmp/sys/BAT0/charge_start_threshold" 2>/dev/null || cat "$tmp/sys/BAT0/charge_control_start_threshold")" '55' "sysfs-only set writes the start threshold"
 assert_contains "$(cat "$tmp/sys/BAT0/charge_control_end_threshold")" '88' "sysfs-only set writes the stop threshold"
 
 # --- no batteries ---------------------------------------------------------
 mkdir -p "$tmp/empty"
-out=$(RICELIN_TLP_SYSFS="$tmp/empty" RICELIN_TLP_CONF="$tmp/none.conf" RICELIN_TLP_TEST=1 PATH="$tmp/bin:$PATH" sh "$helper" status)
+out=$(REDDOT_TLP_SYSFS="$tmp/empty" REDDOT_TLP_CONF="$tmp/none.conf" REDDOT_TLP_TEST=1 PATH="$tmp/bin:$PATH" sh "$helper" status)
 assert_missing "$out" 'BATTERY=' "a desktop with no battery reports none"
 
 if [ "$fails" -ne 0 ]; then

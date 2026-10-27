@@ -1,5 +1,5 @@
 local home = os.getenv("HOME")
-local ok, wc = pcall(dofile, home .. "/.cache/ricelin/hypr-colors.lua")
+local ok, wc = pcall(dofile, home .. "/.cache/reddot/hypr-colors.lua")
 if not ok then wc = nil end
 
 local function border(hex, fallback)
@@ -7,8 +7,8 @@ local function border(hex, fallback)
     return "rgb(" .. hex:gsub("#", "") .. ")"
 end
 
-local active   = border(wc and wc.active, "#e0563b")
-local inactive = border(wc and wc.inactive, "#313a4d")
+local active   = border(wc and wc.active, "#e60012")
+local inactive = border(wc and wc.inactive, "#2a2a2a")
 
 --[[
     Splash rendering SEGVs Hyprland (pango free in renderSplash) when a monitor

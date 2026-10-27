@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# One-time rename of the old ricelin state/cache/data layout to reddot.
+# Idempotent: an existing reddot path always wins and the old path is left
+# untouched for manual inspection.
+set -eu
+
+home="${HOME:?}"
+state="${XDG_STATE_HOME:-$home/.local/state}"
+cache="${XDG_CACHE_HOME:-$home/.cache}"
+data="${XDG_DATA_HOME:-$home/.local/share}"
+
+move_old() {
+    old=$1
+    new=$2
+    [ -e "$old" ] || return 0
+    [ -e "$new" ] && return 0
+    mv "$old" "$new"
+}
+
+move_old "$state/ricelin" "$state/reddot"
+move_old "$cache/ricelin" "$cache/reddot"
+move_old "$data/ricelin" "$data/reddot"
+move_old "$home/Ricelin" "$home/reddot"
+
+for base in "$state" "$cache" "$data"; do
+    for old in "$base"/ricelin-*; do
+        [ -e "$old" ] || continue
+        move_old "$old" "$base/reddot-${old##*/ricelin-}"
+    done
+done
+
+# Paths saved inside state files still point at ~/Ricelin after the directory
+# move. Rewrite only the old home prefix.
+for f in "$state"/reddot-wallpaper "$state"/reddot-wallpaper-dir "$state"/reddot-wallpaper-map "$state"/reddot-wallpaper-bag "$state"/reddot/flags.json; do
+    [ -f "$f" ] || continue
+    sed -i "s#$home/Ricelin/#$home/reddot/#g" "$f"
+done
+
+# Legacy deploy markers, so a later reinstall keeps treating the tree as ours.
+find "$home/.config" -name .ricelin-managed -type f 2>/dev/null | while IFS= read -r old; do
+    new="${old%/.ricelin-managed}/.reddot-managed"
+    [ -e "$new" ] || mv "$old" "$new"
+done
+find "$home/.config" -name '*.ricelin-managed' -type f 2>/dev/null | while IFS= read -r old; do
+    new="${old%.ricelin-managed}.reddot-managed"
+    [ -e "$new" ] || mv "$old" "$new"
+done
+
+# Old CLI symlink; the new installer creates the reddot one.
+[ -L "$home/.local/bin/ricelin" ] && rm -f "$home/.local/bin/ricelin"
+exit 0

@@ -6,7 +6,7 @@ import "Singletons"
 
 /**
  * PRESETS sub-surface. A preset is a complete TLP power snapshot: profile plus
- * charge window. The active badge is computed from a live `ricelin-tlp status`,
+ * charge window. The active badge is computed from a live `reddot-tlp status`,
  * never from the last applied button or a stored default.
  */
 SettingsSurface {
@@ -15,7 +15,7 @@ SettingsSurface {
     implicitHeight: content.implicitHeight
     rows: []
 
-    readonly property string helper: "/usr/local/bin/ricelin-tlp"
+    readonly property string helper: "/usr/local/bin/reddot-tlp"
     readonly property var profileOptions: [
         { label: "Performance", value: "performance" },
         { label: "Balanced", value: "balanced" },

@@ -1,10 +1,10 @@
-# Torii: Ricelin GRUB theme
+# Torii: reddot GRUB theme
 # Background: night-shrine (2560x1440)
 
 desktop-image: "background.png"
 desktop-image-scale-method: "stretch"
 title-text: ""
-message-color: "#ead9cf"
+message-color: "#f2f2f2"
 message-bg-color: "#00000000"
 
 # --- Japanese title ---
@@ -15,7 +15,7 @@ message-bg-color: "#00000000"
     align  = "left"
     text   = "門を選べ"
     font   = "ToriiTitle Regular 92"
-    color  = "#ffe0d2"
+    color  = "#ffffff"
 }
 
 # --- subtitle ---
@@ -26,7 +26,7 @@ message-bg-color: "#00000000"
     align  = "left"
     text   = "CHOOSE YOUR GATE"
     font   = "Cormorant Bold 26"
-    color  = "#e08a8a"
+    color  = "#ff6670"
 }
 
 # --- boot menu ---
@@ -36,7 +36,7 @@ message-bg-color: "#00000000"
     width           = 44%
     height          = 50%
     item_font       = "Cormorant Bold 44"
-    item_color      = "#ddc8bc"
+    item_color      = "#d0d0d0"
     selected_item_color = "#ffffff"
     selected_item_pixmap_style = "select_*.png"
     item_height     = 62
@@ -57,5 +57,5 @@ message-bg-color: "#00000000"
     align = "left"
     text  = "Booting in %d seconds"
     font  = "Cormorant Bold 26"
-    color = "#c0a098"
+    color = "#a8a8a8"
 }

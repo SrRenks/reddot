@@ -1,13 +1,13 @@
 #!/bin/sh
 #
-# Ricelin bootstrap.
+# reddot bootstrap.
 #
 # Thin entrypoint for `curl -fsSL .../install.sh | bash`. It does the bare
 # minimum to get the real installer running on a fresh machine: detect the
 # distro family (so it knows the package manager), make sure git and python3
 # are present, fetch the rice, then hand the whole flow to the Python installer.
 # The wizard, the package logic and the config deploy all live in
-# installer/ricelin_install.py, not here.
+# installer/reddot_install.py, not here.
 
 set -e
 
@@ -24,7 +24,7 @@ GENTOO_IDS="gentoo funtoo calculate pentoo redcore"
 
 say()  { printf '%s\n' "$*"; }
 step() { printf '\n:: %s\n' "$*"; }
-die()  { printf 'ricelin: %s\n' "$*" >&2; exit 1; }
+die()  { printf 'reddot: %s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
 in_list() {
@@ -110,17 +110,17 @@ has_flag() {
 
 main() {
 	say "Preparing installer interface..."
-	[ "$(uname -s)" = Linux ] || die "Ricelin only installs on Linux"
+	[ "$(uname -s)" = Linux ] || die "reddot only installs on Linux"
 
 	# A box that already carries the managed deploy updates through the in-app
 	# updater, not through a full re-install; re-running the one-liner is almost
 	# always someone looking for "how do I update". --reinstall forces the wizard.
-	if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/.ricelin-managed" ] \
+	if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/.reddot-managed" ] \
 		&& ! has_flag --reinstall "$@" && ! has_flag --uninstall "$@"; then
 		say "Reddot is already installed."
-		say "  Update:       open Settings > Updates in the pill, or run: ricelin update"
+		say "  Update:       open Settings > Updates in the pill, or run: reddot update"
 		say "  Re-install:   curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | sh -s -- --reinstall"
-		say "  Uninstall:    ricelin uninstall"
+		say "  Uninstall:    reddot uninstall"
 		exit 0
 	fi
 
@@ -133,7 +133,7 @@ main() {
 	ensure_deps "$fam"
 	fetch
 
-	python3 "$DIR/installer/ricelin_install.py" --source "$DIR/configs" "$@" || exit $?
+	python3 "$DIR/installer/reddot_install.py" --source "$DIR/configs" "$@" || exit $?
 
 	# The Python installer owns ~/.config. The TLP and ThinkPad helpers, the
 	# polkit rule, the AC/BAT policy and the user-level tools live outside it;

@@ -30,14 +30,14 @@ broke.
   `Singletons/PresetStore.qml`.
 - `tools/`: all new shell-side tooling, the TLP helper and the ThinkPad helper
   (installed only when a ThinkPad is detected).
-- `configs/hypr/scripts/ricelin-update.py`: `DEFAULT_REMOTE` points at this fork.
+- `configs/hypr/scripts/reddot-update.py`: `DEFAULT_REMOTE` points at this fork.
 
 ## Update
 
 The in-app updater now pulls this fork (three-way merge for protected files):
 
 ```sh
-ricelin update
+reddot update
 ```
 
 For a fresh machine or a forced refresh:
@@ -52,7 +52,7 @@ TLP policy and user tools are outside it; after a pull that changes `tools/`:
 
 ```sh
 sudo ~/.local/share/reddot/tools/install-extras.sh
-ricelin stop && ricelin start
+reddot stop && reddot start
 ~/Projects/reddot/tools/check.sh
 ```
 
@@ -60,9 +60,9 @@ ricelin stop && ricelin start
 
 ```sh
 ~/Projects/reddot/tools/check.sh          # gate: helper, QML, syntax, drift
-~/Projects/reddot/tools/test-ricelin-tlp.sh
-~/Projects/reddot/tools/test-ricelin-thinkpad.sh
-python3 ~/.config/hypr/scripts/test_ricelin_update.py
+~/Projects/reddot/tools/test-reddot-tlp.sh
+~/Projects/reddot/tools/test-reddot-thinkpad.sh
+python3 ~/.config/hypr/scripts/test_reddot_update.py
 python3 ~/.config/hypr/scripts/test_wallcolors_apps.py
 node ~/.config/quickshell/pill/lib/fuzzy.test.mjs
 node ~/.config/quickshell/pill/lib/monitors.test.mjs
@@ -72,7 +72,7 @@ sh ~/.config/hypr/scripts/test_launch_guard.sh   # needs writable /run/user/$UID
 ## Backups
 
 The installer keeps backups of replaced configs. The three-way merge base and
-last applied sha live in `~/.local/state/ricelin/update.json`. For the local
+last applied sha live in `~/.local/state/reddot/update.json`. For the local
 history of this fork see `git log`; each feature was committed separately.
 
 ## Known trade-offs
@@ -81,14 +81,14 @@ history of this fork see `git log`; each feature was committed separately.
   start (Ukishima) saves that at the cost of 200–400 ms and a riskier lock path.
 - **Auto-hide**: `pillMode=auto`, `pillReserve=false`. If the strip does not
   reveal, any surface keybind makes the pill modal; then **Look → Pill mode →
-  Always**, or edit `~/.local/state/ricelin/flags.json`.
-- **TLP helper**: root-owned `/usr/local/bin/ricelin-tlp`, called through
+  Always**, or edit `~/.local/state/reddot/flags.json`.
+- **TLP helper**: root-owned `/usr/local/bin/reddot-tlp`, called through
   `pkexec`. TLP has no unprivileged threshold API; TLPUI escalates the same way.
-- **Mute LEDs**: `tools/99-ricelin-leds.rules` selects `audio-mute` and
+- **Mute LEDs**: `tools/99-reddot-leds.rules` selects `audio-mute` and
   `audio-micmute` at boot. No daemon; the two LEDs are followers.
 - **ThinkPad helper**: `pkexec` plus polkit, not sudoers. The shared rule returns
-  `AUTH_ADMIN_KEEP` only for `/usr/local/bin/ricelin-thinkpad` and
-  `/usr/local/bin/ricelin-tlp`; reads do not prompt. This needs a running polkit
+  `AUTH_ADMIN_KEEP` only for `/usr/local/bin/reddot-thinkpad` and
+  `/usr/local/bin/reddot-tlp`; reads do not prompt. This needs a running polkit
   agent (`hyprpolkitagent` here).
 - **Two QuickShell processes** (pill + lock): ~311 MB anon for the whole session
   on the reference machine (`docs/LIGHTWEIGHT.md`).

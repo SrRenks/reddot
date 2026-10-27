@@ -6,7 +6,7 @@ import "Singletons"
 
 /**
  * 電 TLP surface: power profile and charge window, driven through the root
- * helper `ricelin-tlp`. Status is read when the surface opens and after every
+ * helper `reddot-tlp`. Status is read when the surface opens and after every
  * write; nothing polls while it is closed.
  *
  * Compatibility is the point of the layout:
@@ -29,7 +29,7 @@ PillSurface {
 
     implicitHeight: content.implicitHeight
 
-    readonly property string helper: "/usr/local/bin/ricelin-tlp"
+    readonly property string helper: "/usr/local/bin/reddot-tlp"
     readonly property var profileOptions: [
         { label: "Perf", value: "performance" },
         { label: "Bal", value: "balanced" },

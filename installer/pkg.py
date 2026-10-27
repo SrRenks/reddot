@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Package-manager operations for the Ricelin multi-distro installer. distro.py
+Package-manager operations for the reddot multi-distro installer. distro.py
 decides what to do with each package (native, fallback, skip); this module turns
 those decisions into the concrete shell argv that actually queries or installs a
 package on the detected family. Building argv lists instead of running them keeps
@@ -199,7 +199,7 @@ def refresh_argv(family):
     return [distro.ROOT, "zypper", "--non-interactive", "refresh"]
 
 
-# Gentoo portage overrides the rice needs, written to files named ricelin under
+# Gentoo portage overrides the rice needs, written to files named reddot under
 # /etc/portage so nothing of the user's own config is ever edited and uninstall
 # can remove them by name. Keywords stay per atom: the whole GURU overlay would
 # unmask thousands of packages, and a ~amd64 line on a stable main-tree package
@@ -241,7 +241,7 @@ def portage_lines(atom_repos):
 
 def portage_config_argv(atom_repos):
     """
-    The privileged steps that write the two ricelin override files. mkdir -p fails
+    The privileged steps that write the two reddot override files. mkdir -p fails
     loud on an old box where package.accept_keywords is still a single file, which
     is the right outcome: converting the user's file is not this installer's call.
     """
@@ -252,14 +252,14 @@ def portage_config_argv(atom_repos):
             continue
         d = f"{PORTAGE_DIR}/{sub}"
         body = "\\n".join(lines)
-        steps.append(["sh", "-c", f"mkdir -p {d} && printf '{body}\\n' > {d}/ricelin"])
+        steps.append(["sh", "-c", f"mkdir -p {d} && printf '{body}\\n' > {d}/reddot"])
     return steps
 
 
 def portage_config_files():
     """The override files this installer may have written, for uninstall."""
-    return [f"{PORTAGE_DIR}/package.accept_keywords/ricelin",
-            f"{PORTAGE_DIR}/package.use/ricelin"]
+    return [f"{PORTAGE_DIR}/package.accept_keywords/reddot",
+            f"{PORTAGE_DIR}/package.use/reddot"]
 
 
 def ensure_aur_helper_steps():
@@ -278,7 +278,7 @@ def ensure_aur_helper_steps():
     """
     if aur_helper() is not None:
         return []
-    build_dir = shlex.quote(os.path.join(tempfile.gettempdir(), "ricelin-yay-build"))
+    build_dir = shlex.quote(os.path.join(tempfile.gettempdir(), "reddot-yay-build"))
     return [
         [distro.ROOT, "pacman", "-S", "--needed", "--noconfirm", "git", "base-devel"],
         ["sh", "-c",
@@ -300,7 +300,7 @@ def privileged(argv, family):
 
 def _write_os_release(fields):
     """Write a throwaway os-release with these fields and return its path, for tests."""
-    fd, path = tempfile.mkstemp(prefix="ricelin-osr-")
+    fd, path = tempfile.mkstemp(prefix="reddot-osr-")
     with os.fdopen(fd, "w") as fh:
         for k, v in fields.items():
             fh.write(f'{k}="{v}"\n')
@@ -384,7 +384,7 @@ def _selftest():
     assert portage_lines({"app-misc/jq": None}) == ([], [])
     steps = portage_config_argv({"gui-wm/hyprland": "overlay:hyproverlay"})
     assert steps[0][2].startswith("mkdir -p /etc/portage/package.accept_keywords && printf")
-    assert steps[0][2].endswith("> /etc/portage/package.accept_keywords/ricelin")
+    assert steps[0][2].endswith("> /etc/portage/package.accept_keywords/reddot")
     assert "LUA_SINGLE_TARGET" in steps[1][2]
     assert portage_config_argv({"app-misc/jq": None}) == []
     checks += 7

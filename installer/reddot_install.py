@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The Ricelin installer orchestrator: the thin top layer that ties distro
+The reddot installer orchestrator: the thin top layer that ties distro
 detection, the package planner, the fallback handlers, the config deploy and the
 terminal UI into one real install flow.
 
@@ -187,7 +187,7 @@ def _wizard(args, info, manifest):
             "Enable the GURU and hyproverlay overlays and accept their ~amd64 "
             "packages. (Recommended)",
             "Hyprland and quickshell only exist there. This writes two files named "
-            "ricelin under /etc/portage and touches nothing else of yours.",
+            "reddot under /etc/portage and touches nothing else of yours.",
         ])
 
     services = True
@@ -215,7 +215,7 @@ def _wizard(args, info, manifest):
     grub = False
     if info["bootloader"] == "grub":
         grub = tui.confirm("GRUB theme", [
-            "Install the Ricelin GRUB theme.",
+            "Install the reddot GRUB theme.",
             "Theme only, it does not touch your boot entries.",
         ])
 
@@ -354,7 +354,7 @@ def _summary_lines(info, choices, plan, args, do_pkgs):
             lines.append("Build via fallback: " + names + ".")
         if info["family"] == "gentoo":
             if pkg.portage_config_argv(plan["atom_repos"]):
-                lines.append("Write package.accept_keywords/ricelin and package.use/ricelin "
+                lines.append("Write package.accept_keywords/reddot and package.use/reddot "
                              "under /etc/portage.")
             if plan["manual"]:
                 lines.append("Overlays skipped, install yourself: emerge -av "
@@ -369,15 +369,15 @@ def _summary_lines(info, choices, plan, args, do_pkgs):
     if choices["fish"]:
         lines.append("Set fish as your login shell.")
     if _is_update(info):
-        lines.append("Update the Ricelin config; your Settings are kept.")
+        lines.append("Update the reddot config; your Settings are kept.")
     else:
-        lines.append("Back up and deploy the Ricelin config.")
+        lines.append("Back up and deploy the reddot config.")
     return lines
 
 
 def _is_update(info):
     """
-    True when this run lands on top of an earlier Ricelin deploy, spotted by the
+    True when this run lands on top of an earlier reddot deploy, spotted by the
     managed marker on the two dirs that always deploy. That flips the messaging
     from "back up and deploy" to "update, your files are kept", since a managed
     replace makes no backup and carries the protected user files across.
@@ -389,23 +389,23 @@ def _is_update(info):
 def seed_wallpapers(dry):
     """
     Give a fresh box a wallpaper to show. Every wallpaper consumer reads
-    ~/Ricelin/wallpapers (wallpaper.sh, the picker, the search, the palette), but
+    ~/reddot/wallpapers (wallpaper.sh, the picker, the search, the palette), but
     that dir is gitignored and untracked, so a clone ships none: no background, an
     empty picker, the palette never fires. Create the dir plus the downloads
-    subfolder and the ricelin cache, and when it holds no images yet, copy the
+    subfolder and the reddot cache, and when it holds no images yet, copy the
     tracked starter set in so swww, the picker and the palette all light up.
     Fail-soft like every other step: an OSError comes back as (ok, detail) for
     the report instead of aborting the run.
     """
     home = Path.home()
-    wp = home / "Ricelin" / "wallpapers"
+    wp = home / "reddot" / "wallpapers"
     starters = Path(__file__).resolve().parent / "starter-wallpapers"
     if dry:
-        print("  would seed wallpapers -> ~/Ricelin/wallpapers")
+        print("  would seed wallpapers -> ~/reddot/wallpapers")
         return True, ""
     try:
         (wp / "downloads").mkdir(parents=True, exist_ok=True)
-        (home / ".cache" / "ricelin").mkdir(parents=True, exist_ok=True)
+        (home / ".cache" / "reddot").mkdir(parents=True, exist_ok=True)
         exts = (".jpg", ".jpeg", ".png")
         has_image = any(p.is_file() and p.suffix.lower() in exts for p in wp.iterdir())
         if has_image:
@@ -427,7 +427,7 @@ def seed_wallpapers(dry):
 
 def seed_app_theme(dry):
     """Fresh boxes start with GTK apps on the palette; the first palette run at login applies it."""
-    flags = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state") / "ricelin" / "flags.json"
+    flags = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state") / "reddot" / "flags.json"
     if dry:
         print(f"  would turn on the app theme in {flags}")
         return True, ""
@@ -478,17 +478,17 @@ def bridge_wallpaper_binary(dry):
     return True, "", True
 
 
-def link_ricelin_cli(dry):
+def link_reddot_cli(dry):
     """
-    Put the `ricelin` control CLI on PATH. The script ships inside the deployed
-    config at ~/.config/hypr/scripts/ricelin, so symlink it into ~/.local/bin where
+    Put the `reddot` control CLI on PATH. The script ships inside the deployed
+    config at ~/.config/hypr/scripts/reddot, so symlink it into ~/.local/bin where
     the wallpaper bridge already lives. Returns (ok, detail, linked) so the caller
     folds it into record() and flags the PATH note only when a fresh link was made.
     """
-    target = deploy.CONFIG_ROOT / "hypr" / "scripts" / "ricelin"
-    link = Path.home() / ".local" / "bin" / "ricelin"
+    target = deploy.CONFIG_ROOT / "hypr" / "scripts" / "reddot"
+    link = Path.home() / ".local" / "bin" / "reddot"
     if dry:
-        print(f"  would link: ricelin -> {target}")
+        print(f"  would link: reddot -> {target}")
         return True, "", False
     if not target.exists():
         return True, "", False
@@ -498,8 +498,8 @@ def link_ricelin_cli(dry):
             link.unlink()
         link.symlink_to(target)
     except OSError as exc:
-        return False, f"{exc}: link ricelin CLI", False
-    print(f"  linked: ricelin -> {target}")
+        return False, f"{exc}: link reddot CLI", False
+    print(f"  linked: reddot -> {target}")
     return True, "", True
 
 
@@ -552,7 +552,7 @@ def _seed_update_baseline(source, config_root, dry):
             capture_output=True, text=True, check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return True, ""
-    engine = Path(config_root) / "hypr" / "scripts" / "ricelin-update.py"
+    engine = Path(config_root) / "hypr" / "scripts" / "reddot-update.py"
     if not head or not engine.exists():
         return True, ""
     try:
@@ -601,7 +601,7 @@ def _report(plan, failures, notes, info, choices, args, do_pkgs, dry):
         cmd = hint[len("Run: "):] if hint.startswith("Run: ") else hint
         attention.append((step, cmd))
 
-    title = "Dry run complete" if dry else "Ricelin is in"
+    title = "Dry run complete" if dry else "reddot is in"
     tui.closing(title, tally, steps, attention, notes or None)
 
 
@@ -623,7 +623,7 @@ def run(args):
         helper_label = "Not needed"
     has_config = any(v["exists"] for v in info["existing"].values())
     if _is_update(info):
-        config_label = "Ricelin (this run updates it, your Settings are kept)"
+        config_label = "reddot (this run updates it, your Settings are kept)"
     elif has_config:
         config_label = "Found (backed up before anything is replaced)"
     else:
@@ -872,19 +872,19 @@ def run(args):
             record(False, str(exc), "Neutralize configs",
                    "Check ~/.config permissions and re-run the installer.")
 
-        # k2. put the ricelin control CLI on PATH now that the script is deployed.
-        ok, detail, linked = link_ricelin_cli(dry)
-        record(ok, detail, "Link ricelin CLI",
-               "Symlink ~/.local/bin/ricelin to ~/.config/hypr/scripts/ricelin yourself.")
+        # k2. put the reddot control CLI on PATH now that the script is deployed.
+        ok, detail, linked = link_reddot_cli(dry)
+        record(ok, detail, "Link reddot CLI",
+               "Symlink ~/.local/bin/reddot to ~/.config/hypr/scripts/reddot yourself.")
         if linked:
-            notes.append("Linked the ricelin CLI into ~/.local/bin. With it on PATH "
-                         "you can run: ricelin status, ricelin restart, ricelin update.")
+            notes.append("Linked the reddot CLI into ~/.local/bin. With it on PATH "
+                         "you can run: reddot status, reddot restart, reddot update.")
 
         # l. seed a starter wallpaper so the first boot has a background, a
         #    populated picker and a palette to render.
         ok, detail = seed_wallpapers(dry)
         record(ok, detail, "Seed wallpapers",
-               "Copy any image into ~/Ricelin/wallpapers yourself.")
+               "Copy any image into ~/reddot/wallpapers yourself.")
         if not _is_update(info):
             ok, detail = seed_app_theme(dry)
             record(ok, detail, "Turn on the app theme",
@@ -964,7 +964,7 @@ def run(args):
 
 def run_uninstall(args):
     """
-    Remove every Ricelin-managed config and put the pre-install backups back.
+    Remove every reddot-managed config and put the pre-install backups back.
     Packages stay; only the deployed files go. Confirms interactively before
     touching anything, and refuses to run headless, since a piped one-liner
     should never be able to wipe a config unattended.
@@ -974,7 +974,7 @@ def run_uninstall(args):
     plan = deploy.uninstall(config_root=deploy.CONFIG_ROOT, apply=False)
     removals = [a for a in plan if a["action"] == "remove"]
     if not removals:
-        tui.info(["Nothing Ricelin-managed found in ~/.config, nothing to remove."])
+        tui.info(["Nothing reddot-managed found in ~/.config, nothing to remove."])
         tui.outro("Done")
         return 0
 
@@ -994,7 +994,7 @@ def run_uninstall(args):
         tui.outro("Dry run complete")
         return 0
     try:
-        if not tui.confirm("Remove Ricelin", lines):
+        if not tui.confirm("Remove reddot", lines):
             tui.outro("Cancelled")
             return 0
     except RuntimeError:
@@ -1014,22 +1014,22 @@ def run_uninstall(args):
         ok, _ = _run([_root_cmd(), "rm", "-f", f], dry)
         print(f"  removed: {f}" if ok else f"  could not remove {f}, delete it yourself")
 
-    link = Path.home() / ".local" / "bin" / "ricelin"
+    link = Path.home() / ".local" / "bin" / "reddot"
     if link.is_symlink():
         try:
             link.unlink()
             print(f"  removed: {link}")
         except OSError:
             pass
-    tui.info(["The repo clone in ~/.local/share/ricelin and your wallpapers in "
-              "~/Ricelin are left for you to delete."])
-    tui.outro("Ricelin removed")
+    tui.info(["The repo clone in ~/.local/share/reddot and your wallpapers in "
+              "~/reddot are left for you to delete."])
+    tui.outro("reddot removed")
     return 0
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Install the Ricelin Hyprland rice across distro families.")
+        description="Install the reddot Hyprland rice across distro families.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Walk the whole flow and change nothing")
     parser.add_argument("--quickstart", action="store_true",
@@ -1045,7 +1045,7 @@ def main():
     parser.add_argument("--no-deps", action="store_true",
                         help="Skip the package step, only deploy the configs")
     parser.add_argument("--reinstall", action="store_true",
-                        help="Run the full install over an existing Ricelin install")
+                        help="Run the full install over an existing reddot install")
     parser.add_argument("--uninstall", action="store_true",
                         help="Remove the deployed configs and restore the backups")
     args = parser.parse_args()

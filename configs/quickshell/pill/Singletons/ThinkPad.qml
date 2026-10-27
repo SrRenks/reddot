@@ -15,7 +15,7 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    readonly property string helper: "/usr/local/bin/ricelin-thinkpad"
+    readonly property string helper: "/usr/local/bin/reddot-thinkpad"
     readonly property var tpOrder: ["sensitivity", "speed", "press_to_select",
                                     "dragging", "drift_time", "inertia"]
     readonly property var ledOrder: [

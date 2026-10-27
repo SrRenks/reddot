@@ -81,7 +81,7 @@ Everything else is a re-skin, and most are months behind upstream.
 - **The big idle item is still the resident lock** (`qs -c lock`), followed by
   `kdeconnectd` + `kdeconnect-indicator`. Neither is shell code.
 - **Measurement rule** (prometheus-ai `core/docs/performance.md`): profile
-  first. `ricelin-bench` exists for that; do not add complexity for a gain
+  first. `reddot-bench` exists for that; do not add complexity for a gain
   nobody measured.
 
 ## Upstream strategy

@@ -45,7 +45,7 @@ Singleton {
     FileView {
         id: file
         path: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state"))
-            + "/ricelin/presets.json"
+            + "/reddot/presets.json"
         blockLoading: true
         watchChanges: true
         printErrors: false

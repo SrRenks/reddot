@@ -1,12 +1,12 @@
 #!/bin/sh
 #
-# Tests for ricelin-thinkpad. No root, no ThinkPad: a fake sysfs tree and a fake
+# Tests for reddot-thinkpad. No root, no ThinkPad: a fake sysfs tree and a fake
 # systemctl stand in for the machine.
 
 set -eu
 
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-helper="$here/ricelin-thinkpad"
+helper="$here/reddot-thinkpad"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 fails=0
@@ -88,11 +88,11 @@ chmod 755 "$tmp/bin/systemctl"
 
 run() {
     PATH="$tmp/bin:$PATH" \
-    RICELIN_THINKPAD_SYSFS="$tmp/sys" \
-    RICELIN_THINKPAD_PROC="$tmp/proc/fan" \
-    RICELIN_THINKPAD_SERIO="$tmp/sys/devices/platform/i8042/serio1" \
-    RICELIN_THINKPAD_THINKFAN="$tmp/thinkfan.yaml" \
-    RICELIN_THINKPAD_TEST=1 \
+    REDDOT_THINKPAD_SYSFS="$tmp/sys" \
+    REDDOT_THINKPAD_PROC="$tmp/proc/fan" \
+    REDDOT_THINKPAD_SERIO="$tmp/sys/devices/platform/i8042/serio1" \
+    REDDOT_THINKPAD_THINKFAN="$tmp/thinkfan.yaml" \
+    REDDOT_THINKPAD_TEST=1 \
     sh "$helper" "$@"
 }
 
@@ -144,7 +144,7 @@ exits 2 "rejects an incomplete curve" run curve set '0:0:40;1:38:46'
 exits 2 "rejects low above high" run curve set '0:0:40;1:48:46;2:44:53;3:51:60;4:58:66;5:64:72;6:70:78;7:75:82'
 
 mkdir -p "$tmp/empty"
-out=$(RICELIN_THINKPAD_SYSFS="$tmp/empty" RICELIN_THINKPAD_TEST=1 PATH="$tmp/bin:$PATH" sh "$helper" status)
+out=$(REDDOT_THINKPAD_SYSFS="$tmp/empty" REDDOT_THINKPAD_TEST=1 PATH="$tmp/bin:$PATH" sh "$helper" status)
 contains "$out" '^PRESENT=0$' "reports no ThinkPad on other hardware"
 missing "$out" '^MODEL=' "does not invent a model"
 

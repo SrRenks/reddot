@@ -26,8 +26,8 @@ number on 16 GB (about 2 %). It is not the floor:
 |---|---|---|
 | Waybar + fuzzel + mako + hyprlock | ~60–120 MB | no morphing pill, assembled theming |
 | Noctalia v5 | ~50 MB/monitor | own C++ shell, no QuickShell/Qt runtime |
-| Ukishima | ~250 MB RSS | same architecture as Ricelin, one qs, jemalloc |
-| **Ricelin here** | **311 MB anon** | compositor + pill + resident lock + helpers |
+| Ukishima | ~250 MB RSS | same architecture as reddot, one qs, jemalloc |
+| **reddot here** | **311 MB anon** | compositor + pill + resident lock + helpers |
 | Caelestia | ~400 MB RSS | one qs, feature-dense |
 
 The 250–400 MB band is the cost of the QuickShell/Qt architecture; you are at
@@ -45,7 +45,7 @@ the lower end of it. The remaining wins are architectural, not micro-tuning.
 3. **Second-monitor pill** — the pill is instantiated per screen. A policy of
    "all / primary / focused" would remove one full Pill scene graph (~40–70 MB)
    on this two-screen desk. Impasto and Noctalia support per-screen bar policy;
-   Ricelin does not yet.
+   reddot does not yet.
 4. **GPU, not RAM** — Hyprland blur passes, window opacity and the pill's
    effects cost battery and GPU time, not resident memory. Lowering them is a
    different optimisation; do not expect the RAM number to move.
@@ -59,11 +59,11 @@ Do **not** chase: JS timers (already event-driven or gated), lazy surfaces
 ## How to re-measure
 
 ```sh
-ricelin-bench 10      # PSS per process + session cgroup anon/file
+reddot-bench 10      # PSS per process + session cgroup anon/file
 ```
 
 `anon` is the number to compare over time. `file cache` is reclaimable and
-should be ignored when judging pressure. `ricelin-bench` walks up from its own
+should be ignored when judging pressure. `reddot-bench` walks up from its own
 cgroup to the `session-*.scope`, so it reports the same block without root.
 
 ## References

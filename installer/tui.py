@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ricelin installer terminal UI, the widget layer the orchestrator imports.
+reddot installer terminal UI, the widget layer the orchestrator imports.
 
 This is a clack-style sequential prompt flow, not a full-screen TUI. The terminal
 keeps scrolling: every answered question stays on screen, collapsed to a single
@@ -10,9 +10,9 @@ gave. The screen is never cleared. Only the one currently active prompt redraws 
 place while you move the arrows; the moment you submit it freezes into scrollback
 and the next prompt prints under it.
 
-The skin is the locked Ricelin Hanko: the vermilion edge marker that echoes the
+The skin is the locked reddot Hanko: the ThinkPad-red edge marker that echoes the
 pill's hanko stamps and the torii, corner-bracketed answers, square seals for
-multiselect and round dots for single choice, all in the rice's ember palette.
+multiselect and round dots for single choice, all in the rice's black-and-red palette.
 
 Keys come from /dev/tty, the controlling terminal, not from stdin. The real
 installer ships as `curl -fsSL ... | bash`, so the process stdin is the piped
@@ -37,12 +37,12 @@ def _rgb(r, g, b):
     return "" if _NO_COLOR else f"\033[38;2;{r};{g};{b}m"
 
 
-VERM = _rgb(192, 68, 43)
-FLAME = _rgb(255, 154, 100)
-CREAM = _rgb(230, 214, 203)
-BRIGHT = _rgb(255, 246, 240)
-DIM = _rgb(138, 125, 116)
-FAINT = _rgb(111, 99, 91)
+VERM = _rgb(230, 0, 18)
+FLAME = _rgb(255, 51, 68)
+CREAM = _rgb(242, 242, 242)
+BRIGHT = _rgb(255, 255, 255)
+DIM = _rgb(138, 138, 138)
+FAINT = _rgb(112, 112, 112)
 GREEN = _rgb(120, 180, 120)
 DEEP = _rgb(63, 69, 80)
 INK = _rgb(51, 55, 63)
@@ -262,16 +262,16 @@ def banner():
         _clip(
             [
                 ("", "  "),
-                (FLAME, "Ricelin"),
+                (FLAME, "reddot"),
                 ("", "   "),
-                (DIM, "A warm Hyprland rice"),
+                (DIM, "A black-and-red Hyprland rice"),
             ],
             width,
         )
     )
     lines.append(_clip([("", "  "), (FAINT, "github.com/SrRenks/reddot")], width))
     lines.append("")
-    lines.append(_header(INTRO, VERM, "Ricelin installer", CREAM, width))
+    lines.append(_header(INTRO, VERM, "reddot installer", CREAM, width))
     lines.append(_spacer(width))
     _write("\n".join(lines) + "\n")
 

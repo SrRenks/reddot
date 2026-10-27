@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Self-test for ricelin-update.py against throwaway git repos in a temp dir. No
+Self-test for reddot-update.py against throwaway git repos in a temp dir. No
 network, no touching the user's real config. Builds a fake origin with a couple of
 commits (some carrying changelog: trailers, some not) and a fake live config, then
 drives check/apply through the engine and asserts the merge classes behave.
@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-spec = importlib.util.spec_from_file_location("ricelin_update", HERE / "ricelin-update.py")
+spec = importlib.util.spec_from_file_location("reddot_update", HERE / "reddot-update.py")
 ru = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ru)
 
@@ -36,7 +36,7 @@ def write(path, text):
 def main():
     tmp = Path(tempfile.mkdtemp())
     origin = tmp / "origin"
-    data = tmp / "data" / "ricelin-update"
+    data = tmp / "data" / "reddot-update"
     state = tmp / "state"
     config = tmp / "config"
 
@@ -58,7 +58,7 @@ def main():
     write(origin / "configs/hypr/scripts/test_tool.py", "harness\n")
     write(origin / "configs/kde/kdeglobals", "[General]\n")
     write(origin / "configs/sddm/themes/torii/Main.qml", "greeter\n")
-    write(origin / "configs/grub/10_ricelin", "entry\n")
+    write(origin / "configs/grub/10_reddot", "entry\n")
     write(origin / "configs/brave-theme/manifest.json", "{}\n")
     git(origin, "add", "-A")
     git(origin, "commit", "-q", "-m", "init")

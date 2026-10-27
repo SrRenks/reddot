@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# ricelin-bench.sh — one snapshot of the shell stack's PSS and idle CPU.
+# reddot-bench.sh — one snapshot of the shell stack's PSS and idle CPU.
 #
-#   ./ricelin-bench.sh        # 5 s sample
-#   ./ricelin-bench.sh 15     # longer sample
+#   ./reddot-bench.sh        # 5 s sample
+#   ./reddot-bench.sh 15     # longer sample
 #
 # Run it on a fresh login, then again after opening calendar, wallpaper and the
 # POWER surface, to see what the lazy surfaces actually cost. PSS comes from
@@ -40,7 +40,7 @@ cmdline() {
 pids=$(for n in $names; do pgrep -x "$n" 2>/dev/null || true; done | sort -u)
 
 if [ -z "$pids" ]; then
-    echo "no Ricelin processes found — run this inside the Hyprland session" >&2
+    echo "no reddot processes found — run this inside the Hyprland session" >&2
 fi
 
 # First sample.
@@ -55,7 +55,7 @@ done
 
 sleep "$interval"
 
-printf '\n  RICELIN BENCH  %s  (%ss, %s Hz)\n\n' "$(date '+%Y-%m-%d %H:%M')" "$interval" "$hz"
+printf '\n  REDDOT BENCH  %s  (%ss, %s Hz)\n\n' "$(date '+%Y-%m-%d %H:%M')" "$interval" "$hz"
 printf '  %-34s %7s %9s %7s\n' "PROCESS" "PID" "PSS MB" "CPU %"
 printf '  %s\n' "------------------------------------------------------------------"
 

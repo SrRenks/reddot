@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Distro detection and package-name resolution for the Ricelin installer. This is
+Distro detection and package-name resolution for the reddot installer. This is
 the contract the rest of the installer builds on: it turns a manifest entry plus
 the detected distro family into a concrete action, either install a native
 package, run a fallback handler, or skip because another package already
@@ -248,7 +248,7 @@ def _selftest():
 def _check_token_mirrors():
     """
     The family tokens are hand-mirrored into install.sh (shell can't import this
-    module) and ricelin-update.py (ships standalone on user boxes). Nothing at
+    module) and reddot-update.py (ships standalone on user boxes). Nothing at
     runtime can enforce the copies, so the selftest does: parse both files and
     fail loud the moment one drifts.
     """
@@ -266,8 +266,8 @@ def _check_token_mirrors():
         assert set(m.group(1).split()) == set(_FAMILY_TOKENS[fam]), \
             f"install.sh {var} drifted from _FAMILY_TOKENS[{fam!r}]"
 
-    engine_path = os.path.join(root, "configs", "hypr", "scripts", "ricelin-update.py")
-    spec = importlib.util.spec_from_file_location("_ricelin_update", engine_path)
+    engine_path = os.path.join(root, "configs", "hypr", "scripts", "reddot-update.py")
+    spec = importlib.util.spec_from_file_location("_reddot_update", engine_path)
     engine = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(engine)
     for fam in _FAMILY_TOKENS:

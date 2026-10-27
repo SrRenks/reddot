@@ -46,8 +46,8 @@ SettingsSurface {
             applyManual();
         else if (v === "dynamic")
             dynamicProc.running = true;
-        else if (Flags.appTheme)
-            syncApps();
+        else if (v === "static")
+            staticProc.running = true;
     }
 
     property bool appsDirty: false
@@ -75,7 +75,7 @@ SettingsSurface {
 
     Process {
         id: appsProc
-        environment: ({ RICELIN_PALETTE: Flags.paletteMode })
+        environment: ({ REDDOT_PALETTE: Flags.paletteMode })
         command: ["sh", "-c", "python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" --apps \"$1\"",
             "sh", Flags.appTheme ? "on" : "off"]
         onExited: {
@@ -87,8 +87,15 @@ SettingsSurface {
     }
 
     Process {
+        id: staticProc
+        environment: ({ REDDOT_PALETTE: "static" })
+        command: ["sh", "-c",
+            "python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" --static && hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com.mitchellh.ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
+    }
+
+    Process {
         id: paletteProc
-        environment: ({ RICELIN_PALETTE: Flags.paletteMode })
+        environment: ({ REDDOT_PALETTE: Flags.paletteMode })
         command: ["sh", "-c",
             "python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" --hue \"$1\" \"$2\" \"$3\" && hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true",
             "sh", root.hueArg, root.modeArg, root.satArg]
@@ -96,9 +103,9 @@ SettingsSurface {
 
     Process {
         id: dynamicProc
-        environment: ({ RICELIN_PALETTE: Flags.paletteMode })
+        environment: ({ REDDOT_PALETTE: Flags.paletteMode })
         command: ["sh", "-c",
-            "f=\"${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper\"; pic=$(cat \"$f\" 2>/dev/null); case \"$pic\" in *.[Mm][Pp]4|*.[Ww][Ee][Bb][Mm]|*.[Mm][Kk][Vv]|*.[Mm][Oo][Vv]) pic=\"${XDG_STATE_HOME:-$HOME/.local/state}/ricelin-wallpaper-still.png\";; esac; [ -f \"$pic\" ] && python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" \"$pic\" >/dev/null 2>&1; hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
+            "f=\"${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper\"; pic=$(cat \"$f\" 2>/dev/null); case \"$pic\" in *.[Mm][Pp]4|*.[Ww][Ee][Bb][Mm]|*.[Mm][Kk][Vv]|*.[Mm][Oo][Vv]) pic=\"${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-still.png\";; esac; [ -f \"$pic\" ] && python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" \"$pic\" >/dev/null 2>&1; hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
     }
 
     Connections {

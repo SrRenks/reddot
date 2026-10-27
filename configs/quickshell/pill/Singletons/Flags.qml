@@ -5,7 +5,7 @@ import Quickshell.Io
 
 /**
  * Shared session flags persisted to a small JSON file and watched for external
- * change, so every Ricelin daemon (pill, lock) reads and writes the same
+ * change, so every reddot daemon (pill, lock) reads and writes the same
  * Do-Not-Disturb and Keep-Awake state live without a second notification server
  * or idle inhibitor. Toggling in one surface updates the others on the next file
  * event, and the state survives a daemon restart.
@@ -59,7 +59,7 @@ Singleton {
 
     FileView {
         id: file
-        path: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/ricelin/flags.json"
+        path: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/reddot/flags.json"
         blockLoading: true
         watchChanges: true
         printErrors: false
@@ -81,7 +81,7 @@ Singleton {
             property string paletteMode: "static"
             /** GTK apps follow the pill palette. Off by default so an update never restyles apps unasked; the installer turns it on for fresh boxes. */
             property bool appTheme: false
-            /** Explicit wallpaper folder override. Empty means autodetect: the dir wallpaper.sh last resolved (ricelin-wallpaper-dir state file), then ~/Ricelin/wallpapers. Lives in user state so an in-app update never clobbers a custom folder. */
+            /** Explicit wallpaper folder override. Empty means autodetect: the dir wallpaper.sh last resolved (reddot-wallpaper-dir state file), then ~/reddot/wallpapers. Lives in user state so an in-app update never clobbers a custom folder. */
             property string wallpaperDir: ""
             /** Super+B random target: "all" repaints every monitor, "cursor" only the one under the pointer. */
             property string randomScope: "all"

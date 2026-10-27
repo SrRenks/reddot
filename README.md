@@ -4,7 +4,7 @@
 
 **A personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), the hand-written Quickshell pill for Hyprland.**
 
-Fork point: `df7fd5f`. Everything upstream credits still applies.
+Fork point: `df7fd5f`. Upstream Ricelin is © 2026 Gakuseei, MIT; everything upstream credits still applies.
 
 ![reddot desktop](assets/hero.png)
 
@@ -22,8 +22,8 @@ kept close to the original.
 - **Power surface** — charge window, profile and Pause/Resume, with multi-battery
   and power-profiles-daemon sysfs fallbacks (`Super+Shift+B`).
 - **Battery history** — 24 h discharge bars and 1 h/24 h averages from UPower's
-  own `GetHistory`; `ricelin-power-report` prints the same plus recent packages.
-- **AC/BAT policy** — `/etc/tlp.d/99-ricelin-acbat.conf`: performance on AC,
+  own `GetHistory`; `reddot-power-report` prints the same plus recent packages.
+- **AC/BAT policy** — `/etc/tlp.d/99-reddot-acbat.conf`: performance on AC,
   balanced on battery, low-power for the manual saver profile.
 - **Power presets** — named TLP profile + charge snapshots in **Settings →
   Presets**; Desktop and Laptop ship as defaults.
@@ -39,13 +39,13 @@ kept close to the original.
   hardware, so other machines are unchanged.
 
 The System sensor snapshot is a small Rust binary built by
-`tools/install-extras.sh` from `tools/ricelin-sensors.rs`; it has no runtime
+`tools/install-extras.sh` from `tools/reddot-sensors.rs`; it has no runtime
 crate dependency and runs only while System is open. If `rustc` is absent, the
 sensor block is omitted instead of falling back to a Python process.
 
 Install runs the upstream Python installer and then `tools/install-extras.sh`
 for the root helper, polkit rule, TLP policy and user tools. On a ThinkPad it
-also installs the optional `ricelin-thinkpad` helper; the shared polkit rule
+also installs the optional `reddot-thinkpad` helper; the shared polkit rule
 covers both helpers on every machine.
 
 ## Install (this fork)
@@ -72,7 +72,7 @@ The pill becomes media and now playing, a calendar, the wallpaper picker, clipbo
 - Font: JetBrains Mono Nerd
 - Colors: matugen, palette pulled from the wallpaper
 
-matugen pulls a palette from each wallpaper and recolors the pill, terminal, window borders, fastfetch and GTK apps. The shell itself runs a warm vermilion theme I tuned by hand.
+matugen pulls a palette from each wallpaper and recolors the pill, terminal, window borders, fastfetch and GTK apps. The shell itself runs a black ThinkPad-red theme I tuned by hand.
 
 <div align="center">
 
@@ -117,7 +117,7 @@ curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | b
 --skip-extras skip the TLP/ThinkPad helpers and user tools step
 ```
 
-Ricelin is a Hyprland shell. On Niri, Sway or anything else only rishot (the
+reddot is a Hyprland shell. On Niri, Sway or anything else only rishot (the
 screenshot tool) makes sense; grab it from [rishot](https://github.com/Gakuseei/rishot)'s own installer.
 
 ## Keybinds

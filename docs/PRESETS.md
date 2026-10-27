@@ -19,7 +19,7 @@ Names are user-editable. Create, rename or delete presets from
 - **New preset** opens a form with name, profile and two charge values.
 - Clicking a row opens the same form for editing.
 - **Delete** removes the selected preset; **Cancel** leaves it untouched.
-- The active dot comes from a live `ricelin-tlp status`, not from the last
+- The active dot comes from a live `reddot-tlp status`, not from the last
   button pressed. If the live profile or window differs, no preset is marked
   active.
 
@@ -29,7 +29,7 @@ polkit rule keeps that authentication for five minutes.
 ## Storage
 
 ```text
-~/.local/state/ricelin/presets.json
+~/.local/state/reddot/presets.json
 ```
 
 The file is ordinary JSON and can be edited by hand:
@@ -68,5 +68,5 @@ not poll while closed, and the list is a small Repeater over the JSON array.
 | `configs/quickshell/pill/Singletons/PresetStore.qml` | JSON store and watcher |
 | `configs/quickshell/pill/PresetsSurface.qml` | list, editor and apply |
 | `configs/quickshell/pill/Settings.qml` | Presets category |
-| `tools/ricelin-tlp` | `apply <profile> <start> <stop>` batch verb |
-| `tools/49-ricelin.rules` | polkit rule for TLP and ThinkPad helpers |
+| `tools/reddot-tlp` | `apply <profile> <start> <stop>` batch verb |
+| `tools/49-reddot.rules` | polkit rule for TLP and ThinkPad helpers |

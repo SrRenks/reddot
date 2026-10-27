@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# ricelin-thinkpad — read and adjust the ThinkPad-specific sysfs knobs.
+# reddot-thinkpad — read and adjust the ThinkPad-specific sysfs knobs.
 #
 # Installed only when a ThinkPad is detected. `status` needs no root; the
 # setters need root and run through pkexec/polkit.
@@ -16,14 +16,14 @@
 
 set -eu
 
-SYS="${RICELIN_THINKPAD_SYSFS:-/sys}"
+SYS="${REDDOT_THINKPAD_SYSFS:-/sys}"
 TP="$SYS/devices/platform/thinkpad_acpi"
-PROC="${RICELIN_THINKPAD_PROC:-/proc/acpi/ibm/fan}"
-THINKFAN_CONF="${RICELIN_THINKPAD_THINKFAN:-/etc/thinkfan.yaml}"
-SERIO="${RICELIN_THINKPAD_SERIO:-}"
+PROC="${REDDOT_THINKPAD_PROC:-/proc/acpi/ibm/fan}"
+THINKFAN_CONF="${REDDOT_THINKPAD_THINKFAN:-/etc/thinkfan.yaml}"
+SERIO="${REDDOT_THINKPAD_SERIO:-}"
 LEDS="$SYS/class/leds"
 HWMON="$SYS/class/hwmon"
-TEST="${RICELIN_THINKPAD_TEST:-0}"
+TEST="${REDDOT_THINKPAD_TEST:-0}"
 
 die() { echo "$*" >&2; exit 2; }
 need_root() {
@@ -231,7 +231,7 @@ cmd_curve() {
     done
     IFS=$oldifs
 
-    backup="$THINKFAN_CONF.ricelin.bak"
+    backup="$THINKFAN_CONF.reddot.bak"
     [ -e "$backup" ] || cp -p "$THINKFAN_CONF" "$backup"
     cp "$tmp" "$THINKFAN_CONF"
     chmod 0644 "$THINKFAN_CONF"
@@ -291,7 +291,7 @@ case "${1:-}" in
     led) shift; cmd_led "$@" ;;
     *)
         cat >&2 <<'EOF'
-usage: ricelin-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|fnlock 0|1|curve set <spec>|led <name> <value>}
+usage: reddot-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|fnlock 0|1|curve set <spec>|led <name> <value>}
 EOF
         exit 2
         ;;

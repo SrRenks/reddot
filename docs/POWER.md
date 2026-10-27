@@ -53,14 +53,14 @@ kernel change.
   in QML.
 - The battery card renders **24 hourly bars** of average discharge watts, the
   **24 h average**, the **peak**, and a **1 h average** row.
-- `ricelin-power-report` prints the same numbers plus current state, top CPU,
+- `reddot-power-report` prints the same numbers plus current state, top CPU,
   recent package activity and failed units. It is the thing to run after an
   update when the fan or the battery feels wrong.
 
 ## How to use it when something drains
 
 1. On battery, idle for 5 minutes, then note the 1 h average in the battery
-   surface (or `ricelin-power-report`).
+   surface (or `reddot-power-report`).
 2. Compare with the number you remember, or with the 24 h average from before
    the update. A sustained idle jump above ~2 W is worth investigating; a single
    peak is usually a compile, a video call or a game.
@@ -72,7 +72,7 @@ kernel change.
    sudo powerstat 300 5                              # controlled average
    ```
 
-4. If it started after a package change, `ricelin-power-report` already lists
+4. If it started after a package change, `reddot-power-report` already lists
    the last 12 ALPM actions; check kernel, firmware, GPU driver, PipeWire and
    the desktop shell first.
 5. Battery wear is separate: `upower -i <path>` and `tlp-stat -b` show cycles,
@@ -101,7 +101,7 @@ Split it in two:
   stack. The surface is a thin read-only binding to it, not a fork of another
   project.
 - **The UI: no established Quickshell package does this.** The shell ecosystems
-  (DMS, Noctalia, Caelestia, Ricelin itself) show live battery state; none ships
+  (DMS, Noctalia, Caelestia, reddot itself) show live battery state; none ships
   a history widget. The implementation here is custom but small and isolated to
   one singleton and one card block, so there is little to inherit.
 - **The audit tooling: yes.** PowerTOP, powerstat and turbostat are what distro

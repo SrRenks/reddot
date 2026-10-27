@@ -5,16 +5,16 @@ import Quickshell
 import Quickshell.Io
 
 /**
- * Native sensor snapshot for the System surface. One short Python scan of
- * hwmon, power_supply and the ThinkPad fan interface every five seconds while
- * the surface is open; nothing runs while closed. No Glances process.
+ * Native sensor snapshot for the System surface. One short Rust scan of hwmon,
+ * power_supply and the ThinkPad fan interface every five seconds while the
+ * surface is open; nothing runs while closed. No Glances process.
  */
 Singleton {
     id: root
 
     property bool open: false
     property bool available: false
-    readonly property string reader: Quickshell.env("HOME") + "/.local/bin/ricelin-sensors"
+    readonly property string reader: Quickshell.env("HOME") + "/.local/bin/reddot-sensors"
     property string cpuLabel: "CPU"
     property string gpuLabel: "IGPU"
     property int cpuTemp: -1

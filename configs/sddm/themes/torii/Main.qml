@@ -22,14 +22,14 @@ Item {
     readonly property real userScale: parseFloat(cfg("scale", "1.0")) || 1.0
     readonly property real s: (root.height > 0 ? root.height / 1080 : 1) * userScale
 
-    readonly property color verm: cfg("accent", "#c0442b")
-    readonly property color vermDeep: "#a3371f"
+    readonly property color verm: cfg("accent", "#e60012")
+    readonly property color vermDeep: "#7a0010"
     readonly property color vermGlow: Qt.rgba(192 / 255, 68 / 255, 43 / 255, 0.9)
-    readonly property color cream: "#e6d6cb"
-    readonly property color brightWhite: "#fff6f0"
+    readonly property color cream: "#f2f2f2"
+    readonly property color brightWhite: "#ffffff"
     readonly property color dim: "#aeb3bd"
     readonly property color hairStrong: Qt.rgba(150 / 255, 172 / 255, 212 / 255, 0.32)
-    readonly property color emberBase: "#1D120E"
+    readonly property color emberBase: "#0b0b0b"
 
     property int currentUserIndex: hasSddm ? Math.max(0, userProbe.lastIndex) : 0
     property int currentSessionIndex: hasSddm ? Math.max(0, sessionProbe.lastIndex) : 0
@@ -391,7 +391,7 @@ Item {
                 border.width: 1.5 * root.s
                 border.color: root.verm
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#3a2a22" }
+                    GradientStop { position: 0.0; color: "#2a2a2a" }
                     GradientStop { position: 1.0; color: "#1d120e" }
                 }
 

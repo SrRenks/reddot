@@ -165,12 +165,12 @@ rest.
 
 | Row | Read | Write | Fallback |
 |---|---|---|---|
-| Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `ricelin-thinkpad led kbd 0-2` | hide if absent |
-| Mute LEDs | `platform::micmute`, `platform::mute` | `ricelin-thinkpad led platform::micmute|mute 0|1` | trigger is cleared by the manual write |
-| Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `ricelin-thinkpad led lid|vantage 0|1` | hide if absent |
-| Every LED | every LED in `/sys/class/leds` | `ricelin-thinkpad led <name> 0..max` | firmware or NIC may take it back |
-| TrackPoint | `serio*/sensitivity`, `press_to_select` | `ricelin-thinkpad trackpoint ...` | detect attrs, hide missing |
-| Double-tap | `thinkpad_acpi/doubletap_enable` | `ricelin-thinkpad doubletap 0|1` | hide if absent |
+| Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `reddot-thinkpad led kbd 0-2` | hide if absent |
+| Mute LEDs | `platform::micmute`, `platform::mute` | `reddot-thinkpad led platform::micmute|mute 0|1` | trigger is cleared by the manual write |
+| Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `reddot-thinkpad led lid|vantage 0|1` | hide if absent |
+| Every LED | every LED in `/sys/class/leds` | `reddot-thinkpad led <name> 0..max` | firmware or NIC may take it back |
+| TrackPoint | `serio*/sensitivity`, `press_to_select` | `reddot-thinkpad trackpoint ...` | detect attrs, hide missing |
+| Double-tap | `thinkpad_acpi/doubletap_enable` | `reddot-thinkpad doubletap 0|1` | hide if absent |
 
 Refresh: one `status` read when the surface opens, and one after a write. There
 is no timer, watcher or background poll. The hardware state wins when the
@@ -192,15 +192,15 @@ for LEDs and TrackPoint on some machines, but it cannot write
 and distribution. Polkit covers both cases with one policy and no permanent
 passwordless rule.
 
-The helper is a root-owned helper `ricelin-thinkpad`, invoked with
-`pkexec /usr/local/bin/ricelin-thinkpad ...`. Reads work unprivileged; writes ask
+The helper is a root-owned helper `reddot-thinkpad`, invoked with
+`pkexec /usr/local/bin/reddot-thinkpad ...`. Reads work unprivileged; writes ask
 the session polkit agent, `hyprpolkitagent`, for authentication. There is no
 passwordless sudoers rule for either helper.
 
 `tools/install-extras.sh` installs
-`/etc/polkit-1/rules.d/49-ricelin.rules`. The rule returns
+`/etc/polkit-1/rules.d/49-reddot.rules`. The rule returns
 `AUTH_ADMIN_KEEP` only when the pkexec program is
-`/usr/local/bin/ricelin-thinkpad` or `/usr/local/bin/ricelin-tlp`, so the first
+`/usr/local/bin/reddot-thinkpad` or `/usr/local/bin/reddot-tlp`, so the first
 write asks for the admin password and later writes inside five minutes reuse it.
 Every other pkexec call keeps the default policy. No shell interpolation, allowlisted attributes, ranges
 validated in the helper.
@@ -228,10 +228,10 @@ Battery and power link. Fan telemetry and the curve are in System.
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `FanCurvePanel.qml` lives in System; `Singletons/Sensors.qml` reads the
   native hwmon/power_supply scan while System is open.
-- `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
+- `tools/reddot-thinkpad` implements `status`, `trackpoint`, `doubletap`,
   `curve set` and `led kbd|lid|vantage`. `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
-  thinkfan. `tools/test-ricelin-thinkpad.sh` covers success and refusal.
+  thinkfan. `tools/test-reddot-thinkpad.sh` covers success and refusal.
 - `tools/install-extras.sh` installs the shared polkit rule on every machine and
   the ThinkPad helper only when a ThinkPad is detected. The same rule covers the
   TLP helper, so battery writes use the same prompt.
@@ -276,7 +276,7 @@ each write. Lock LEDs do not change the actual lock state.
 kernel exposes `audio-mute` and `audio-micmute`, but nothing selects them, so
 muting ALSA changed the audio while the LEDs stayed off.
 
-`tools/99-ricelin-leds.rules` selects the triggers at boot:
+`tools/99-reddot-leds.rules` selects the triggers at boot:
 
 ```udev
 ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"

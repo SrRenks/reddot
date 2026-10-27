@@ -55,7 +55,7 @@ def run(tmp):
     else:
         assert (w.GTK3 / "gtk.css").read_text() == "/* mine */\n", "gtk3 css kept without adw-gtk3"
     assert (w.GTK4 / "gtk.css").read_text().startswith(w.MARK), "gtk4 entry written"
-    assert "#e0563b" in (w.GTK4 / "ricelin.css").read_text(), "static accent in gtk4 colors"
+    assert "#e60012" in (w.GTK4 / "reddot.css").read_text(), "static accent in gtk4 colors"
     assert settings["color-scheme"] == "prefer-dark", "static palette is dark"
     print("B enable: ok")
 
@@ -70,10 +70,10 @@ def run(tmp):
     assert not has_adw or settings["gtk-theme"] != before, "gtk3 theme name alternates"
     print("D same tone: ok")
 
-    os.environ["RICELIN_PALETTE"] = "static"
+    os.environ["REDDOT_PALETTE"] = "static"
     w.sync_apps(dict(w.STATIC, primary="#00ff00"))
-    assert "#e0563b" in (w.GTK4 / "ricelin.css").read_text(), "static mode ignores the wallpaper palette"
-    del os.environ["RICELIN_PALETTE"]
+    assert "#e60012" in (w.GTK4 / "reddot.css").read_text(), "static mode ignores the wallpaper palette"
+    del os.environ["REDDOT_PALETTE"]
     w.apply_apps(dict(w.STATIC, surface="#f0ece8", bright="#1a1410"))
     assert settings["color-scheme"] == "prefer-light", "light palette flips the scheme"
     print("E static and light: ok")
@@ -81,10 +81,10 @@ def run(tmp):
     w.disable_apps()
     assert (w.GTK3 / "gtk.css").read_text() == "/* mine */\n", "foreign gtk.css restored"
     assert (w.GTK3 / "bookmarks").read_text() == "file:///tmp\n", "bookmarks untouched"
-    assert not (w.GTK4 / "gtk.css").exists() and not (w.GTK4 / "ricelin.css").exists(), "gtk4 files removed"
+    assert not (w.GTK4 / "gtk.css").exists() and not (w.GTK4 / "reddot.css").exists(), "gtk4 files removed"
     assert settings == {"gtk-theme": "Nordic", "color-scheme": "prefer-dark"}, "own theme restored, default comes back dark"
     assert "filesystems=xdg-config/gtk-4.0;" in w.OVERRIDES.read_text(), "user's flatpak share survives off"
-    assert not any((w.THEMES / n).exists() for n in w.RICELIN_THEMES), "theme dirs removed"
+    assert not any((w.THEMES / n).exists() for n in w.REDDOT_THEMES), "theme dirs removed"
     print("F disable: ok")
 
     settings.update({"gtk-theme": "Adwaita", "color-scheme": "prefer-light"})

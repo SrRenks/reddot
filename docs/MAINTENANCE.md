@@ -12,7 +12,7 @@ broke.
 | `installer/` | upstream Python wizard: packages, deploy, neutralize, backup |
 | `install.sh` | bootstrap: clone/update, run the wizard, then `tools/install-extras.sh` |
 | `tools/` | TLP helper, TLP AC/BAT policy, bench, power report, tests, `check.sh` |
-| `docs/` | power, memory, related shells, credits |
+| `docs/` | power, keybinds, startup, memory, related shells, credits |
 | `assets/` | screenshots and demo images only |
 
 ## What is local to this fork

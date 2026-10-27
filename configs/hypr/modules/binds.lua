@@ -48,21 +48,23 @@ hl.bind(mod .. " + S",         hl.dsp.workspace.toggle_special("stash"))
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/special-toggle.sh stash"))
 
 hl.bind(mod .. " + SHIFT + C",  hl.dsp.exec_cmd("hyprpicker -a"))
+hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/record.sh")) -- Record
+hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("easyeffects --bypass-toggle")) -- EasyEffects bypass
 
 hl.bind(mod .. " + A",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh launcher")) -- Open Apps
+hl.bind(mod .. " + W",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh wallpaper")) -- Wallpaper Picker
+hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh")) -- Wallpaper Flush
 hl.bind(mod .. " + V",          hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh clipboard")) -- Open Clipboard
 
 hl.bind(mod .. " + L",          hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/lock.sh"))
 
-hl.bind(mod .. " + B",          hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh")) -- Wallpaper Flush
 hl.bind(mod .. " + SHIFT + B",  hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh tlp")) -- TLP charge window
 hl.bind(mod .. " + SHIFT + T",  hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh thinkpad")) -- ThinkPad extras
-hl.bind(mod .. " + C",          hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh wallpaper"))
-hl.bind(mod .. " + D",          hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/record.sh"))
 hl.bind(mod .. " + G",          hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh gameMode")) -- Gamemode
 
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/volume.sh"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/volume.sh down"), { locked = true, repeating = true })
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),     { locked = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true })
 hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"), { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { locked = true, repeating = true })
@@ -70,10 +72,13 @@ hl.bind("XF86AudioPlay",        hl.dsp.global("quickshell:mediaToggle"),        
 hl.bind("XF86AudioNext",        hl.dsp.global("quickshell:mediaNext"),                             { locked = true })
 hl.bind("XF86AudioPrev",        hl.dsp.global("quickshell:mediaPrev"),                             { locked = true })
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd("hyprctl switchxkblayout all next")) -- Toggle Keyboard Layout
-hl.bind(mod .. " + F12", hl.dsp.exec_cmd("rishot monitor")) -- Rishot Monitor
-hl.bind(mod .. " + SHIFT + F12", hl.dsp.exec_cmd("rishot")) -- Rishot
 hl.bind(mod .. " + Up",   hl.dsp.focus({ direction = "u" })) -- Focus Up Window
 hl.bind(mod .. " + Down", hl.dsp.focus({ direction = "d" })) -- Focus Below Window
-hl.bind(mod .. " + SHIFT + L", hl.dsp.exec_cmd("systemctl hibernate")) -- Hibernate
-hl.bind(mod .. " + XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
-hl.bind(mod .. " + SHIFT + XF86AudioMute", hl.dsp.exec_cmd("easyeffects --bypass-toggle"))
+hl.bind(mod .. " + SHIFT + Left",  hl.dsp.window.move({ direction = "l" })) -- Move Window Left
+hl.bind(mod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "r" })) -- Move Window Right
+hl.bind(mod .. " + SHIFT + Up",    hl.dsp.window.move({ direction = "u" })) -- Move Window Up
+hl.bind(mod .. " + SHIFT + Down",  hl.dsp.window.move({ direction = "d" })) -- Move Window Down
+
+-- Screenshots: Print is the full/region flow, Shift+Print targets a monitor.
+hl.bind("Print", hl.dsp.exec_cmd("rishot"))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd("rishot monitor"))

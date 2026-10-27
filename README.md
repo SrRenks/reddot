@@ -37,6 +37,8 @@ kept close to the original.
 - **Startup hub** — Settings → Power & system → Startup lists the Hyprland
   autostart stack: KDE Connect is editable, system services are locked. Changes
   apply on the next Hyprland start.
+- **Conventional keymap** — see `docs/KEYBINDS.md`; screenshots, mic mute and
+  window movement are unified and the dangerous hibernate chord is gone.
 - ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and
   writable LEDs. Detection is lazy and the helper is installed only on ThinkPad
   hardware, so other machines are unchanged.

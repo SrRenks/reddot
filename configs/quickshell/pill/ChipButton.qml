@@ -22,6 +22,8 @@ Rectangle {
     border.color: chip.danger
         ? Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.45)
         : ((chip.lit || area.containsMouse) ? Theme.vermDim : Theme.border)
+    Behavior on color { ColorAnimation { duration: Motion.fast } }
+    Behavior on border.color { ColorAnimation { duration: Motion.fast } }
 
     Text {
         id: label

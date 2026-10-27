@@ -3,4 +3,7 @@
 f="${XDG_STATE_HOME:-$HOME/.local/state}/reddot/sound.json"
 sink=$(wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | sed -n 's/^[ *]*node\.name = "\(.*\)"$/\1/p' | head -n 1)
 lim=$(jq -r --arg s "$sink" '((.devices[$s].boost // 100) / 100)' "$f" 2>/dev/null)
-exec wpctl set-volume -l "${lim:-1}" @DEFAULT_AUDIO_SINK@ 5%+
+case "${1:-up}" in
+    down) exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
+    *) exec wpctl set-volume -l "${lim:-1}" @DEFAULT_AUDIO_SINK@ 5%+ ;;
+esac

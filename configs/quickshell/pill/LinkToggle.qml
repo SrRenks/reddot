@@ -18,6 +18,7 @@ Rectangle {
     color: on ? Theme.verm : Theme.tileBg
     border.width: on ? 0 : 1
     border.color: Theme.border
+    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter

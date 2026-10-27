@@ -6,25 +6,25 @@ import "Singletons"
 /**
  * 系 SYSTEM surface: a flat washi card of live machine vitals fed by the Sysmon
  * singleton. The header carries the kanji, label and uptime. Below it sit flame
- * dials for CPU, IGPU and memory load, each a 270deg arc stroked with the mixer's
- * vermLit-to-vermBurn gradient on a thread track and rounded caps, the sweep
- * eased over the value change; the centre shows the value, a unit and a sub line
- * (memory total). A second dial row reads CPU/IGPU temperature and fan RPM from
- * the native sensor scan. Thermal, Power and Fan groups list every remaining
- * sensor, followed by the network/disk/swap/VRAM stripe. A fan-curve
- * group closes the card. On a machine with no IGPU telemetry the IGPU dial and
+ * rectangular horizontal gauges for CPU, IGPU and memory load, with a vermilion
+ * bar and the value at the right; a second row reads CPU/IGPU temperature and fan
+ * RPM. A COMPUTE card exposes governor/EPP/profile/clock/load/pressure and links
+ * to TLP. Every hwmon/thermal/power-supply sensor is listed in grouped cards,
+ * followed by the network/disk/swap/VRAM strip and the fan curve. On a machine
+ * with no IGPU telemetry the IGPU gauge and
  * VRAM cell drop and the remaining dials recentre. System polling lives in the
  * singleton and only runs while this surface is open.
  */
 PillSurface {
     id: root
 
-    mTop: 14
-    mLeft: 16
-    mRight: 16
+    mTop: 15
+    mLeft: 19
+    mRight: 19
     mBottom: 16
 
     implicitHeight: content.implicitHeight
+    signal requestSurface(string name)
 
     readonly property var dialKeys: Sysmon.hasGpu ? ["cpu", "gpu", "mem"] : ["cpu", "mem"]
     readonly property var cellKeys: Sysmon.hasVram ? ["net", "disk", "swap", "vram"] : ["net", "disk", "swap"]
@@ -41,39 +41,46 @@ PillSurface {
         return out;
     }
     readonly property var sensorGroups: {
-        var groups = [
-            { title: "Thermal", items: [] },
-            { title: "Power", items: [] },
-            { title: "Fan", items: [] },
-            { title: "Other", items: [] }
-        ];
+        var order = ["Temperatures", "Clocks", "Power", "Battery", "Power supply",
+                     "USB-C", "Fans", "Voltages", "Currents", "Energy", "Other"];
+        var groups = {};
         if (!Sensors.available)
             return [];
         for (let i = 0; i < Sensors.list.length; i++) {
             const item = Sensors.list[i] || {};
             const label = String(item.label || "").toUpperCase();
             const type = String(item.type || "");
+            // The three dials and the dedicated fan block already own these.
             if (type === "temperature_core"
                     && (label === "CPU" || label === "GPU" || label === "IGPU"))
                 continue;
-            if ((type === "fan_speed" || type === "fan_level") && Sensors.fanRpm >= 0)
+            if (label === "FAN RPM" || label === "FAN LEVEL")
                 continue;
-            let index = 3;
-            if (type === "temperature_core")
-                index = 0;
-            else if (type === "battery" || type === "battery_power" || type === "amd_ppt")
-                index = 1;
-            else if (type === "fan_speed" || type === "fan_level")
-                index = 2;
-            groups[index].items.push(item);
+            var group = item.group || "Other";
+            if (order.indexOf(group) < 0)
+                group = "Other";
+            if (groups[group] === undefined)
+                groups[group] = [];
+            groups[group].push(item);
         }
         var out = [];
-        for (let j = 0; j < groups.length; j++) {
-            if (groups[j].items.length > 0)
-                out.push(groups[j]);
+        for (let j = 0; j < order.length; j++) {
+            if (groups[order[j]] && groups[order[j]].length > 0)
+                out.push({ title: order[j], items: groups[order[j]] });
         }
         return out;
     }
+
+    readonly property var computeItems: [
+        { label: "Governor", value: Sysmon.governor.length > 0 ? Sysmon.governor : "—" },
+        { label: "EPP", value: Sysmon.epp.length > 0 ? Sysmon.epp.replace(/_/g, " ") : "—" },
+        { label: "Profile", value: Sysmon.platformProfile.length > 0 ? Sysmon.platformProfile : "—" },
+        { label: "Clock", value: (Sysmon.freqMhz / 1000).toFixed(2) + " / "
+            + (Sysmon.maxFreqMhz / 1000).toFixed(2) + " GHz · " + Sysmon.cores + "c" },
+        { label: "Load 1/5/15", value: Sysmon.load1.toFixed(2) + "  " + Sysmon.load5.toFixed(2) + "  " + Sysmon.load15.toFixed(2) },
+        { label: "Pressure C·M·I", value: Sysmon.pressureCpu.toFixed(0) + " · "
+            + Sysmon.pressureMem.toFixed(0) + " · " + Sysmon.pressureIo.toFixed(0) + "%" }
+    ]
 
     function sensorValue(item) {
         var v = Number(item.value);
@@ -83,7 +90,10 @@ PillSurface {
     }
 
     function sensorUnit(item) {
-        return item.unit === "C" ? "°C" : (item.unit || "");
+        if (item.unit === "C") return "°C";
+        if (item.unit === "R") return "RPM";
+        if (item.unit === "PWM") return "";
+        return item.unit || "";
     }
 
     function sensorTrend(item) {
@@ -167,433 +177,582 @@ PillSurface {
         property string unit: ""
         property string sub: ""
         property string label: ""
-        property bool shrink: false
 
-        property real display: 0
-        onArcChanged: display = arc
-        Component.onCompleted: display = arc
-        onDisplayChanged: face.requestPaint()
-        Behavior on display { NumberAnimation { duration: Math.round(700 * Motion.mult); easing.type: Easing.OutCubic } }
+        width: 100 * root.s
+        height: 62 * root.s
 
-        width: 110 * root.s
-        height: 110 * root.s
-
-        Canvas {
-            id: face
+        Rectangle {
             anchors.fill: parent
-            antialiasing: true
-
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
-                var cx = width / 2;
-                var cy = height / 2;
-                var lw = 8 * root.s;
-                var r = Math.min(width, height) / 2 - lw / 2 - root.s;
-                var start = 135 * Math.PI / 180;
-                var full = 270 * Math.PI / 180;
-                ctx.lineCap = "round";
-                ctx.lineWidth = lw;
-                ctx.strokeStyle = Qt.rgba(0.94, 0.88, 0.84, 0.13);
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, start, start + full, false);
-                ctx.stroke();
-                var v = Math.max(0, Math.min(100, dial.display));
-                if (v > 0.5) {
-                    var diag = r * 0.7071;
-                    var grad = ctx.createLinearGradient(cx - diag, cy + diag, cx + diag, cy - diag);
-                    grad.addColorStop(0, Theme.vermBurn);
-                    grad.addColorStop(0.35, Theme.vermBurn);
-                    grad.addColorStop(1, Theme.vermLit);
-                    ctx.strokeStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, start, start + full * v / 100, false);
-                    ctx.stroke();
-                }
-            }
+            radius: 10 * root.s
+            color: Theme.tileBg
+            border.width: 1
+            border.color: Theme.frameBorder
         }
 
-        /**
-         * The big value owns the dial's exact centre so it reads as the focal
-         * number whatever its width, with the label and sub line stacked
-         * directly beneath it; centring the value rather than the whole column
-         * means a one- or three-digit value never drifts off the eye line.
-         */
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 9 * root.s
+            anchors.top: parent.top
+            anchors.topMargin: 7 * root.s
+            text: dial.label
+            color: Theme.faint
+            font.family: Theme.font
+            font.pixelSize: 7.5 * root.s
+            font.weight: Font.Bold
+            font.capitalization: Font.AllUppercase
+            font.letterSpacing: 0.8 * root.s
+        }
+
         Row {
-            id: bigRow
-            anchors.centerIn: parent
-            /** Ring gap is at the bottom, so its optical middle sits above the hole centre; lift the value there. */
-            anchors.verticalCenterOffset: -12 * root.s
-            spacing: 1 * root.s
+            anchors.right: parent.right
+            anchors.rightMargin: 9 * root.s
+            anchors.top: parent.top
+            anchors.topMargin: 4 * root.s
+            spacing: 2 * root.s
 
             Text {
-                id: bigText
                 text: dial.big
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: (dial.shrink ? 16 : 20) * root.s
+                font.pixelSize: 18 * root.s
                 font.weight: Font.ExtraBold
                 font.letterSpacing: -0.5 * root.s
                 font.features: { "tnum": 1 }
             }
             Text {
-                anchors.baseline: bigText.baseline
+                anchors.baseline: parent.children[0].baseline
                 visible: dial.unit.length > 0
                 text: dial.unit
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: 9 * root.s
                 font.weight: Font.Bold
             }
         }
 
-        Column {
-            anchors.top: bigRow.bottom
-            anchors.topMargin: 3 * root.s
-            anchors.horizontalCenter: bigRow.horizontalCenter
-            spacing: 3 * root.s
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 9 * root.s
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 9 * root.s
+            text: dial.sub
+            color: Theme.subtle
+            font.family: Theme.font
+            font.pixelSize: 8 * root.s
+            font.weight: Font.Medium
+            elide: Text.ElideRight
+            width: parent.width - 18 * root.s
+        }
 
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: dial.label
-                color: Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 8.5 * root.s
-                font.weight: Font.Bold
-                font.capitalization: Font.AllUppercase
-                font.letterSpacing: 1 * root.s
-            }
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: 9 * root.s
+            anchors.rightMargin: 9 * root.s
+            anchors.bottomMargin: 4 * root.s
+            height: 3 * root.s
+            radius: 1.5 * root.s
+            color: Qt.alpha(Theme.onGlow, 0.10)
 
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: dial.sub
-                color: Theme.subtle
-                font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
-                font.weight: Font.Bold
-                font.features: { "tnum": 1 }
+            Rectangle {
+                width: parent.width * Math.max(0, Math.min(100, dial.arc)) / 100
+                height: parent.height
+                radius: parent.radius
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: Theme.vermBurn }
+                    GradientStop { position: 1; color: Theme.vermLit }
+                }
+                Behavior on width { NumberAnimation { duration: Math.round(700 * Motion.mult); easing.type: Easing.OutCubic } }
             }
         }
     }
 
-    Column {
-        id: content
-        anchors.top: parent.top
-        anchors.left: parent.left
-        width: parent.width
-        spacing: 0
+    component SectionHead: Item {
+        id: section
+
+        property string title: ""
+        property string meta: ""
+
+        width: parent ? parent.width : 0
+        height: 16 * root.s
+
+        Text {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: section.title
+            color: Theme.faint
+            font.family: Theme.font
+            font.pixelSize: 7.5 * root.s
+            font.weight: Font.Bold
+            font.capitalization: Font.AllUppercase
+            font.letterSpacing: 1 * root.s
+        }
+
+        Text {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            visible: section.meta.length > 0
+            text: section.meta
+            color: Theme.dim
+            font.family: Theme.font
+            font.pixelSize: 7.5 * root.s
+            font.weight: Font.Medium
+            font.capitalization: Font.AllUppercase
+            font.letterSpacing: 0.7 * root.s
+        }
+    }
+
+    component SensorGroup: Item {
+        id: group
+
+        property string title: ""
+        property var items: []
+        property bool open: false
+
+        width: parent ? parent.width : 0
+        height: head.height + (open ? flow.implicitHeight + 6 * root.s : 0)
+        clip: true
+        Behavior on height { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeStandard } }
 
         Item {
+            id: head
             width: parent.width
-            height: 24 * root.s
+            height: 20 * root.s
 
-            Row {
+            Text {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 9 * root.s
-
-                Text {
-                    id: kanji
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: Flags.showGlyphs
-                    text: "系"
-                    color: Theme.cream
-                    font.family: Theme.fontJp
-                    font.weight: Font.Medium
-                    font.pixelSize: 16 * root.s
-                }
-                Text {
-                    id: sysLabel
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "SYSTEM"
-                    color: Theme.subtle
-                    font.family: Theme.font
-                    font.pixelSize: 10 * root.s
-                    font.weight: Font.DemiBold
-                    font.capitalization: Font.AllUppercase
-                    font.letterSpacing: 1.8 * root.s
-                }
+                text: group.title
+                color: group.open ? Theme.cream : Theme.subtle
+                font.family: Theme.font
+                font.pixelSize: 8.5 * root.s
+                font.weight: Font.DemiBold
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 0.8 * root.s
             }
 
             Text {
+                anchors.left: parent.left
+                anchors.leftMargin: 92 * root.s
+                anchors.verticalCenter: parent.verticalCenter
+                text: group.items.length + " READ"
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 7 * root.s
+                font.weight: Font.Medium
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 0.6 * root.s
+            }
+
+            GlyphIcon {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                text: Sysmon.uptime
-                color: Theme.dim
-                font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
-                font.weight: Font.Bold
-                font.capitalization: Font.AllUppercase
-                font.letterSpacing: 1.1 * root.s
-                font.features: { "tnum": 1 }
+                width: 11 * root.s
+                height: 11 * root.s
+                name: group.open ? "chevron-up" : "chevron-down"
+                color: headArea.containsMouse ? Theme.cream : Theme.faint
+                stroke: 1.7
+            }
+
+            MouseArea {
+                id: headArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: group.open = !group.open
             }
         }
 
-        Item { width: 1; height: 16 * root.s }
-
-        Item {
+        Flow {
+            id: flow
+            y: head.height
             width: parent.width
-            height: 110 * root.s
+            spacing: 4 * root.s
 
             Repeater {
-                model: root.dialKeys
+                model: group.items
 
-                Dial {
-                    required property int index
+                Item {
+                    id: sensorCell
                     required property var modelData
-                    readonly property string key: modelData
-                    readonly property int val: key === "cpu" ? Sysmon.cpu : key === "gpu" ? Sysmon.gpu : Sysmon.memPct
+                    width: (flow.width - 8 * root.s) / 3
+                    height: 27 * root.s
 
-                    x: root.dialKeys.length > 1
-                        ? index * (parent.width - width) / (root.dialKeys.length - 1)
-                        : (parent.width - width) / 2
+                    Text {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        text: sensorCell.modelData.label
+                        color: Theme.faint
+                        font.family: Theme.font
+                        font.pixelSize: 7 * root.s
+                        font.weight: Font.Medium
+                        font.capitalization: Font.AllUppercase
+                        elide: Text.ElideRight
+                        width: parent.width
+                    }
 
-                    arc: val
-                    big: key === "mem" ? Sysmon.memUsedGb.toFixed(1) : "" + val
-                    unit: key === "mem" ? "" : "%"
-                    shrink: key !== "mem" && val >= 100
-                    label: key === "gpu" ? "IGPU" : key
-                    sub: key === "mem" ? "/ " + Sysmon.memTotalGb.toFixed(0) + " GB" : ""
+                    Row {
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        spacing: 2 * root.s
+
+                        Text {
+                            text: root.sensorValue(sensorCell.modelData)
+                            color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.cream
+                            font.family: Theme.font
+                            font.pixelSize: 10.5 * root.s
+                            font.weight: Font.DemiBold
+                            font.features: { "tnum": 1 }
+                        }
+                        Text {
+                            text: root.sensorUnit(sensorCell.modelData)
+                            color: Theme.subtle
+                            font.family: Theme.font
+                            font.pixelSize: 7.5 * root.s
+                            font.weight: Font.Medium
+                        }
+                        Text {
+                            visible: root.sensorTrend(sensorCell.modelData) !== 0
+                            text: root.sensorTrend(sensorCell.modelData) > 0 ? "▲" : "▼"
+                            color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.subtle
+                            font.family: Theme.font
+                            font.pixelSize: 7 * root.s
+                            font.weight: Font.Bold
+                        }
+                    }
                 }
             }
         }
+    }
 
-        Item { width: 1; height: 12 * root.s }
-
-        Item {
+        Column {
+            id: content
             width: parent.width
-            height: root.sensorKeys.length > 0 ? 110 * root.s : 0
-            visible: root.sensorKeys.length > 0
+            spacing: 0
 
-            Repeater {
-                model: root.sensorKeys
-
-                Dial {
-                    required property int index
-                    required property var modelData
-                    readonly property string key: modelData
-
-                    x: root.sensorKeys.length > 1
-                        ? index * (parent.width - width) / (root.sensorKeys.length - 1)
-                        : (parent.width - width) / 2
-
-                    arc: root.sensorArc(key)
-                    big: root.sensorBig(key)
-                    unit: key === "fan" ? "RPM" : "°C"
-                    shrink: false
-                    label: root.sensorLabel(key)
-                    sub: root.sensorSub(key)
-                }
-            }
-        }
-
-        Item {
-            width: parent.width
-            height: root.sensorGroups.length > 0 ? card.implicitHeight + 12 * root.s : 0
-            visible: root.sensorGroups.length > 0
-            clip: true
-
-            Column {
-                id: card
+            Item {
                 width: parent.width
-                spacing: 9 * root.s
+                height: 24 * root.s
+
+                Row {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 9 * root.s
+
+                    Text {
+                        id: kanji
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: Flags.showGlyphs
+                        text: "系"
+                        color: Theme.cream
+                        font.family: Theme.fontJp
+                        font.weight: Font.Medium
+                        font.pixelSize: 16 * root.s
+                    }
+                    Text {
+                        id: sysLabel
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "SYSTEM"
+                        color: Theme.subtle
+                        font.family: Theme.font
+                        font.pixelSize: 10 * root.s
+                        font.weight: Font.DemiBold
+                        font.capitalization: Font.AllUppercase
+                        font.letterSpacing: 1.8 * root.s
+                    }
+                }
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Sysmon.uptime
+                    color: Theme.dim
+                    font.family: Theme.font
+                    font.pixelSize: 9 * root.s
+                    font.weight: Font.Bold
+                    font.capitalization: Font.AllUppercase
+                    font.letterSpacing: 1 * root.s
+                    font.features: { "tnum": 1 }
+                }
+            }
+
+            Item { width: 1; height: 14 * root.s }
+
+            Row {
+                id: dialRow
+                width: parent.width
+                height: 62 * root.s
+                spacing: 7 * root.s
 
                 Repeater {
-                    model: root.sensorGroups
+                    model: root.dialKeys
 
-                    Column {
-                        id: groupCol
+                    Dial {
+                        required property int index
                         required property var modelData
-                        width: card.width
-                        spacing: 3 * root.s
+                        readonly property string key: modelData
+                        readonly property int val: key === "cpu" ? Sysmon.cpu : key === "gpu" ? Sysmon.gpu : Sysmon.memPct
 
-                        Row {
-                            width: parent.width
-                            spacing: 7 * root.s
+                        width: (dialRow.width - (root.dialKeys.length - 1) * 7 * root.s) / root.dialKeys.length
+                        height: dialRow.height
+
+                        arc: val
+                        big: key === "mem" ? Sysmon.memUsedGb.toFixed(1) : "" + val
+                        unit: key === "mem" ? "GB" : "%"
+                        label: key === "gpu" ? "IGPU" : key
+                        sub: key === "mem" ? "/ " + Sysmon.memTotalGb.toFixed(0) + " GB" : ""
+                    }
+                }
+            }
+
+            Item { width: 1; height: 10 * root.s }
+
+            Row {
+                id: sensorRow
+                width: parent.width
+                height: root.sensorKeys.length > 0 ? 58 * root.s : 0
+                visible: root.sensorKeys.length > 0
+                spacing: 7 * root.s
+
+                Repeater {
+                    model: root.sensorKeys
+
+                    Dial {
+                        required property int index
+                        required property var modelData
+                        readonly property string key: modelData
+
+                        width: (sensorRow.width - (root.sensorKeys.length - 1) * 7 * root.s) / root.sensorKeys.length
+                        height: sensorRow.height
+
+                        arc: root.sensorArc(key)
+                        big: root.sensorBig(key)
+                        unit: key === "fan" ? "RPM" : "°C"
+                        label: root.sensorLabel(key)
+                        sub: root.sensorSub(key)
+                    }
+                }
+            }
+
+            Item { width: 1; height: 16 * root.s }
+
+            SectionHead { title: "Activity" }
+            Item { width: 1; height: 8 * root.s }
+
+            Item {
+                width: parent.width
+                height: 30 * root.s
+
+                Repeater {
+                    model: root.cellKeys
+
+                    Item {
+                        id: cell
+                        required property int index
+                        required property var modelData
+                        readonly property string key: modelData
+
+                        width: parent.width / root.cellKeys.length
+                        height: parent.height
+                        x: index * width
+
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.topMargin: 2 * root.s
+                            anchors.bottomMargin: 2 * root.s
+                            height: parent.height - 4 * root.s
+                            width: 1
+                            visible: cell.index > 0
+                            color: Theme.hairSoft
+                        }
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 4 * root.s
 
                             Text {
-                                text: groupCol.modelData.title
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: cell.key === "net" ? "Net · MB/s"
+                                    : cell.key === "disk" ? "Disk · %"
+                                    : cell.key === "swap" ? "Swap · GB"
+                                    : "VRAM · GB"
                                 color: Theme.faint
                                 font.family: Theme.font
                                 font.pixelSize: 7.5 * root.s
                                 font.weight: Font.Bold
                                 font.capitalization: Font.AllUppercase
-                                font.letterSpacing: 1 * root.s
+                                font.letterSpacing: 0.7 * root.s
                             }
 
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width - 52 * root.s
-                                height: 1
-                                color: Theme.hairSoft
-                            }
-                        }
+                            Row {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: 7 * root.s
+                                visible: cell.key === "net"
 
-                        Flow {
-                            id: cells
-                            width: parent.width
-                            spacing: 5 * root.s
-
-                            Repeater {
-                                model: groupCol.modelData.items
-
-                                Item {
-                                    id: sensorCell
-                                    required property var modelData
-                                    width: (cells.width - 10 * root.s) / 3
-                                    height: 28 * root.s
-
-                                    Text {
-                                        anchors.left: parent.left
-                                        anchors.top: parent.top
-                                        text: sensorCell.modelData.label
-                                        color: Theme.faint
-                                        font.family: Theme.font
-                                        font.pixelSize: 7.5 * root.s
-                                        font.weight: Font.Medium
-                                        font.capitalization: Font.AllUppercase
-                                        elide: Text.ElideRight
-                                        width: parent.width
-                                    }
-
-                                    Row {
-                                        anchors.left: parent.left
-                                        anchors.bottom: parent.bottom
-                                        spacing: 2 * root.s
-
-                                        Text {
-                                            text: root.sensorValue(sensorCell.modelData)
-                                            color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.cream
-                                            font.family: Theme.font
-                                            font.pixelSize: 11 * root.s
-                                            font.weight: Font.DemiBold
-                                            font.features: { "tnum": 1 }
-                                        }
-
-                                        Text {
-                                            text: root.sensorUnit(sensorCell.modelData)
-                                            color: Theme.subtle
-                                            font.family: Theme.font
-                                            font.pixelSize: 8 * root.s
-                                            font.weight: Font.Medium
-                                        }
-
-                                        Text {
-                                            visible: root.sensorTrend(sensorCell.modelData) !== 0
-                                            text: root.sensorTrend(sensorCell.modelData) > 0 ? "▲" : "▼"
-                                            color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.subtle
-                                            font.family: Theme.font
-                                            font.pixelSize: 7.5 * root.s
-                                            font.weight: Font.Bold
-                                        }
-                                    }
+                                Text {
+                                    text: "↓" + Sysmon.netDown.toFixed(1)
+                                    color: Theme.cream
+                                    font.family: Theme.font
+                                    font.pixelSize: 12 * root.s
+                                    font.weight: Font.ExtraBold
+                                    font.features: { "tnum": 1 }
+                                }
+                                Text {
+                                    text: "↑" + Sysmon.netUp.toFixed(1)
+                                    color: Theme.vermLit
+                                    font.family: Theme.font
+                                    font.pixelSize: 12 * root.s
+                                    font.weight: Font.ExtraBold
+                                    font.features: { "tnum": 1 }
                                 }
                             }
-                        }
-                    }
-                }
-            }
-        }
-
-        Item { width: 1; height: 18 * root.s }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.hair
-        }
-
-        Item { width: 1; height: 13 * root.s }
-
-        Item {
-            width: parent.width
-            height: 30 * root.s
-
-            Repeater {
-                model: root.cellKeys
-
-                Item {
-                    id: cell
-                    required property int index
-                    required property var modelData
-                    readonly property string key: modelData
-
-                    width: parent.width / root.cellKeys.length
-                    height: parent.height
-                    x: index * width
-
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.topMargin: 2 * root.s
-                        anchors.bottomMargin: 2 * root.s
-                        height: parent.height - 4 * root.s
-                        width: 1
-                        visible: cell.index > 0
-                        color: Theme.hairSoft
-                    }
-
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 6 * root.s
-
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: cell.key === "net" ? "Net · MB/s"
-                                : cell.key === "disk" ? "Disk · %"
-                                : cell.key === "swap" ? "Swap · GB"
-                                : "VRAM · GB"
-                            color: Theme.faint
-                            font.family: Theme.font
-                            font.pixelSize: 8 * root.s
-                            font.weight: Font.Bold
-                            font.capitalization: Font.AllUppercase
-                            font.letterSpacing: 0.9 * root.s
-                        }
-
-                        Row {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 8 * root.s
-                            visible: cell.key === "net"
 
                             Text {
-                                text: "↓" + Sysmon.netDown.toFixed(1)
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                visible: cell.key !== "net"
+                                text: cell.key === "disk" ? "" + Sysmon.diskPct
+                                    : cell.key === "swap" ? Sysmon.swapUsedGb.toFixed(1)
+                                    : Sysmon.vramUsedGb.toFixed(1) + " / " + Sysmon.vramTotalGb.toFixed(0)
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 13 * root.s
+                                font.pixelSize: 12 * root.s
                                 font.weight: Font.ExtraBold
                                 font.features: { "tnum": 1 }
                             }
-                            Text {
-                                text: "↑" + Sysmon.netUp.toFixed(1)
-                                color: Theme.vermLit
-                                font.family: Theme.font
-                                font.pixelSize: 13 * root.s
-                                font.weight: Font.ExtraBold
-                                font.features: { "tnum": 1 }
-                            }
-                        }
-
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            visible: cell.key !== "net"
-                            text: cell.key === "disk" ? "" + Sysmon.diskPct
-                                : cell.key === "swap" ? Sysmon.swapUsedGb.toFixed(1)
-                                : Sysmon.vramUsedGb.toFixed(1) + " / " + Sysmon.vramTotalGb.toFixed(0)
-                            color: Theme.cream
-                            font.family: Theme.font
-                            font.pixelSize: 13 * root.s
-                            font.weight: Font.ExtraBold
-                            font.features: { "tnum": 1 }
                         }
                     }
                 }
             }
-        }
 
-        FanCurvePanel {
-            s: root.s
-            surface: root
+            Item {
+                width: parent.width
+                height: ThinkPad.present ? 16 * root.s : 0
+            }
+
+            SectionHead { title: "Cooling"; visible: ThinkPad.present }
+            FanCurvePanel {
+                width: parent.width
+                s: root.s
+                surface: root
+            }
+
+            Item { width: 1; height: 18 * root.s }
+
+            SectionHead { title: "Compute" }
+            Item { width: 1; height: 7 * root.s }
+
+            Column {
+                id: computeCol
+                width: parent.width
+                spacing: 4 * root.s
+
+                Flow {
+                    width: parent.width
+                    spacing: 4 * root.s
+
+                    Repeater {
+                        model: root.computeItems
+
+                        Item {
+                            required property var modelData
+                            width: (parent.width - 4 * root.s) / 2
+                            height: 25 * root.s
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                text: parent.modelData.label
+                                color: Theme.faint
+                                font.family: Theme.font
+                                font.pixelSize: 7.5 * root.s
+                                font.weight: Font.Medium
+                                font.capitalization: Font.AllUppercase
+                                elide: Text.ElideRight
+                                width: parent.width
+                            }
+                            Text {
+                                anchors.left: parent.left
+                                anchors.bottom: parent.bottom
+                                text: parent.modelData.value
+                                color: Theme.cream
+                                font.family: Theme.font
+                                font.pixelSize: 10 * root.s
+                                font.weight: Font.DemiBold
+                                font.features: { "tnum": 1 }
+                                elide: Text.ElideRight
+                                width: parent.width
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    width: parent.width
+                    height: 21 * root.s
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Power policy → TLP"
+                        color: tlpArea.containsMouse ? Theme.cream : Theme.vermLit
+                        font.family: Theme.font
+                        font.pixelSize: 9 * root.s
+                        font.weight: Font.DemiBold
+                    }
+
+                    MouseArea {
+                        id: tlpArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.requestSurface("tlp")
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    text: "Read-only here; TLP owns governor and profile."
+                    color: Theme.faint
+                    font.family: Theme.font
+                    font.pixelSize: 8 * root.s
+                    wrapMode: Text.WordWrap
+                }
+            }
+
+            Item { width: 1; height: 18 * root.s }
+
+            SectionHead {
+                title: "Sensors"
+                meta: Sensors.available ? Sensors.list.length + " read" : ""
+                visible: Sensors.available
+            }
+
+            Item {
+                width: parent.width
+                height: Sensors.available ? 7 * root.s : 0
+            }
+
+            Column {
+                width: parent.width
+                spacing: 2 * root.s
+                visible: Sensors.available
+
+                Repeater {
+                    model: root.sensorGroups
+
+                    SensorGroup {
+                        required property var modelData
+                        width: parent.width
+                        title: modelData.title
+                        items: modelData.items
+                        open: false
+                    }
+                }
+            }
+
+            Item { width: 1; height: 18 * root.s }
         }
-    }
 }

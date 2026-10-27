@@ -18,6 +18,12 @@ Item {
     property string title: ""
     property bool showBack: false
     property bool showIcon: true
+    property bool forceGlyph: false
+    property string icon: ""
+    property bool iconAccent: false
+    property real iconSize: 18
+    property color glyphColor: Theme.cream
+    property color iconAccentColor: Theme.verm
     property alias titleContent: titleRow.data
 
     width: parent ? parent.width : 0
@@ -29,11 +35,36 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 8 * head.s
 
+        Item {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: head.icon.length > 0
+            width: visible ? head.iconSize * head.s : 0
+            height: head.iconSize * head.s
+
+            GlyphIcon {
+                anchors.fill: parent
+                name: head.icon
+                color: head.glyphColor
+                stroke: 1.9
+            }
+
+            /** Small vermilion TrackPoint/lid accent, readable on the cream mark. */
+            Rectangle {
+                visible: head.iconAccent
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: 2 * head.s
+                width: 6 * head.s
+                height: 6 * head.s
+                radius: width / 2
+                color: head.iconAccentColor
+            }
+        }
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            visible: Flags.showGlyphs && head.glyph.length > 0
+            visible: head.icon.length === 0 && (Flags.showGlyphs || head.forceGlyph)
+                && head.glyph.length > 0
             text: head.glyph
-            color: Theme.cream
+            color: head.glyphColor
             font.family: Theme.fontJp
             font.weight: Font.Medium
             font.pixelSize: 16 * head.s
@@ -53,11 +84,12 @@ Item {
     GlyphIcon {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        visible: head.showIcon
+        /** The shared in-pill strip now owns back; suppress the old header chevron. */
+        visible: head.showIcon && !head.showBack
         width: 16 * head.s
         height: 16 * head.s
         name: head.showBack ? "chevron-left" : "cog"
-        color: Theme.iconDim
+        color: head.showBack ? Theme.vermLit : Theme.iconDim
         stroke: head.showBack ? 2.2 : 1.7
     }
 }

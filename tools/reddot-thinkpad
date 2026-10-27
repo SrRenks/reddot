@@ -130,14 +130,55 @@ cmd_status() {
     done
 
     led_spec=""
+    led_meta=""
     for d in "$LEDS"/*; do
         [ -r "$d/brightness" ] || continue
         name=${d##*/}
         value=$(cat "$d/brightness" 2>/dev/null || true)
         max=$(cat "$d/max_brightness" 2>/dev/null || echo 1)
         [ -n "$value" ] && led_spec="${led_spec}${name}|${value}|${max};"
+
+        # Trigger metadata is optional: a LED without a trigger file still has
+        # brightness. Triggers are space-separated and the current one is [bracketed].
+        if [ -r "$d/trigger" ]; then
+            trigger_spec=$(cat "$d/trigger" 2>/dev/null || true)
+            trigger_now=$(printf '%s\n' "$trigger_spec" | tr ' ' '\n' \
+                | sed -n 's/^\[\(.*\)\]$/\1/p' | head -n 1)
+            trigger_list=$(printf '%s\n' "$trigger_spec" | tr ' ' '\n' \
+                | tr -d '[]' | awk '!seen[$0]++' | paste -sd, -)
+            delay_on=$(read_or "$d/delay_on")
+            delay_off=$(read_or "$d/delay_off")
+            led_meta="${led_meta}${name}|${max}|${value}|${trigger_now}|${trigger_list}|${delay_on}|${delay_off};"
+        fi
     done
     [ -n "$led_spec" ] && echo "LEDS=$led_spec"
+    [ -n "$led_meta" ] && echo "LED_META=$led_meta"
+
+    # Write-only on kernel: reading returns the accepted language list, not the
+    # active code. Expose the list so the UI can still offer the picker.
+    if [ -r "$TP/keyboard_lang" ]; then
+        langs=$(read_or "$TP/keyboard_lang" | trim)
+        [ -n "$langs" ] && echo "KEYBOARD_LANGS=$langs"
+    fi
+    [ -r "$TP/dytc_lapmode" ] && \
+        echo "LAP_MODE=$(read_or "$TP/dytc_lapmode" | trim)"
+    for d in /proc/acpi/button/lid/*/state; do
+        [ -r "$d" ] || continue
+        state=$(read_or "$d" | trim)
+        [ -n "$state" ] && { echo "LID_STATE=$state"; break; }
+    done
+    [ -r "$TP/usb_c_security" ] && \
+        echo "USB_C_SECURITY=$(read_or "$TP/usb_c_security" | trim)"
+
+    # Kernel modules that add useful triggers on demand. They are not loaded by
+    # probe; selecting one in the UI loads it through the root helper.
+    extras=""
+    for m in timer heartbeat oneshot pattern; do
+        if command -v modinfo >/dev/null 2>&1 && modinfo "ledtrig-$m" >/dev/null 2>&1; then
+            extras="${extras}${extras:+,}$m"
+        fi
+    done
+    [ -n "$extras" ] && echo "LED_EXTRA_TRIGGERS=$extras"
 
     serio=$(find_serio || true)
     if [ -n "$serio" ]; then
@@ -249,6 +290,69 @@ cmd_fnlock() {
     printf '%s\n' "$1" > "$TP/fn_lock"
 }
 
+ensure_trigger_module() {
+    case "$1" in
+        timer|heartbeat|oneshot|pattern)
+            command -v modprobe >/dev/null 2>&1 \
+                && modprobe "ledtrig-$1" 2>/dev/null || true
+            ;;
+    esac
+}
+
+cmd_led_trigger() {
+    [ "$#" -eq 2 ] || die "usage: led-trigger <name> <trigger>"
+    name=$1
+    trigger=$2
+    case "$name" in ''|*[!A-Za-z0-9:_-]*) die "invalid LED name" ;; esac
+    case "$trigger" in ''|*[!A-Za-z0-9:_-]*) die "invalid trigger" ;; esac
+
+    dir="$LEDS/$name"
+    trigfile="$dir/trigger"
+    [ -r "$trigfile" ] || die "LED has no trigger: $name"
+    available=$(cat "$trigfile" 2>/dev/null || true)
+    if ! printf '%s\n' "$available" | tr ' ' '\n' | tr -d '[]' | grep -Fxq -- "$trigger"; then
+        ensure_trigger_module "$trigger"
+        available=$(cat "$trigfile" 2>/dev/null || true)
+    fi
+    if ! printf '%s\n' "$available" | tr ' ' '\n' | tr -d '[]' | grep -Fxq -- "$trigger"; then
+        die "trigger not available for $name: $trigger"
+    fi
+    need_root
+    printf '%s\n' "$trigger" > "$trigfile"
+}
+
+cmd_led_delay() {
+    [ "$#" -eq 3 ] || die "usage: led-delay <name> <on_ms> <off_ms>"
+    name=$1
+    on=$2
+    off=$3
+    case "$name" in ''|*[!A-Za-z0-9:_-]*) die "invalid LED name" ;; esac
+    case "$on" in ''|*[!0-9]*) die "delay_on is not a number" ;; esac
+    case "$off" in ''|*[!0-9]*) die "delay_off is not a number" ;; esac
+    [ "$on" -le 10000 ] && [ "$off" -le 10000 ] \
+        || die "delay must be 0..10000 ms"
+    dir="$LEDS/$name"
+    [ -e "$dir/delay_on" ] && [ -e "$dir/delay_off" ] \
+        || die "LED has no timer delay files: $name"
+    need_root
+    printf '%s\n' "$on" > "$dir/delay_on"
+    printf '%s\n' "$off" > "$dir/delay_off"
+}
+
+cmd_keyboard_lang() {
+    [ "$#" -eq 1 ] || die "usage: keyboard-lang <code>"
+    code=$1
+    case "$code" in ''|*[!a-zA-Z-]*) die "invalid keyboard language" ;; esac
+    [ -r "$TP/keyboard_lang" ] || die "keyboard_lang is not exposed on this model"
+    available=$(read_or "$TP/keyboard_lang" | trim)
+    case " $available " in
+        *" $code "*) ;;
+        *) die "keyboard language not available: $code" ;;
+    esac
+    need_root
+    printf '%s\n' "$code" > "$TP/keyboard_lang"
+}
+
 cmd_led() {
     [ "$#" -eq 2 ] || die "usage: led <name|kbd|lid|vantage> <value>"
     name=$1
@@ -289,9 +393,12 @@ case "${1:-}" in
     doubletap) shift; cmd_doubletap "$@" ;;
     fnlock) shift; cmd_fnlock "$@" ;;
     led) shift; cmd_led "$@" ;;
+    led-trigger) shift; cmd_led_trigger "$@" ;;
+    led-delay) shift; cmd_led_delay "$@" ;;
+    keyboard-lang) shift; cmd_keyboard_lang "$@" ;;
     *)
         cat >&2 <<'EOF'
-usage: reddot-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|fnlock 0|1|curve set <spec>|led <name> <value>}
+usage: reddot-thinkpad {status|trackpoint <attr> <value>|doubletap 0|1|fnlock 0|1|curve set <spec>|led <name> <value>|led-trigger <name> <trigger>|led-delay <name> <on_ms> <off_ms>|keyboard-lang <code>}
 EOF
         exit 2
         ;;

@@ -211,8 +211,26 @@ silent fallback to sudo.
 
 ## What ships now
 
-The surface has two collapsible sections, Lighting and Pointing, plus the
-Battery and power link. Fan telemetry and the curve are in System.
+The surface has Lighting, LED engine, Pointing and Machine groups, plus the
+Battery and power link. Fan telemetry and the curve stay in System.
+
+`LED engine` is a generic capability-driven editor: pick any LED from
+`/sys/class/leds`, set brightness, choose any trigger the kernel advertises, and
+edit timer delay-on/off when the `timer` trigger is active. The helper loads
+`ledtrig-timer`, `ledtrig-heartbeat`, `ledtrig-oneshot` or `ledtrig-pattern` on
+demand when one of those triggers is selected. Status advertises those module
+triggers as `LED_EXTRA_TRIGGERS`, so the chips exist before the module is loaded.
+
+The surface keeps a 500 ms live LED snapshot while it is open. That is how a
+physical Caps Lock press updates the row without reopening the panel, and it is
+also what follows Fn keyboard-backlight changes, firmware power/standby states
+and mute-trigger changes. Closing the surface stops the timer; there is no
+resident watcher.
+
+Keyboard language is offered as a picker on models that expose
+`keyboard_lang`. The kernel is write-only there: reading returns the accepted
+codes, not the active code, so no current value is invented. Lap mode, platform
+profile and USB-C security are shown read-only when exposed.
 
 - `configs/quickshell/pill/Singletons/ThinkPad.qml` detects
   `/sys/devices/platform/thinkpad_acpi` with one `test -d` and calls the helper
@@ -229,7 +247,8 @@ Battery and power link. Fan telemetry and the curve are in System.
 - `FanCurvePanel.qml` lives in System; `Singletons/Sensors.qml` reads the
   native hwmon/power_supply scan while System is open, now on a 2 s cadence.
 - `tools/reddot-thinkpad` implements `status`, `trackpoint`, `doubletap`,
-  `curve set` and `led kbd|lid|vantage`. `curve set` backs up
+  `fnlock`, `curve set`, `led`, `led-trigger`, `led-delay` and `keyboard-lang`.
+  `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
   thinkfan. `tools/test-reddot-thinkpad.sh` covers success and refusal.
 - `tools/install-extras.sh` installs the shared polkit rule on every machine and
@@ -251,6 +270,26 @@ that owns those levels.
   hardware detected" state; nothing else changes.
 - No package is added to the base installer. thinkfan remains the fan owner and
   is not required by the QML.
+
+## Why LED brightness reads 0
+
+On this kernel, `thinkpad_acpi` registers `brightness_get` only for the legacy
+LED-570 interface. The new-generation LED class used by the E14 is
+**write-only**: `led_sysfs_set()` sends the ACPI LED command, but the class
+device has no getter, so `/sys/class/leds/.../brightness` keeps reporting 0 even
+after a successful write. A naive toggle therefore reads "off", writes "on", and
+can never send "off" again.
+
+The UI keeps an optimistic `writtenLeds` map for `tpacpi::*` LEDs. A click sends
+the intended value and the row follows that value; a successful write is also
+confirmed by the helper. Input/platform LEDs keep using the live sysfs read
+because those classes do report their real state.
+
+The power-button LED and lid logo are additionally owned by the EC/firmware on
+this model. The UI infers their displayed state from the machine/lid state when
+no explicit write exists, and shows a caption saying the firmware can reclaim
+them. A request to turn them off is still sent; whether the EC honors it is a
+firmware property, not a Quickshell state issue.
 
 ## LED write check
 

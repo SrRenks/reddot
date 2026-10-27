@@ -57,6 +57,9 @@ printf '2\n' > "$tmp/sys/class/leds/tpacpi::kbd_backlight/max_brightness"
 printf '0\n' > "$tmp/sys/class/leds/tpacpi::kbd_backlight/brightness"
 printf '255\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/max_brightness"
 printf '0\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/brightness"
+printf 'none default [none] timer\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/trigger"
+printf '0\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/delay_on"
+printf '0\n' > "$tmp/sys/class/leds/tpacpi::lid_logo_dot/delay_off"
 printf '255\n' > "$tmp/sys/class/leds/tpacpi::thinkvantage/max_brightness"
 printf '0\n' > "$tmp/sys/class/leds/tpacpi::thinkvantage/brightness"
 printf '1\n' > "$tmp/sys/class/leds/platform::micmute/brightness"
@@ -65,6 +68,8 @@ printf '1\n' > "$tmp/sys/class/leds/input3::capslock/max_brightness"
 printf '0\n' > "$tmp/sys/class/leds/enp1s0-0::lan/brightness"
 printf '255\n' > "$tmp/sys/class/leds/enp1s0-0::lan/max_brightness"
 printf 'custom\n' > "$tmp/sys/firmware/acpi/platform_profile"
+printf 'be cz da de en es fr fr-ch\n' > "$tmp/sys/devices/platform/thinkpad_acpi/keyboard_lang"
+printf '0\n' > "$tmp/sys/devices/platform/thinkpad_acpi/dytc_lapmode"
 printf 'status:\t\tenabled\nspeed:\t\t2200\nlevel:\t\t2\n' > "$tmp/proc/fan"
 cat > "$tmp/thinkfan.yaml" <<'YAML'
 sensors:
@@ -110,6 +115,9 @@ contains "$out" '^CURVE=0:0:42;1:39:48;2:45:55;3:52:62;4:59:68;5:65:74;6:72:80;7
 contains "$out" '^LEDS=.*input3::capslock|0|1;' "lists every LED"
 contains "$out" '^DOUBLETAP=1$' "reads double-tap"
 contains "$out" '^FN_LOCK=0$' "reads Fn lock state"
+contains "$out" '^KEYBOARD_LANGS=be cz da de en es fr fr-ch$' "reads keyboard language choices"
+contains "$out" '^LAP_MODE=0$' "reads lap mode"
+contains "$out" '^LED_META=.*tpacpi::lid_logo_dot|255|0|none|none,default,timer|0|0;' "reads LED trigger metadata"
 
 run trackpoint sensitivity 160
 contains "$(cat "$tmp/sys/devices/platform/i8042/serio1/sensitivity")" '^160$' "writes sensitivity"
@@ -136,6 +144,17 @@ contains "$(cat "$tmp/sys/class/leds/input3::capslock/brightness")" '^1$' "write
 run led enp1s0-0::lan 255
 contains "$(cat "$tmp/sys/class/leds/enp1s0-0::lan/brightness")" '^255$' "writes a LAN LED"
 exits 2 "rejects a path LED name" run led ../brightness 1
+
+run led-trigger tpacpi::lid_logo_dot timer
+contains "$(cat "$tmp/sys/class/leds/tpacpi::lid_logo_dot/trigger")" '^timer$' "writes an LED trigger"
+run led-delay tpacpi::lid_logo_dot 500 1250
+contains "$(cat "$tmp/sys/class/leds/tpacpi::lid_logo_dot/delay_on")" '^500$' "writes LED delay_on"
+contains "$(cat "$tmp/sys/class/leds/tpacpi::lid_logo_dot/delay_off")" '^1250$' "writes LED delay_off"
+exits 2 "rejects an unknown trigger" run led-trigger tpacpi::lid_logo_dot bogus
+exits 2 "rejects an oversized delay" run led-delay tpacpi::lid_logo_dot 20000 1
+run keyboard-lang de
+contains "$(cat "$tmp/sys/devices/platform/thinkpad_acpi/keyboard_lang")" '^de$' "writes keyboard language"
+exits 2 "rejects an unknown keyboard language" run keyboard-lang xx
 
 run curve set '0:0:40;1:38:46;2:44:53;3:51:60;4:58:66;5:64:72;6:70:78;7:75:82'
 contains "$(cat "$tmp/thinkfan.yaml")" 'level 0", 0, 40' "writes the fan curve"

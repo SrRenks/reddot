@@ -28,6 +28,13 @@ for test in test-reddot-tlp.sh test-reddot-thinkpad.sh; do
     fi
 done
 
+echo "== surfaces =="
+if command -v node >/dev/null 2>&1; then
+    if node "$here/check-surfaces.mjs"; then ok "surface catalog"; else bad "surface catalog"; fi
+else
+    printf '  skip  node not found\n'
+fi
+
 echo "== qml =="
 lint=$(command -v qmllint 2>/dev/null || true)
 [ -n "$lint" ] || lint=/usr/lib/qt6/bin/qmllint

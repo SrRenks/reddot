@@ -7,6 +7,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import "Singletons"
+import "lib/surfaces.js" as SurfaceCatalog
 
 /**
  * Washi pill top shell. Each monitor carries two layer-shell windows:
@@ -33,6 +34,14 @@ ShellRoot {
     property string peekMon: ""
     /** Monitor whose pill is currently pulled down from the auto-hide strip. */
     property string revealMon: ""
+    /** Keybind-opened monitor waiting for the layer to map before the focus warp. */
+    property string pendingWarpMon: ""
+    /** Suppress the hover-open state after a keyboard toggle closes the pill. */
+    property string forceHiddenMon: ""
+    /** Keyboard close holds the pill during the surface morph, then hides it once. */
+    property string closingMon: ""
+    /** Keep the overlay full-screen until the retract animation has finished. */
+    property string layerHoldMon: ""
 
     function refresh() {
         Hyprland.refreshMonitors();
@@ -45,6 +54,44 @@ ShellRoot {
         Devices.restore();
         void GameMode.active;
         void Sound.eq;
+    }
+
+    /**
+     * The first cursor warp can happen before the layer surface maps, so Hyprland
+     * never sees a pointer enter and keyboard focus stays with the window below.
+     * A delayed second warp generates the enter after mapping, without a timer
+     * loop or any resident process.
+     */
+    Timer {
+        id: warpRetry
+        interval: 240
+        repeat: false
+        onTriggered: {
+            if (root.pendingWarpMon.length > 0)
+                root.warpToPill(root.pendingWarpMon, 2);
+        }
+    }
+
+    Timer {
+        id: keyboardHide
+        interval: Motion.closeRest
+        repeat: false
+        onTriggered: {
+            if (root.closingMon.length > 0)
+                root.forceHiddenMon = root.closingMon;
+            root.closingMon = "";
+            layerRelease.restart();
+        }
+    }
+
+    Timer {
+        id: layerRelease
+        interval: Motion.closeTail
+        repeat: false
+        onTriggered: {
+            if (root.closingMon.length === 0 && root.layerHoldMon.length > 0)
+                root.layerHoldMon = "";
+        }
     }
 
     /**
@@ -128,20 +175,151 @@ ShellRoot {
      * keybind scripts skip their hyprctl+jq round trip and a surface open costs
      * one IPC call instead of three process spawns.
      */
+    /** Resolve an empty keybind monitor even before Hyprland reports focusedMonitor. */
+    function focusedMonitorName() {
+        if (Hyprland.focusedMonitor)
+            return Hyprland.focusedMonitor.name;
+        var mons = Hyprland.monitors.values;
+        for (var i = 0; i < mons.length; i++)
+            if (mons[i] && mons[i].focused)
+                return mons[i].name;
+        var ws = Hyprland.focusedWorkspace;
+        if (ws) {
+            for (var j = 0; j < mons.length; j++)
+                if (mons[j] && mons[j].activeWorkspace && mons[j].activeWorkspace.id === ws.id)
+                    return mons[j].name;
+        }
+        return Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "";
+    }
+
     function toggleSurface(mon, surface) {
+        if (!SurfaceCatalog.isValid(surface))
+            return;
         if (!mon || mon.length === 0)
-            mon = Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : "";
+            mon = root.focusedMonitorName();
         if (root.openMon === mon && root.openSurface === surface) {
-            root.close();
+            root.closeWithAnimation(mon);
             return;
         }
+        root.resetCloseState();
+        root.peekMon = "";
         root.openMon = mon;
         root.openSurface = surface;
+        Flags.lastSurface = surface;
+    }
+
+    /** Home is the expanded pill with no surface. It is a real history state. */
+    function openHome(mon) {
+        if (!mon || mon.length === 0)
+            mon = root.openMon || root.focusedMonitorName();
+        root.resetCloseState();
+        root.layerHoldMon = mon;
+        Flags.lastSurface = "";
+        root.openMon = "";
+        root.openSurface = "";
+        root.peekMon = mon;
+        root.pendingWarpMon = mon;
+        layerRelease.restart();
+        Qt.callLater(() => root.warpToPill(mon));
+        warpRetry.restart();
+    }
+
+    /** Open the remembered surface, or close the pill when one is already open. */
+    function togglePill(mon) {
+        if (!mon || mon.length === 0)
+            mon = root.focusedMonitorName();
+        if (root.openSurface.length > 0) {
+            root.closeWithAnimation(mon);
+            return;
+        }
+        if (root.peekMon === mon) {
+            root.peekMon = "";
+            root.closeWithAnimation(mon);
+            return;
+        }
+        root.resetCloseState();
+        if (SurfaceCatalog.isValid(Flags.lastSurface)) {
+            root.peekMon = "";
+            root.openMon = mon;
+            root.openSurface = Flags.lastSurface;
+            root.pendingWarpMon = mon;
+            Qt.callLater(() => root.warpToPill(mon));
+            warpRetry.restart();
+        } else {
+            root.openHome(mon);
+        }
+    }
+
+    /**
+     * The layer surface takes keyboard focus on open, but Hyprland grants it to a
+     * layer only when the pointer is over that layer on this setup. The keyboard
+     * toggle therefore parks the pointer on the pill's top-centre, which also
+     * preserves hover and keeps Escape/arrow keys working without a mouse trip.
+     */
+    function warpToPill(mon, nudge) {
+        var screens = Quickshell.screens;
+        for (var i = 0; i < screens.length; i++) {
+            var s = screens[i];
+            if (!s || s.name !== mon)
+                continue;
+            var x = Math.round(s.x + s.width / 2) + (nudge || 0);
+            var y = Math.round(s.y + Math.max(8, 24 * (s.height / 1080) * Flags.uiScale));
+            Hyprland.dispatch("hl.dsp.cursor.move({ x = " + x + ", y = " + y + " })");
+            return;
+        }
+        // Fallback for a compositor that has not populated Quickshell.screens yet.
+        var mons = Hyprland.monitors.values;
+        for (var j = 0; j < mons.length; j++) {
+            var m = mons[j];
+            if (!m || m.name !== mon)
+                continue;
+            var fx = Math.round(m.x + m.width / 2) + (nudge || 0);
+            var fy = Math.round(m.y + Math.max(8, 24 * (m.height / 1080) * Flags.uiScale));
+            Hyprland.dispatch("hl.dsp.cursor.move({ x = " + fx + ", y = " + fy + " })");
+            return;
+        }
     }
 
     function close() {
         root.openMon = "";
         root.openSurface = "";
+        root.pendingWarpMon = "";
+    }
+
+    /**
+     * Return the per-monitor chrome to its neutral state. Every open path calls
+     * this instead of stopping the two close timers ad hoc.
+     */
+    function resetCloseState() {
+        keyboardHide.stop();
+        layerRelease.stop();
+        root.closingMon = "";
+        root.layerHoldMon = "";
+        root.forceHiddenMon = "";
+    }
+
+    /**
+     * The single close timeline. `resetHistory` is false for the keybind toggle
+     * (which remembers the panel) and true for Escape/backdrop (which returns to
+     * home). Visual state is cleared by the overlay's closingMon connection.
+     */
+    function closePill(mon, resetHistory) {
+        if (!mon || mon.length === 0)
+            mon = root.focusedMonitorName();
+        layerRelease.stop();
+        root.closingMon = mon;
+        root.layerHoldMon = mon;
+        if (resetHistory)
+            Flags.lastSurface = "";
+        root.close();
+        keyboardHide.restart();
+    }
+
+    function closeWithAnimation(mon) { root.closePill(mon, false); }
+
+    /** A back click lands on the pill home, not on a stale panel. */
+    function back() {
+        root.openHome(root.openMon || root.focusedMonitorName());
     }
 
     function peek(mon) {
@@ -165,7 +343,16 @@ ShellRoot {
         function settings(mon: string): void { root.toggleSurface(mon, "settings"); }
         function presets(mon: string): void { root.toggleSurface(mon, "presets"); }
         function startup(mon: string): void { root.toggleSurface(mon, "startup"); }
-        function blur(): void { WindowBlur.setEnabled(!WindowBlur.enabled); }
+        function toggle(mon: string): void { root.togglePill(mon); }
+        function blur(): void {
+            const on = !WindowBlur.enabled;
+            WindowBlur.setEnabled(on);
+            KeyNotice.show("sparkles", "Window blur", on ? "On" : "Off");
+        }
+        function notice(icon: string, label: string, value: string): void {
+            KeyNotice.show(icon, label, value);
+        }
+        function panelblur(): void { UiBlur.setEnabled(!UiBlur.enabled); }
         function keybinds(mon: string): void { root.toggleSurface(mon, "keybinds"); }
         function recorder(mon: string): void { root.toggleSurface(mon, "recorder"); }
 
@@ -202,6 +389,8 @@ ShellRoot {
 
         /** Opens any surface by name, settings sub-pages included; dev and scripting door. */
         function page(mon: string, name: string): void { root.toggleSurface(mon, name); }
+        function open(mon: string, name: string): void { root.toggleSurface(mon, name); }
+        function close(): void { root.close(); }
 
         /**
          * The two halves of the SUPER+M minimize toggle, driven by the
@@ -270,7 +459,8 @@ ShellRoot {
             readonly property string surface: root.openMon === modelData.name ? root.openSurface : ""
             readonly property bool surfaceOpen: surface.length > 0
             readonly property bool modal: pill.authPending ? false : (surfaceOpen || pill.held || pill.quickChoosing)
-
+            readonly property bool keyboardOpen: surfaceOpen || pill.held || pill.hoverLatch || pill.quickChoosing
+            property bool grabReady: false
             /**
              * True while this monitor's active workspace reports a fullscreen
              * client. The pill retracts off the top edge and the layer is
@@ -296,6 +486,7 @@ ShellRoot {
             readonly property bool autoHidden: autoMode && !monFullscreen && !Flags.gameMode
                 && !modal && !pill.pinned && !pill.osdActive && !pill.toastActive
                 && root.peekMon !== modelData.name && root.revealMon !== modelData.name
+                && root.closingMon !== modelData.name
             readonly property bool hiddenNow: pillHidden || autoHidden
 
             onMonFullscreenChanged: if (monFullscreen) {
@@ -313,11 +504,50 @@ ShellRoot {
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: ((surfaceOpen || pill.quickChoosing) && !pill.authPending) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: (keyboardOpen && !pill.authPending)
+                ? WlrKeyboardFocus.Exclusive
+                : WlrKeyboardFocus.None
             WlrLayershell.namespace: "pill"
 
+            /** Close an explicitly held pill without leaving a pinned/revealed state behind. */
+            function dismissPill() { root.closePill(modelData.name, true); }
+
+            /**
+             * HyprlandFocusGrab retains keyboard focus for the listed surface
+             * even when the mouse leaves it. This is what makes Escape and arrow
+             * keys reliable after a keyboard open; the compositor pointer-enter
+             * heuristic otherwise decides when the layer may take focus.
+             */
+            HyprlandFocusGrab {
+                id: surfaceGrab
+                windows: [overlay]
+                active: overlay.keyboardOpen && !pill.authPending
+                onActiveChanged: {
+                    if (active) {
+                        overlay.grabReady = false;
+                        grabArm.restart();
+                    } else {
+                        grabArm.stop();
+                    }
+                }
+                /** Ignore the grab's initial clear; outside clicks after it settles close. */
+                onCleared: if (overlay.surfaceOpen && overlay.grabReady
+                               && root.forceHiddenMon !== modelData.name
+                               && root.closingMon !== modelData.name)
+                               overlay.dismissPill()
+            }
+
+            /** QtObject children cannot own a Timer; this one belongs to the PanelWindow. */
+            Timer {
+                id: grabArm
+                interval: 280
+                repeat: false
+                onTriggered: overlay.grabReady = true
+            }
+
             anchors { top: true; left: true; right: true }
-            implicitHeight: tall ? modelData.height : bandH
+            implicitHeight: (tall || root.layerHoldMon === modelData.name)
+                ? modelData.height : bandH
 
             mask: modal ? fullRegion
                 : (pillHidden ? hiddenRegion
@@ -343,7 +573,9 @@ ShellRoot {
                 x: Math.max(0, overlay.width / 2 - revealW / 2)
                 y: 0
                 width: revealW
-                height: 10 * overlay.s
+                /* A 10 px target demanded too much precision when the pointer
+                   swept the edge; 18 px makes the retracted strip forgiving. */
+                height: 18 * overlay.s
             }
 
             /** Strip + pill while revealed, so the pointer can travel from one to the other without losing hover. */
@@ -358,22 +590,40 @@ ShellRoot {
             }
 
             HoverHandler {
+                id: autoHover
                 enabled: overlay.autoMode && !overlay.monFullscreen
                 onHoveredChanged: {
                     if (!enabled)
                         return;
                     if (hovered) {
-                        root.revealMon = overlay.modelData.name;
-                        revealHide.stop();
-                    } else if (root.revealMon === overlay.modelData.name) {
-                        revealHide.restart();
+                        forceRelease.stop();
+                        if (root.forceHiddenMon !== overlay.modelData.name) {
+                            root.revealMon = overlay.modelData.name;
+                            revealHide.stop();
+                        }
+                    } else {
+                        if (root.revealMon === overlay.modelData.name)
+                            revealHide.restart();
+                        if (root.forceHiddenMon === overlay.modelData.name)
+                            forceRelease.restart();
                     }
+                }
+            }
+
+            /** Do not let the morph's temporary leave/enter cycle re-show a keyboard-closed pill. */
+            Timer {
+                id: forceRelease
+                interval: Motion.forceRelease
+                repeat: false
+                onTriggered: {
+                    if (root.forceHiddenMon === overlay.modelData.name && !autoHover.hovered)
+                        root.forceHiddenMon = "";
                 }
             }
 
             Timer {
                 id: revealHide
-                interval: 420
+                interval: Motion.revealExit
                 onTriggered: if (root.revealMon === overlay.modelData.name)
                     root.revealMon = "";
             }
@@ -387,20 +637,31 @@ ShellRoot {
                 anchors.fill: parent
                 enabled: overlay.modal
                 acceptedButtons: Qt.AllButtons
-                onPressed: (mouse) => {
+                /**
+                 * Close on the completed click, not on the press. Closing on press
+                 * released the layer before the physical button was released; the
+                 * release then leaked to the application below and produced the
+                 * click-outside stutter. Every outside close now uses the same
+                 * dismissPill timeline as Escape.
+                 */
+                onClicked: (mouse) => {
                     if (pill.quickChoosing) {
                         ScreenRec.quickChoosing = false;
                         ScreenRec.quickScreenChoosing = false;
-                    } else if (overlay.surfaceOpen) {
+                        return;
+                    }
+                    if (overlay.surfaceOpen) {
                         var inside = mouse.x >= pillRegion.x && mouse.x <= pillRegion.x + pillRegion.width
                             && mouse.y >= pillRegion.y && mouse.y <= pillRegion.y + pillRegion.height;
-                        if (!inside)
-                            root.close();
-                        else if (mouse.y <= pillRegion.y + 40 * pill.s)
+                        if (!inside) {
+                            overlay.dismissPill();
+                        } else if (mouse.y <= pillRegion.y + 40 * pill.s) {
                             pill.surfaceBack();
-                    } else {
-                        pill.pinned = false;
-                        root.peekMon = "";
+                        }
+                    } else if (pill.held || pill.hoverLatch
+                               || root.peekMon === modelData.name
+                               || root.revealMon === modelData.name) {
+                        overlay.dismissPill();
                     }
                 }
             }
@@ -408,7 +669,7 @@ ShellRoot {
             FocusScope {
                 id: focusScope
                 anchors.fill: parent
-                focus: overlay.surfaceOpen || pill.quickChoosing
+                focus: overlay.keyboardOpen
 
                 HoverHandler {
                     onHoveredChanged: pill.hovered = hovered
@@ -418,7 +679,14 @@ ShellRoot {
                         ScreenRec.quickChoosing = false;
                         ScreenRec.quickScreenChoosing = false;
                     } else if (!pill.keybindsBack()) {
-                        root.close();
+                        if (overlay.surfaceOpen && SurfaceCatalog.parent(overlay.surface).length > 0)
+                            pill.surfaceBack(false);
+                        else if (overlay.surfaceOpen)
+                            pill.requestBack();
+                        else if (pill.held || pill.hoverLatch || root.peekMon === modelData.name)
+                            overlay.dismissPill();
+                        else
+                            overlay.dismissPill();
                     }
                 }
                 Keys.onUpPressed: (e) => {
@@ -452,6 +720,15 @@ ShellRoot {
                  * is swallowed for everything else so a held key never re-fires.
                  */
                 Keys.onPressed: (e) => {
+                    // The focus grab can keep the compositor from seeing the
+                    // global toggle while the pill is modal. Handle it here too.
+                    if (e.key === Qt.Key_Space
+                        && (e.modifiers & Qt.MetaModifier)
+                        && (e.modifiers & Qt.ShiftModifier)) {
+                        root.togglePill(overlay.modelData.name);
+                        e.accepted = true;
+                        return;
+                    }
                     if (pill.wallpaperOpen && !pill.wallpaperSearching
                         && e.text.length === 1 && e.text > " ") {
                         pill.wallpaperType(e.text);
@@ -573,12 +850,133 @@ ShellRoot {
                     ]
 
                     onRequestSurface: (name) => root.toggleSurface(overlay.modelData.name, name)
-                    onRequestClose: root.close()
+                    onRequestClose: root.closeWithAnimation(overlay.modelData.name)
+                    onRequestBack: root.back()
                 }
                 }
             }
 
-            onSurfaceOpenChanged: if (surfaceOpen) focusScope.forceActiveFocus()
+            /**
+             * One-glyph back control in the pill's left gutter. The gutter exists
+             * only while a surface is open; the panel content keeps its original
+             * width because the target width grows by the same amount.
+             */
+            Rectangle {
+                id: surfaceBackChip
+                visible: overlay.surfaceOpen
+                z: 20
+                x: pillRegion.x + 1 * overlay.s
+                y: pillRegion.y + 2 * overlay.s
+                width: 22 * overlay.s
+                height: 30 * overlay.s
+                radius: 5 * overlay.s
+                opacity: backMouse.containsMouse ? 1 : 0.9
+                color: backMouse.containsMouse
+                    ? Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.16)
+                    : Qt.rgba(Theme.tileBg.r, Theme.tileBg.g, Theme.tileBg.b, 0.9)
+                border.width: 1
+                border.color: backMouse.containsMouse
+                    ? Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.72)
+                    : Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.35)
+                Behavior on color { ColorAnimation { duration: Motion.fast } }
+                Behavior on border.color { ColorAnimation { duration: Motion.fast } }
+
+                GlyphIcon {
+                    anchors.centerIn: parent
+                    width: 17 * overlay.s
+                    height: 17 * overlay.s
+                    name: "chevron-left"
+                    color: Theme.vermLit
+                    stroke: 2.5
+                }
+
+                MouseArea {
+                    id: backMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: pill.surfaceBack()
+                }
+
+                Tooltip {
+                    s: overlay.s
+                    title: "Back"
+                    desc: "Esc"
+                    show: backMouse.containsMouse
+                    placement: "below"
+                }
+            }
+
+            Connections {
+                target: root
+
+                /**
+                 * Clear the interactive state as soon as a close starts, not only
+                 * when the retract finishes. This is the difference between a mouse
+                 * close (pill was pinned) and a keyboard close; both must target the
+                 * same rest state before the hide animation begins.
+                 */
+                function onClosingMonChanged() {
+                    if (root.closingMon === modelData.name) {
+                        pill.suppressHover = true;
+                        pill.hoverLatch = false;
+                        pill.pinned = false;
+                        root.peekMon = "";
+                        root.revealMon = "";
+                    } else if (root.closingMon.length === 0) {
+                        pill.suppressHover = false;
+                    }
+                }
+
+                function onForceHiddenMonChanged() {
+                    if (root.forceHiddenMon === modelData.name) {
+                        pill.suppressHover = true;
+                        pill.hoverLatch = false;
+                        pill.pinned = false;
+                        root.peekMon = "";
+                        root.revealMon = "";
+                    } else if (root.forceHiddenMon.length === 0) {
+                        pill.suppressHover = false;
+                    }
+                }
+            }
+
+            onKeyboardOpenChanged: {
+                if (keyboardOpen) {
+                    focusArmTimer.restart();
+                    focusPulse.restart();
+                } else {
+                    focusArmTimer.stop();
+                    focusPulse.stop();
+                }
+            }
+
+            Timer {
+                id: focusArmTimer
+                interval: 80
+                repeat: false
+                onTriggered: {
+                    if (!overlay.surfaceOpen)
+                        return;
+                    focusScope.forceActiveFocus();
+                }
+            }
+
+            /** Second focus pulse after the morph settles; the first can land before the layer is active. */
+            Timer {
+                id: focusPulse
+                interval: 300
+                repeat: false
+                onTriggered: {
+                    if (!overlay.surfaceOpen)
+                        return;
+                    focusScope.forceActiveFocus();
+                    if (root.pendingWarpMon === modelData.name) {
+                        root.warpToPill(modelData.name, 1);
+                        root.pendingWarpMon = "";
+                    }
+                }
+            }
 
             Connections {
                 target: pill

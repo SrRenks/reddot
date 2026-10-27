@@ -15,6 +15,7 @@ SettingsSurface {
 
     rows: [
         { item: appearanceRow, kind: "nav", surface: "appearance" },
+        { item: barRow, kind: "nav", surface: "bar" },
         { item: lookRow, kind: "nav", surface: "look" },
         { item: displayRow, kind: "nav", surface: "display" },
         { item: inputRow, kind: "nav", surface: "input" },
@@ -60,12 +61,29 @@ SettingsSurface {
         }
 
         SettingsRow {
+            id: barRow
+            surface: root
+            captionOnFocus: true
+            icon: "layers"
+            name: "Bar"
+            sub: "Alignment, order, visible items"
+
+            GlyphIcon {
+                width: 16 * root.s
+                height: 16 * root.s
+                name: "chevron-right"
+                color: root.focusRowItem === barRow ? Theme.cream : Theme.iconDim
+                stroke: 2.2
+            }
+        }
+
+        SettingsRow {
             id: lookRow
             surface: root
             captionOnFocus: true
             icon: "app-window"
             name: "Look"
-            sub: "Gaps, rounding, blur, opacity"
+            sub: "Gaps, blur, pill, notices"
 
             GlyphIcon {
                 width: 16 * root.s

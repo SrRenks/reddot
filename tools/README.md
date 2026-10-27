@@ -3,7 +3,7 @@
 | File | Purpose |
 |---|---|
 | `reddot-tlp` | root helper: status, set, profile, pause/resume, chargeonce/fullcharge |
-| `reddot-thinkpad` | ThinkPad helper: status, TrackPoint, double-tap, fan curve, LEDs |
+| `reddot-thinkpad` | ThinkPad helper: status, TrackPoint, double-tap, fan curve, LEDs, triggers, timers, keyboard language |
 | `tlp-acbat.conf` | `/etc/tlp.d` drop-in: AC performance, battery balanced, saver low-power |
 | `install-extras.sh` | installs the helper, polkit rule, TLP policy and user tools |
 | `49-reddot.rules` | polkit rule: admin auth kept for the TLP and ThinkPad helpers |
@@ -17,4 +17,4 @@
 `install.sh` runs `install-extras.sh` after the Python installer unless
 `--skip-extras` is passed.
 
-| `reddot-sensors.rs` | one-shot native hwmon/power_supply reader for the System surface |
+| `reddot-sensors.rs` | one-shot native hwmon/thermal/power_supply scanner: every readable sensor for the System surface |

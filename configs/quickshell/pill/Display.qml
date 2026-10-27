@@ -522,8 +522,6 @@ SettingsSurface {
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
-        height: root.height + root.mBottom * root.s
-        clip: true
 
         SettingsHeader {
             s: root.s

@@ -10,7 +10,9 @@ import "Singletons"
  * 操 INPUT sub-surface: edits the pointer, keyboard and cursor settings that live
  * in the Hyprland Lua modules, writing each change straight back to its source so
  * the choice survives a restart. Pointer and keyboard fields rewrite input.lua
- * and reload Hyprland; the layout row cycles a curated list of common layouts.
+ * and reload Hyprland. The physical keyboard model (`kb_model`) is separate from
+ * the ordered language/variant list (`kb_layout`/`kb_variant`); the list supports
+ * adding, removing and direct selection, while Super+Space keeps cycling it.
  * Cursor size and theme apply live through `hyprctl setcursor` with no reload,
  * and persist by rewriting the XCURSOR/HYPRCURSOR env lines and the autostart
  * setcursor call. The theme list is scanned from the installed icon themes that
@@ -31,10 +33,16 @@ SettingsSurface {
     rows: [
         { item: sensRow, kind: "scrub", bump: function (d) { sensScrub.bump(d); } },
         { item: accelRow, kind: "seg", vals: ["flat", "adaptive"], get: function () { return root.accelProfile; }, set: function (v) { root.accelProfile = v; root.writeInputField("accel_profile", "\"" + v + "\""); } },
-        { item: layoutRow, kind: "seg", vals: root.kbLayoutVals, get: function () { return root.kbLayout; }, set: function (v) { root.setKbLayout(v); } },
+        { item: modelRow, kind: "seg", vals: root.kbModelVals, get: function () { return root.kbModel; }, set: function (v) { root.setKbModel(v); } },
+        { item: layoutRow, kind: "seg", vals: root.languageNames, get: function () { return root.activeLanguageName; }, set: function (v) { root.selectLanguageName(v); } },
         { item: rateRow, kind: "scrub", bump: function (d) { rateScrub.bump(d); } },
         { item: delayRow, kind: "scrub", bump: function (d) { delayScrub.bump(d); } },
         { item: numlockRow, kind: "toggle", get: function () { return root.numlockOn; }, set: function (v) { root.numlockOn = v; root.writeInputField("numlock_by_default", v ? "true" : "false"); } },
+        { item: naturalRow, kind: "toggle", get: function () { return root.naturalScroll; }, set: function (v) { root.naturalScroll = v; root.writeInputKey("natural_scroll", v ? "true" : "false"); } },
+        { item: tapRow, kind: "toggle", get: function () { return root.tapToClick; }, set: function (v) { root.tapToClick = v; root.writeInputKey("tap_to_click", v ? "true" : "false"); } },
+        { item: typingRow, kind: "toggle", get: function () { return root.disableWhileTyping; }, set: function (v) { root.disableWhileTyping = v; root.writeInputKey("disable_while_typing", v ? "true" : "false"); } },
+        { item: clickfingerRow, kind: "toggle", get: function () { return root.clickfinger; }, set: function (v) { root.clickfinger = v; root.writeInputKey("clickfinger_behavior", v ? "true" : "false"); } },
+        { item: middleRow, kind: "toggle", get: function () { return root.middleButton; }, set: function (v) { root.middleButton = v; root.writeInputKey("middle_button_emulation", v ? "true" : "false"); } },
         { item: sizeRow, kind: "scrub", bump: function (d) { sizeScrub.bump(d); } },
         { item: themeRow, kind: "toggle", get: function () { return root.themeOpen; }, set: function (v) { root.themeOpen = v; } }
     ]
@@ -47,10 +55,18 @@ SettingsSurface {
 
     property real sensitivity: 0
     property string accelProfile: "flat"
-    property string kbLayout: "de"
+    property string kbModel: "auto"
+    property var languages: []
+    property string activeKeymap: ""
+    property int activeIndex: -1
     property int repeatRate: 25
     property int repeatDelay: 600
     property bool numlockOn: false
+    property bool naturalScroll: true
+    property bool tapToClick: true
+    property bool disableWhileTyping: true
+    property bool clickfinger: false
+    property bool middleButton: false
     property int cursorSize: 24
     property string cursorTheme: "Bibata-Modern-Ice"
     property var cursorThemes: []
@@ -68,8 +84,51 @@ SettingsSurface {
         { label: "Adaptive", value: "adaptive" }
     ]
 
-    readonly property var kbLayouts: ["de", "us", "gb", "fr", "es", "it", "tr"]
-    readonly property var kbLayoutVals: kbLayouts.indexOf(kbLayout) >= 0 ? kbLayouts : kbLayouts.concat([kbLayout])
+    /**
+     * Each entry is a language+variant pair, matching Hyprland's parallel
+     * kb_layout/kb_variant lists. The physical keyboard model is separate.
+     */
+    readonly property var kbCatalog: [
+        { layout: "us", variant: "", short: "US", label: "English (US)", keymap: "English (US)" },
+        { layout: "us", variant: "intl", short: "US INTL", label: "English (US, intl.)", keymap: "English (US, intl., with dead keys)" },
+        { layout: "us", variant: "altgr-intl", short: "US ALTGR", label: "English (US, alt. intl.)", keymap: "English (US, alt. intl.)" },
+        { layout: "gb", variant: "", short: "GB", label: "English (UK)", keymap: "English (UK)" },
+        { layout: "de", variant: "", short: "DE", label: "German", keymap: "German" },
+        { layout: "fr", variant: "", short: "FR", label: "French", keymap: "French" },
+        { layout: "es", variant: "", short: "ES", label: "Spanish", keymap: "Spanish" },
+        { layout: "it", variant: "", short: "IT", label: "Italian", keymap: "Italian" },
+        { layout: "pt", variant: "", short: "PT", label: "Portuguese", keymap: "Portuguese" },
+        { layout: "br", variant: "", short: "BR", label: "Portuguese (Brazil)", keymap: "Portuguese (Brazil)" },
+        { layout: "tr", variant: "", short: "TR", label: "Turkish", keymap: "Turkish" },
+        { layout: "ru", variant: "", short: "RU", label: "Russian", keymap: "Russian" },
+        { layout: "jp", variant: "", short: "JP", label: "Japanese", keymap: "Japanese" },
+        { layout: "kr", variant: "", short: "KR", label: "Korean", keymap: "Korean" }
+    ]
+
+    readonly property var kbModelOptions: [
+        { label: "Auto", value: "auto" },
+        { label: "ANSI", value: "pc104" },
+        { label: "ISO", value: "pc105" },
+        { label: "JIS", value: "jp106" }
+    ]
+    readonly property var kbModelVals: ["auto", "pc104", "pc105", "jp106"]
+
+    readonly property var languageNames: {
+        var out = [];
+        for (var i = 0; i < languages.length; i++)
+            out.push(languages[i].label);
+        return out;
+    }
+    readonly property string activeLanguageName: {
+        if (activeIndex >= 0 && activeIndex < languages.length)
+            return languages[activeIndex].label;
+        return activeKeymap.length > 0 ? activeKeymap : "";
+    }
+    readonly property string activeLanguageShort: {
+        if (activeIndex >= 0 && activeIndex < languages.length)
+            return languages[activeIndex].short;
+        return activeKeymap.length > 0 ? activeKeymap : "—";
+    }
 
     onActiveChanged: {
         if (active) {
@@ -77,6 +136,7 @@ SettingsSurface {
             envFile.reload();
             autostartFile.reload();
             seed();
+            kbStatus.running = true;
             themeProc.running = true;
         } else {
             themeOpen = false;
@@ -101,12 +161,20 @@ SettingsSurface {
         var ap = SetInput.getField(inp, "accel_profile");
         root.accelProfile = ap.length > 0 ? ap : "flat";
         var kl = SetInput.getField(inp, "kb_layout");
-        root.kbLayout = kl.length > 0 ? kl : "de";
+        var kv = SetInput.getField(inp, "kb_variant");
+        var km = SetInput.getField(inp, "kb_model");
+        root.kbModel = km.length > 0 ? km : "auto";
+        root.languages = root.pairEntries(kl, kv);
         var rr = parseInt(SetInput.getField(inp, "repeat_rate"), 10);
         root.repeatRate = isNaN(rr) ? 25 : rr;
         var rd = parseInt(SetInput.getField(inp, "repeat_delay"), 10);
         root.repeatDelay = isNaN(rd) ? 600 : rd;
         root.numlockOn = SetInput.getField(inp, "numlock_by_default") === "true";
+        root.naturalScroll = SetInput.getKey(inp, "natural_scroll") === "true";
+        root.tapToClick = SetInput.getKey(inp, "tap_to_click") === "true";
+        root.disableWhileTyping = SetInput.getKey(inp, "disable_while_typing") === "true";
+        root.clickfinger = SetInput.getKey(inp, "clickfinger_behavior") === "true";
+        root.middleButton = SetInput.getKey(inp, "middle_button_emulation") === "true";
 
         var env = root.envText;
         var cs = parseInt(SetInput.getField(env, "XCURSOR_SIZE"), 10);
@@ -135,9 +203,148 @@ SettingsSurface {
         reloadTimer.restart();
     }
 
-    function setKbLayout(v) {
-        root.kbLayout = v;
-        root.writeInputField("kb_layout", "\"" + v + "\"");
+    function writeInputKey(name, literal) {
+        var res = SetInput.setKey(root.inputText, name, literal);
+        if (!res.ok)
+            return;
+        root.inputText = res.text;
+        inputWriter.setText(res.text);
+        reloadTimer.restart();
+    }
+
+    function splitCsv(text) {
+        return String(text || "").split(",").map(function (part) { return part.trim(); });
+    }
+
+    function catalogFor(layout, variant) {
+        for (var i = 0; i < root.kbCatalog.length; i++) {
+            var c = root.kbCatalog[i];
+            if (c.layout === layout && (c.variant || "") === (variant || ""))
+                return c;
+        }
+        return null;
+    }
+
+    function pairEntries(layoutText, variantText) {
+        var layouts = splitCsv(layoutText);
+        var variants = splitCsv(variantText);
+        var out = [];
+        for (var i = 0; i < layouts.length; i++) {
+            if (layouts[i].length === 0)
+                continue;
+            var variant = (i < variants.length ? variants[i] : "") || "";
+            var c = catalogFor(layouts[i], variant);
+            out.push({
+                layout: layouts[i],
+                variant: variant,
+                label: c ? c.label : (layouts[i] + (variant.length > 0 ? " (" + variant + ")" : "")),
+                short: c ? c.short : (layouts[i] + (variant.length > 0 ? "-" + variant : "")).toUpperCase(),
+                keymap: c ? c.keymap : ""
+            });
+        }
+        if (out.length === 0)
+            out.push({ layout: "us", variant: "", label: "English (US)", short: "US", keymap: "English (US)" });
+        return out;
+    }
+
+    function languageIndexOfLabel(label) {
+        for (var i = 0; i < root.languages.length; i++)
+            if (root.languages[i].label === label)
+                return i;
+        return -1;
+    }
+
+    function writeLanguages(next) {
+        if (next.length === 0)
+            return;
+        var layouts = next.map(function (e) { return e.layout; }).join(",");
+        var variants = next.map(function (e) { return e.variant || ""; }).join(",");
+        root.languages = next;
+        root.writeInputField("kb_layout", JSON.stringify(layouts));
+        root.writeInputField("kb_variant", JSON.stringify(variants));
+        kbStatus.running = true;
+    }
+
+    function addLanguage(layout, variant) {
+        var c = root.catalogFor(layout, variant);
+        var next = root.languages.slice();
+        next.push({
+            layout: layout,
+            variant: variant || "",
+            label: c ? c.label : (layout + (variant ? " (" + variant + ")" : "")),
+            short: c ? c.short : (layout + (variant ? "-" + variant : "")).toUpperCase(),
+            keymap: c ? c.keymap : ""
+        });
+        root.writeLanguages(next);
+    }
+
+    function removeLanguage(index) {
+        if (index < 0 || index >= root.languages.length || root.languages.length <= 1)
+            return;
+        var next = root.languages.slice();
+        next.splice(index, 1);
+        root.writeLanguages(next);
+    }
+
+    function selectLanguage(index) {
+        if (index < 0 || index >= root.languages.length)
+            return;
+        root.activeIndex = index;
+        switchLayoutProc.layoutIndex = index;
+        switchLayoutProc.running = true;
+    }
+
+    function selectLanguageName(name) {
+        var i = root.languageIndexOfLabel(name);
+        if (i >= 0)
+            root.selectLanguage(i);
+    }
+
+    function cycleLanguage() {
+        if (root.languages.length === 0)
+            return;
+        var next = (root.activeIndex + 1) % root.languages.length;
+        root.selectLanguage(next);
+    }
+
+    function setKbModel(v) {
+        root.kbModel = v;
+        root.writeInputField("kb_model", JSON.stringify(v === "auto" ? "" : v));
+    }
+
+    function readActiveKeymap(text) {
+        try {
+            var data = JSON.parse(text);
+            var keyboards = data.keyboards || [];
+            var keymap = "";
+            for (var i = 0; i < keyboards.length; i++) {
+                if (keyboards[i].active_keymap && keyboards[i].active_keymap.length > 0) {
+                    keymap = keyboards[i].active_keymap;
+                    break;
+                }
+            }
+            root.activeKeymap = keymap;
+            var idx = -1;
+            for (var j = 0; j < root.languages.length; j++) {
+                if (root.languages[j].keymap === keymap) {
+                    idx = j;
+                    break;
+                }
+            }
+            // Some XKB descriptions differ slightly; fall back to a label prefix.
+            if (idx < 0) {
+                for (var k = 0; k < root.languages.length; k++) {
+                    var label = root.languages[k].label.toLowerCase();
+                    if (keymap.toLowerCase().indexOf(label) === 0) {
+                        idx = k;
+                        break;
+                    }
+                }
+            }
+            root.activeIndex = idx;
+        } catch (e) {
+            root.activeKeymap = "";
+        }
     }
 
     /**
@@ -229,6 +436,35 @@ SettingsSurface {
     }
 
     Process {
+        id: kbStatus
+        command: ["hyprctl", "devices", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: root.readActiveKeymap(this.text)
+        }
+    }
+
+    Process {
+        id: switchLayoutProc
+        property int layoutIndex: 0
+        command: ["hyprctl", "switchxkblayout", "all", String(layoutIndex)]
+        onExited: kbPollTimer.start()
+    }
+
+    Timer {
+        id: kbPollTimer
+        interval: 180
+        repeat: false
+        onTriggered: kbStatus.running = true
+    }
+
+    Timer {
+        interval: 700
+        running: root.active
+        repeat: true
+        onTriggered: if (!kbStatus.running) kbStatus.running = true
+    }
+
+    Process {
         id: setcursorProc
         property string theme: ""
         property int size: 24
@@ -257,8 +493,6 @@ SettingsSurface {
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
-        height: root.height + root.mBottom * root.s
-        clip: true
 
         SettingsHeader {
             s: root.s
@@ -313,30 +547,84 @@ SettingsSurface {
             GroupLabel { text: "Keyboard" }
 
             FieldRow {
+                id: modelRow
+                label: "Keyboard model"
+                caption: "Physical keys: ANSI is pc104, ISO is pc105. Separate from languages."
+                icon: "keyboard"
+
+                SettingsSeg {
+                    s: root.s
+                    options: root.kbModelOptions
+                    value: root.kbModel
+                    onPicked: (v) => root.setKbModel(v)
+                }
+            }
+
+            FieldRow {
                 id: layoutRow
-                label: "Layout"
-                caption: "Click to cycle common layouts"
+                label: "Active language"
+                caption: "Super+Space cycles; click the chip to advance"
                 icon: "language"
 
                 Rectangle {
-                    width: layoutLbl.implicitWidth + 20 * root.s
+                    width: 112 * root.s
                     height: 22 * root.s
                     radius: 9 * root.s
-                    color: "transparent"
+                    color: Qt.alpha(Theme.vermLit, 0.08)
                     border.width: 1
                     border.color: Theme.hairSoft
 
                     Text {
-                        id: layoutLbl
-                        anchors.centerIn: parent
-                        text: root.kbLayout
+                        id: languageLbl
+                        anchors.left: parent.left
+                        anchors.leftMargin: 9 * root.s
+                        anchors.right: cycleArrow.left
+                        anchors.rightMargin: 5 * root.s
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.activeLanguageShort
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 11 * root.s
+                        font.pixelSize: 10 * root.s
                         font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+
+                    GlyphIcon {
+                        id: cycleArrow
+                        anchors.right: parent.right
+                        anchors.rightMargin: 7 * root.s
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 11 * root.s
+                        height: 11 * root.s
+                        name: "refresh"
+                        color: Theme.vermLit
+                        stroke: 1.7
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.cycleLanguage()
                     }
                 }
             }
+
+            KeyboardLanguages {
+                id: languagesEditor
+                width: parent.width
+                s: root.s
+                entries: root.languages
+                catalog: root.kbCatalog
+                activeKeymap: root.activeKeymap
+                activeIndex: root.activeIndex
+                activeLabel: root.activeLanguageName
+                onActivate: (index) => root.selectLanguage(index)
+                onCycle: root.cycleLanguage()
+                onAdd: (layout, variant) => root.addLanguage(layout, variant)
+                onRemove: (index) => root.removeLanguage(index)
+            }
+
+            Item { width: 1; height: 5 * root.s }
 
             FieldRow {
                 id: rateRow
@@ -385,6 +673,83 @@ SettingsSurface {
                     onToggled: {
                         root.numlockOn = !root.numlockOn;
                         root.writeInputField("numlock_by_default", root.numlockOn ? "true" : "false");
+                    }
+                }
+            }
+
+            GroupLabel { text: "Touchpad" }
+
+            FieldRow {
+                id: naturalRow
+                label: "Natural scroll"
+                caption: "Content follows the finger direction"
+                icon: "mouse"
+                LinkToggle {
+                    s: root.s
+                    on: root.naturalScroll
+                    onToggled: {
+                        root.naturalScroll = !root.naturalScroll;
+                        root.writeInputKey("natural_scroll", root.naturalScroll ? "true" : "false");
+                    }
+                }
+            }
+
+            FieldRow {
+                id: tapRow
+                label: "Tap to click"
+                caption: "A short tap is a left click"
+                icon: "mouse"
+                LinkToggle {
+                    s: root.s
+                    on: root.tapToClick
+                    onToggled: {
+                        root.tapToClick = !root.tapToClick;
+                        root.writeInputKey("tap_to_click", root.tapToClick ? "true" : "false");
+                    }
+                }
+            }
+
+            FieldRow {
+                id: typingRow
+                label: "Disable while typing"
+                caption: "Ignore the touchpad while a key is held"
+                icon: "keyboard"
+                LinkToggle {
+                    s: root.s
+                    on: root.disableWhileTyping
+                    onToggled: {
+                        root.disableWhileTyping = !root.disableWhileTyping;
+                        root.writeInputKey("disable_while_typing", root.disableWhileTyping ? "true" : "false");
+                    }
+                }
+            }
+
+            FieldRow {
+                id: clickfingerRow
+                label: "Clickfinger"
+                caption: "Two/three-finger taps map to right/middle"
+                icon: "mouse"
+                LinkToggle {
+                    s: root.s
+                    on: root.clickfinger
+                    onToggled: {
+                        root.clickfinger = !root.clickfinger;
+                        root.writeInputKey("clickfinger_behavior", root.clickfinger ? "true" : "false");
+                    }
+                }
+            }
+
+            FieldRow {
+                id: middleRow
+                label: "Middle-button emulation"
+                caption: "Three-finger tap is the middle button"
+                icon: "mouse"
+                LinkToggle {
+                    s: root.s
+                    on: root.middleButton
+                    onToggled: {
+                        root.middleButton = !root.middleButton;
+                        root.writeInputKey("middle_button_emulation", root.middleButton ? "true" : "false");
                     }
                 }
             }

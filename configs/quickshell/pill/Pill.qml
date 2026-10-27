@@ -9,6 +9,7 @@ import Quickshell.Networking
 import Quickshell.Bluetooth
 import Quickshell.Hyprland
 import "Singletons"
+import "lib/surfaces.js" as SurfaceCatalog
 
 /**
  * The pill body. One element carries every state. Width/height driven by `state`
@@ -27,6 +28,12 @@ Item {
     property string screenName: ""
     property var barWindow
     property string surface: ""
+
+    Component.onCompleted: {
+        // These singletons are otherwise lazy and only load when Look opens.
+        UiBlur.refresh();
+        WindowBlur.refresh();
+    }
 
     /**
      * Toast swipe offset and fade, written by Toast while dragging and applied
@@ -71,6 +78,7 @@ Item {
     readonly property bool recorderOpen: surface === "recorder"
     readonly property bool sysmonOpen: surface === "sysmon"
     readonly property bool appearanceOpen: surface === "appearance"
+    readonly property bool barOpen: surface === "bar"
     readonly property bool updatesOpen: surface === "updates"
     readonly property bool displayOpen: surface === "display"
     readonly property bool inputOpen: surface === "input"
@@ -79,8 +87,7 @@ Item {
     readonly property bool idlelockOpen: surface === "idlelock"
     readonly property bool animationOpen: surface === "animation"
     readonly property bool fontpickerOpen: surface === "fontpicker"
-    readonly property bool settingsLike: settingsOpen || appearanceOpen || updatesOpen
-        || lookOpen || presetsOpen || startupOpen || inputOpen || displayOpen || animationOpen || idlelockOpen || fontpickerOpen
+    readonly property bool settingsLike: SurfaceCatalog.settingsLike(surface)
     readonly property bool hasMedia: Players.list.length > 0
 
     readonly property var netDevices: (typeof Networking !== "undefined" && Networking && Networking.devices) ? Networking.devices.values : []
@@ -93,6 +100,8 @@ Item {
     readonly property bool btOn: btAdapter ? btAdapter.enabled === true : false
     readonly property bool surfaceOpen: surface.length > 0
     property bool hoverLatch: false
+    /** Set after a keyboard close; prevents the still-hovered pointer from re-latching. */
+    property bool suppressHover: false
 
     /**
      * False for the first seconds after the shell maps. Hyprland hands pointer
@@ -189,8 +198,9 @@ Item {
     readonly property real stashW: 392 * s
     readonly property real spaceappsW: 392 * s
     readonly property real recorderW: 384 * s
-    readonly property real sysmonW: 392 * s
+    readonly property real sysmonW: 520 * s
     readonly property real appearanceW: 392 * s
+    readonly property real barW: 392 * s
     readonly property real updatesW: 360 * s
     readonly property real displayW: 392 * s
     readonly property real inputW: 392 * s
@@ -210,6 +220,12 @@ Item {
     readonly property real gameW: barWindow ? barWindow.width : 1920
     readonly property real restCorner: 18 * s
     readonly property real openCorner: 22 * s
+    /** Every surface stops at the vertical midpoint of its monitor. */
+    readonly property real maxSurfaceH: {
+        const sc = barWindow && barWindow.screen ? barWindow.screen : null;
+        const h = sc ? sc.height : 1080;
+        return Math.max(180 * s, h * 0.5 - 24 * s);
+    }
 
     /**
      * Latch-once lazy load. Every surface sleeps in an inactive Loader until its
@@ -235,6 +251,12 @@ Item {
      * derive from this, so adding a surface is one entry here plus its Loader —
      * no parallel ternary chains to keep in lockstep.
      */
+    Binding {
+        target: SurfaceChrome
+        property: "reserveBack"
+        value: pill.surfaceOpen
+    }
+
     readonly property var surfaces: ({
         calendar:  { size: () => { const it = surfaceItem(ldCalendar); return Qt.size((it.implicitWidth > 0 ? it.implicitWidth : 282 * s) + 36 * s, it.implicitHeight + 32 * s); }, ame: () => surfaceItem(ldCalendar) },
         launcher:  { size: () => { surfaceItem(ldLauncher); return Qt.size(launcherW, launcherH); }, ame: () => surfaceItem(ldLauncher) },
@@ -259,6 +281,7 @@ Item {
         recorder:  { size: () => Qt.size(recorderW, surfaceItem(ldRecorder).implicitHeight + 33 * s), ame: () => surfaceItem(ldRecorder) },
         sysmon:    { size: () => Qt.size(sysmonW, surfaceItem(ldSysmon).implicitHeight + 33 * s), ame: () => surfaceItem(ldSysmon) },
         appearance: { size: () => Qt.size(appearanceW, surfaceItem(ldAppearance).implicitHeight + 29 * s), ame: () => surfaceItem(ldAppearance) },
+        bar:       { size: () => Qt.size(barW, surfaceItem(ldBar).implicitHeight + 29 * s), ame: () => surfaceItem(ldBar) },
         updates:    { size: () => Qt.size(updatesW, surfaceItem(ldUpdates).implicitHeight + 29 * s), ame: () => surfaceItem(ldUpdates) },
         display:    { size: () => Qt.size(displayW, surfaceItem(ldDisplay).implicitHeight + 29 * s), ame: () => surfaceItem(ldDisplay) },
         input:      { size: () => Qt.size(inputW, surfaceItem(ldInput).implicitHeight + 29 * s), ame: () => surfaceItem(ldInput) },
@@ -288,6 +311,7 @@ Item {
 
     signal requestSurface(string name)
     signal requestClose()
+    signal requestBack()
 
     /**
      * Forward an arrow-key nudge to the open mixer's targeted fader. Returns true
@@ -324,6 +348,8 @@ Item {
             return ldSettings.item;
         if (pill.appearanceOpen)
             return ldAppearance.item;
+        if (pill.barOpen)
+            return ldBar.item;
         if (pill.lookOpen)
             return ldLook.item;
         if (pill.presetsOpen)
@@ -430,41 +456,32 @@ Item {
      * a keybinds form to its list, and any other surface dismisses to the hover
      * pill. Empty space in the body never triggers this.
      */
-    function surfaceBack() {
-        if (pill.keybindsOpen) {
-            if (ldKeybinds.item && ldKeybinds.item.formOpen)
-                ldKeybinds.item.closeForm();
-            else
-                pill.requestSurface("settings");
+    function surfaceBack(resetLast) {
+        if (pill.keybindsOpen && ldKeybinds.item && ldKeybinds.item.formOpen) {
+            ldKeybinds.item.closeForm();
             return;
         }
-        if (pill.fontpickerOpen) {
-            pill.requestSurface("appearance");
+        if (pill.stashOpen && ldStash.item && ldStash.item.addOpen) {
+            ldStash.item.closeAdd();
             return;
         }
-        if (pill.stashOpen) {
-            if (ldStash.item && ldStash.item.addOpen)
-                ldStash.item.closeAdd();
-            else
-                pill.requestSurface("workspaces");
-            return;
-        }
-        if (pill.spaceappsOpen) {
-            if (ldSpaceapps.item && ldSpaceapps.item.addOpen)
-                ldSpaceapps.item.closeAdd();
-            else
-                pill.requestSurface("workspaces");
+        if (pill.spaceappsOpen && ldSpaceapps.item && ldSpaceapps.item.addOpen) {
+            ldSpaceapps.item.closeAdd();
             return;
         }
         if (pill.workspacesOpen && ldWorkspaces.item && ldWorkspaces.item.formOpen) {
             ldWorkspaces.item.closeForm();
             return;
         }
-        if (pill.appearanceOpen || pill.updatesOpen || pill.displayOpen || pill.inputOpen || pill.lookOpen || pill.presetsOpen || pill.startupOpen || pill.idlelockOpen || pill.animationOpen || pill.workspacesOpen) {
-            pill.requestSurface("settings");
+        var parent = SurfaceCatalog.parent(pill.surface);
+        if (parent.length > 0) {
+            pill.requestSurface(parent);
             return;
         }
-        pill.requestClose();
+        if (resetLast === false)
+            pill.requestClose();
+        else
+            pill.requestBack();
     }
 
     /**
@@ -553,16 +570,29 @@ Item {
      * surface stay. Ported from Ukishima, which holds the tail shorter than the
      * upstream two minutes so a one-off surface's objects leave the heap sooner.
      */
+    /** Loader lookup for the catalog's cold set; the catalog decides what unloads. */
+    readonly property var coldLoaders: ({
+        sound: ldSound, calendar: ldCalendar, launcher: ldLauncher, clipboard: ldClip,
+        wallpaper: ldWall, power: ldPower, wifi: ldWifi, bt: ldBt, battery: ldBattery,
+        tlp: ldTlp, thinkpad: ldThinkpad, settings: ldSettings, keybinds: ldKeybinds,
+        workspaces: ldWorkspaces, stash: ldStash, spaceapps: ldSpaceapps, recorder: ldRecorder,
+        sysmon: ldSysmon, appearance: ldAppearance, bar: ldBar, updates: ldUpdates, display: ldDisplay,
+        input: ldInput, look: ldLook, presets: ldPresets, startup: ldStartup,
+        idlelock: ldIdlelock, animation: ldAnimation, fontpicker: ldFontpicker
+    })
+
     Timer {
         id: unloadIdle
         interval: 30000
         onTriggered: {
-            const cold = [ldSound, ldCalendar, ldLauncher, ldClip, ldWall, ldPower, ldWifi, ldBt, ldBattery,
-                          ldTlp, ldThinkpad, ldSettings, ldKeybinds, ldWorkspaces, ldStash, ldSpaceapps, ldRecorder, ldSysmon,
-                          ldAppearance, ldUpdates, ldDisplay, ldInput, ldLook, ldPresets, ldStartup, ldIdlelock, ldAnimation, ldFontpicker];
-            for (const ld of cold)
-                if (ld.active && !(ld.item && ld.item.busy === true))
+            var ids = SurfaceCatalog.ids();
+            for (var i = 0; i < ids.length; i++) {
+                if (!SurfaceCatalog.cold(ids[i]))
+                    continue;
+                var ld = pill.coldLoaders[ids[i]];
+                if (ld && ld.active && !(ld.item && ld.item.busy === true))
                     ld.active = false;
+            }
         }
     }
 
@@ -602,8 +632,11 @@ Item {
 
     readonly property size targetSize: {
         const sf = surfaces[mode];
-        if (sf)
-            return sf.size();
+        if (sf) {
+            const size = sf.size();
+            return Qt.size(size.width + SurfaceChrome.gutter * s,
+                            Math.min(size.height, maxSurfaceH));
+        }
         const f = modeSize[mode];
         return f ? f() : Qt.size(Math.max(restW, restRow.implicitWidth + 36 * s), restH);
     }
@@ -866,24 +899,19 @@ Item {
 
     onHoveredChanged: {
         if (hovered) {
-            if (bootSettled)
+            if (bootSettled && !suppressHover)
                 hoverLatch = true;
             graceTimer.stop();
         } else {
+            suppressHover = false;
             graceTimer.restart();
         }
     }
 
     Timer {
         id: graceTimer
-        interval: 300
-        onTriggered: {
-            if (pill.morphCloseness < 0.95) {
-                graceTimer.restart();
-                return;
-            }
-            pill.hoverLatch = false;
-        }
+        interval: Motion.hoverExit
+        onTriggered: pill.hoverLatch = false
     }
 
     TapHandler {
@@ -1393,6 +1421,64 @@ Item {
         }
     }
 
+    readonly property var statusOrder: {
+        var base = Flags.barStatusOrder.split(",");
+        return Flags.barStatusReverse ? base.slice().reverse() : base;
+    }
+    readonly property real statusGap: 12 * s
+
+    function statusWidth(id) {
+        switch (id) {
+        case "weather":    return weatherGlance.visible ? weatherGlance.implicitWidth : 0;
+        case "minimized":  return minimized.visible ? minimized.width : 0;
+        case "tray":       return trayItem.visible ? trayItem.width : 0;
+        case "dnd":        return dndIcon.visible ? dndIcon.width : 0;
+        case "network":    return networkGroup.visible ? networkGroup.width : 0;
+        case "inbox":      return inboxIcon.width;
+        case "mixer":      return mixerIcon.width;
+        case "sound":      return soundIcon.width;
+        case "thinkpad":   return thinkpadIcon.width;
+        case "sysmon":     return sysmonIcon.width;
+        case "recorder":   return recorderIcon.width;
+        case "settings":   return settingsIcon.width;
+        case "power":      return powerIcon.width;
+        }
+        return 0;
+    }
+
+    function statusX(id) {
+        var x = 0;
+        var any = false;
+        for (var i = 0; i < statusOrder.length; i++) {
+            var key = statusOrder[i];
+            if (key === id)
+                return x;
+            var w = statusWidth(key);
+            if (w <= 0)
+                continue;
+            if (any)
+                x += statusGap;
+            x += w;
+            any = true;
+        }
+        return x;
+    }
+
+    readonly property real statusTotalWidth: {
+        var x = 0;
+        var any = false;
+        for (var i = 0; i < statusOrder.length; i++) {
+            var w = statusWidth(statusOrder[i]);
+            if (w <= 0)
+                continue;
+            if (any)
+                x += statusGap;
+            x += w;
+            any = true;
+        }
+        return x;
+    }
+
     Item {
         id: hover
         anchors.fill: parent
@@ -1404,13 +1490,18 @@ Item {
 
         Row {
             id: hoverRow
-            anchors.centerIn: parent
+            anchors.verticalCenter: parent.verticalCenter
             spacing: 20 * pill.s
+            layoutDirection: Flags.barOrder === "mirrored" ? Qt.RightToLeft : Qt.LeftToRight
+            x: Flags.barAlign === "left" ? 18 * pill.s
+                : (Flags.barAlign === "right" ? parent.width - width - 18 * pill.s
+                : (parent.width - width) / 2)
 
             Workspaces {
                 id: ws
                 anchors.verticalCenter: parent.verticalCenter
-                width: implicitWidth
+                visible: Flags.barWorkspaces
+                width: visible ? implicitWidth : 0
                 screenName: pill.screenName
                 s: pill.s
                 gap: 8 * pill.s
@@ -1423,14 +1514,16 @@ Item {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 1
+                visible: Flags.barWorkspaces && Flags.barClock
+                width: visible ? 1 : 0
                 height: 22 * pill.s
                 color: Theme.hair
             }
 
             Item {
                 anchors.verticalCenter: parent.verticalCenter
-                width: hoverClock.implicitWidth
+                visible: Flags.barClock
+                width: visible ? hoverClock.implicitWidth : 0
                 height: hoverClock.implicitHeight
 
                 Column {
@@ -1448,6 +1541,7 @@ Item {
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
+                        visible: Flags.barDate
                         text: clock.date
                         color: Theme.dim
                         font.family: Theme.font
@@ -1470,20 +1564,24 @@ Item {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 1
+                visible: Flags.barClock
+                width: visible ? 1 : 0
                 height: 22 * pill.s
                 color: Theme.hair
             }
 
-            Row {
+            Item {
                 id: statusRow
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 12 * pill.s
+                width: pill.statusTotalWidth
+                height: 22 * pill.s
 
                 Row {
                     id: weatherGlance
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: Weather.ready
+                    x: pill.statusX("weather")
+                    visible: Flags.barWeather && Weather.ready
+                    width: visible ? implicitWidth : 0
                     spacing: 5 * pill.s
 
                     HoverHandler {
@@ -1518,23 +1616,20 @@ Item {
                 MinimizedTray {
                     id: minimized
                     anchors.verticalCenter: parent.verticalCenter
+                    x: pill.statusX("minimized")
                     s: pill.s
                     screenName: pill.screenName
                     enabled: hover.live
-                    visible: count > 0
-                }
-
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: minimized.count > 0
-                    width: 1
-                    height: 14 * pill.s
-                    color: Theme.hair
-                    opacity: 0.7
+                    visible: Flags.barMinimized && count > 0
+                    width: visible ? implicitWidth : 0
                 }
 
                 Tray {
+                    id: trayItem
                     anchors.verticalCenter: parent.verticalCenter
+                    x: pill.statusX("tray")
+                    visible: Flags.barTray
+                    width: visible ? implicitWidth : 0
                     s: pill.s
                     barWindow: pill.barWindow
                     enabled: hover.live
@@ -1543,8 +1638,9 @@ Item {
                 Item {
                     id: dndIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: Flags.dnd
-                    width: 16 * pill.s
+                    x: pill.statusX("dnd")
+                    visible: Flags.barDnd && Flags.dnd
+                    width: visible ? 16 * pill.s : 0
                     height: 16 * pill.s
 
                     Shape {
@@ -1597,15 +1693,17 @@ Item {
                 }
 
                 Row {
+                    id: networkGroup
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: pill.wifiDev !== null || pill.btAdapter !== null || Battery.present
+                    x: pill.statusX("network")
+                    visible: Flags.barNetwork && (pill.wifiDev !== null || pill.btAdapter !== null || Battery.present)
                     spacing: 12 * pill.s
 
                     Item {
                         id: wifiIcon
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: pill.wifiDev !== null
-                        width: 15 * pill.s
+                        visible: Flags.barWifi && pill.wifiDev !== null
+                        width: visible ? 15 * pill.s : 0
                         height: 15 * pill.s
 
                         WifiGlyph {
@@ -1639,8 +1737,8 @@ Item {
                     Item {
                         id: btIcon
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: pill.btAdapter !== null
-                        width: 15 * pill.s + (btLowPct.visible ? btLowPct.implicitWidth + 4 * pill.s : 0)
+                        visible: Flags.barBt && pill.btAdapter !== null
+                        width: visible ? 15 * pill.s + (btLowPct.visible ? btLowPct.implicitWidth + 4 * pill.s : 0) : 0
                         height: 15 * pill.s
 
                         GlyphIcon {
@@ -1691,8 +1789,8 @@ Item {
                     Item {
                         id: batteryIcon
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: Battery.present
-                        width: battPct.implicitWidth
+                        visible: Flags.barBattery && Battery.present
+                        width: visible ? battPct.implicitWidth : 0
                         height: 17 * pill.s
 
                         Text {
@@ -1722,7 +1820,9 @@ Item {
                 Item {
                     id: inboxIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("inbox")
+                    visible: Flags.barInbox
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -1759,7 +1859,9 @@ Item {
                 Item {
                     id: mixerIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("mixer")
+                    visible: Flags.barMixer
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -1784,7 +1886,9 @@ Item {
                 Item {
                     id: soundIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("sound")
+                    visible: Flags.barSound
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -1809,14 +1913,15 @@ Item {
                 Item {
                     id: thinkpadIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: ThinkPad.present
+                    x: pill.statusX("thinkpad")
+                    visible: Flags.barThinkpad && ThinkPad.present
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
                         anchors.fill: parent
                         name: "laptop"
-                        color: thinkpadArea.containsMouse ? Theme.cream : Theme.iconDim
+                        color: thinkpadArea.containsMouse ? Theme.cream : "#ffffff"
                         stroke: 1.7
                     }
 
@@ -1846,7 +1951,9 @@ Item {
                 Item {
                     id: sysmonIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("sysmon")
+                    visible: Flags.barSysmon
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -1871,7 +1978,9 @@ Item {
                 Item {
                     id: recorderIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("recorder")
+                    visible: Flags.barRecorder
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -1924,7 +2033,9 @@ Item {
                 Item {
                     id: settingsIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("settings")
+                    visible: Flags.barSettings
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -1949,7 +2060,9 @@ Item {
                 Item {
                     id: powerIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 17 * pill.s
+                    x: pill.statusX("power")
+                    visible: Flags.barPower
+                    width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
                     GlyphIcon {
@@ -2248,6 +2361,7 @@ Item {
             open: pill.sysmonOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
         }
     }
 
@@ -2300,6 +2414,17 @@ Item {
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldBar
+        active: false
+        anchors.fill: parent
+        sourceComponent: Bar {
+            s: pill.s
+            open: pill.barOpen
+            morphCloseness: pill.morphCloseness
         }
     }
 
@@ -2645,6 +2770,31 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: ScreenRec.cancel()
+        }
+    }
+
+    /** Scrollbar appears only when the page overflows the half-screen cap. */
+    Rectangle {
+        id: surfaceScrollTrack
+        readonly property real contentH: SurfaceChrome.scrollViewH + SurfaceChrome.scrollMax
+        visible: pill.surfaceOpen && SurfaceChrome.scrollMax > 0
+        x: pill.width - 4 * pill.s
+        y: 6 * pill.s
+        width: 2 * pill.s
+        radius: 1 * pill.s
+        height: Math.max(20 * pill.s, pill.height - 12 * pill.s)
+        color: Qt.alpha(Theme.onGlow, 0.035)
+        z: 30
+
+        Rectangle {
+            width: parent.width
+            radius: parent.radius
+            height: Math.max(14 * pill.s,
+                parent.height * SurfaceChrome.scrollViewH / Math.max(surfaceScrollTrack.contentH, 1))
+            y: SurfaceChrome.scrollMax > 0
+                ? SurfaceChrome.scrollOffset / SurfaceChrome.scrollMax * (parent.height - height)
+                : 0
+            color: Qt.alpha(Theme.vermLit, 0.26)
         }
     }
 

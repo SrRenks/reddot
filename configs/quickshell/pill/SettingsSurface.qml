@@ -22,7 +22,7 @@ PillSurface {
     mTop: 15
     mLeft: 19
     mRight: 19
-    mBottom: 14
+    mBottom: 16
 
     signal requestSurface(string name)
 

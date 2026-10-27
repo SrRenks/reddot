@@ -9,6 +9,12 @@ Singleton {
     readonly property int morph:    Math.round(420 * mult)
     readonly property int shapeshift: Math.round(820 * mult)
     readonly property int glide:    Math.round(260 * mult)
+    /** Hover/reveal exit and the two explicit stages of a pill close. */
+    readonly property int revealExit:  Math.round(300 * mult)
+    readonly property int hoverExit:   Math.round(180 * mult)
+    readonly property int closeRest:   Math.round(420 * mult)
+    readonly property int closeTail:   Math.round(300 * mult)
+    readonly property int forceRelease: Math.round(320 * mult)
     readonly property int heat:     Math.round(1100 * mult)
     readonly property int easeStandard: Easing.OutCubic
     readonly property int easeMorph:    Easing.BezierSpline

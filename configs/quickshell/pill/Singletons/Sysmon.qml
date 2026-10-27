@@ -59,6 +59,21 @@ Singleton {
 
     property int diskPct: 0
     property string uptime: ""
+    /** Performance/compute read-out; TLP owns the actual governor/profile policy. */
+    property string governor: ""
+    property string epp: ""
+    property string platformProfile: ""
+    property int freqMhz: 0
+    property int maxFreqMhz: 0
+    property real load1: 0
+    property real load5: 0
+    property real load15: 0
+    property int procsRunning: 0
+    property int procsTotal: 0
+    property int cores: 0
+    property real pressureCpu: 0
+    property real pressureMem: 0
+    property real pressureIo: 0
 
     property string tempPath: ""
 
@@ -258,7 +273,19 @@ Singleton {
     Process {
         id: slowProc
         command: ["sh", "-c",
-            "df -P / | awk 'NR==2{gsub(\"%\",\"\",$5);print \"DISK \"$5}'; awk '{print \"UP \"int($1)}' /proc/uptime"]
+            "df -P / | awk 'NR==2{gsub(\"%\",\"\",$5);print \"DISK \"$5}'; awk '{print \"UP \"int($1)}' /proc/uptime; "
+            + "c0=/sys/devices/system/cpu/cpu0/cpufreq; "
+            + "echo \"GOV $(cat $c0/scaling_governor 2>/dev/null)\"; "
+            + "echo \"EPP $(cat $c0/energy_performance_preference 2>/dev/null)\"; "
+            + "echo \"PROFILE $(cat /sys/firmware/acpi/platform_profile 2>/dev/null)\"; "
+            + "freqs=$(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq 2>/dev/null | awk '{s+=$1;n++} END{if(n)printf \"%.0f\",s/n/1000}'); echo \"FREQ ${freqs:-0}\"; "
+            + "max=$(cat $c0/cpuinfo_max_freq 2>/dev/null); echo \"MAXFREQ $((${max:-0}/1000))\"; "
+            + "cores=$(ls -d /sys/devices/system/cpu/cpu[0-9]* 2>/dev/null | wc -l); echo \"CORES $cores\"; "
+            + "read -r l1 l5 l15 procs _ < /proc/loadavg; echo \"LOAD $l1 $l5 $l15\"; "
+            + "echo \"PROCS ${procs%%/*} ${procs##*/}\"; "
+            + "awk '/^some/{print \"PRESSCPU \"substr($2,7)}' /proc/pressure/cpu; "
+            + "awk '/^some/{print \"PRESSMEM \"substr($2,7)}' /proc/pressure/memory; "
+            + "awk '/^some/{print \"PRESSIO \"substr($2,7)}' /proc/pressure/io"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var lines = this.text.split("\n");
@@ -268,6 +295,32 @@ Singleton {
                         root.diskPct = parseInt(p[1], 10) || 0;
                     else if (p[0] === "UP")
                         root.uptime = root.fmtUptime(parseInt(p[1], 10) || 0);
+                    else if (p[0] === "GOV")
+                        root.governor = p.slice(1).join(" ");
+                    else if (p[0] === "EPP")
+                        root.epp = p.slice(1).join(" ");
+                    else if (p[0] === "PROFILE")
+                        root.platformProfile = p.slice(1).join(" ");
+                    else if (p[0] === "FREQ")
+                        root.freqMhz = parseInt(p[1], 10) || 0;
+                    else if (p[0] === "MAXFREQ")
+                        root.maxFreqMhz = parseInt(p[1], 10) || 0;
+                    else if (p[0] === "CORES")
+                        root.cores = parseInt(p[1], 10) || 0;
+                    else if (p[0] === "LOAD") {
+                        root.load1 = parseFloat(p[1]) || 0;
+                        root.load5 = parseFloat(p[2]) || 0;
+                        root.load15 = parseFloat(p[3]) || 0;
+                    } else if (p[0] === "PROCS") {
+                        root.procsRunning = parseInt(p[1], 10) || 0;
+                        root.procsTotal = parseInt(p[2], 10) || 0;
+                    }
+                    else if (p[0] === "PRESSCPU")
+                        root.pressureCpu = parseFloat(p[1]) || 0;
+                    else if (p[0] === "PRESSMEM")
+                        root.pressureMem = parseFloat(p[1]) || 0;
+                    else if (p[0] === "PRESSIO")
+                        root.pressureIo = parseFloat(p[1]) || 0;
                 }
             }
         }

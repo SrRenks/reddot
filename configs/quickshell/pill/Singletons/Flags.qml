@@ -30,6 +30,9 @@ Singleton {
     property alias uiFont: adapter.uiFont
     property alias pillOpacity: adapter.pillOpacity
     property alias pillBlur: adapter.pillBlur
+    property alias windowBlur: adapter.windowBlur
+    property alias keyNoticeEnabled: adapter.keyNoticeEnabled
+    property alias keyNoticeMs: adapter.keyNoticeMs
     property alias pillMode: adapter.pillMode
     property alias pillReserve: adapter.pillReserve
     property alias topGap: adapter.topGap
@@ -56,6 +59,32 @@ Singleton {
     property alias nightLightTemp: adapter.nightLightTemp
     property alias nightLightOnMin: adapter.nightLightOnMin
     property alias nightLightOffMin: adapter.nightLightOffMin
+    property alias fxSavedActive: adapter.fxSavedActive
+    property alias fxSavedInactive: adapter.fxSavedInactive
+    property alias lastSurface: adapter.lastSurface
+    property alias barAlign: adapter.barAlign
+    property alias barOrder: adapter.barOrder
+    property alias barStatusReverse: adapter.barStatusReverse
+    property alias barStatusOrder: adapter.barStatusOrder
+    property alias barWorkspaces: adapter.barWorkspaces
+    property alias barClock: adapter.barClock
+    property alias barDate: adapter.barDate
+    property alias barWeather: adapter.barWeather
+    property alias barMinimized: adapter.barMinimized
+    property alias barTray: adapter.barTray
+    property alias barDnd: adapter.barDnd
+    property alias barNetwork: adapter.barNetwork
+    property alias barWifi: adapter.barWifi
+    property alias barBt: adapter.barBt
+    property alias barBattery: adapter.barBattery
+    property alias barInbox: adapter.barInbox
+    property alias barMixer: adapter.barMixer
+    property alias barSound: adapter.barSound
+    property alias barThinkpad: adapter.barThinkpad
+    property alias barSysmon: adapter.barSysmon
+    property alias barRecorder: adapter.barRecorder
+    property alias barSettings: adapter.barSettings
+    property alias barPower: adapter.barPower
 
     FileView {
         id: file
@@ -93,6 +122,11 @@ Singleton {
             property string uiFont: ""
             property real pillOpacity: 1.0
             property bool pillBlur: false
+            /** Intent for ordinary window blur; panel blur has its own switch. */
+            property bool windowBlur: false
+            /** Brief pill feedback for keybind changes (keyboard layout, etc.). */
+            property bool keyNoticeEnabled: true
+            property int keyNoticeMs: 500
             /** "always" rests the pill on screen; "auto" retracts it and reveals it when the pointer touches the top strip. */
             property string pillMode: "auto"
             /** Reserve the top band so tiled windows start below the pill. Auto mode ignores it (the strip must stay reachable). */
@@ -123,6 +157,36 @@ Singleton {
             property int nightLightTemp: 4000
             property int nightLightOnMin: 1260
             property int nightLightOffMin: 450
+            /** What the blur/transparency toggle restores when it is switched back on. */
+            property real fxSavedActive: 0.80
+            property real fxSavedInactive: 0.50
+            /** Last surface opened by the keyboard pill toggle; restored on reopen. */
+            property string lastSurface: ""
+            /** Main-bar presentation and item visibility. */
+            property string barAlign: "center"
+            property string barOrder: "standard"
+            property bool barStatusReverse: false
+            /** Status-cluster order; the Bar page edits this list. */
+            property string barStatusOrder: "weather,minimized,tray,dnd,network,inbox,mixer,sound,thinkpad,sysmon,recorder,settings,power"
+            property bool barWorkspaces: true
+            property bool barClock: true
+            property bool barDate: true
+            property bool barWeather: true
+            property bool barMinimized: true
+            property bool barTray: true
+            property bool barDnd: true
+            property bool barNetwork: true
+            property bool barWifi: true
+            property bool barBt: true
+            property bool barBattery: true
+            property bool barInbox: true
+            property bool barMixer: true
+            property bool barSound: true
+            property bool barThinkpad: true
+            property bool barSysmon: true
+            property bool barRecorder: true
+            property bool barSettings: true
+            property bool barPower: true
         }
     }
 }

@@ -26,7 +26,11 @@ Singleton {
     property bool active: false
 
     property bool available: false
-    readonly property bool wanted: Flags.musicViz && available
+    /**
+     * A paused/closed player does not need a 60 fps FFT process. Starting on
+     * playback keeps the idle shell light; the bars return on the next play.
+     */
+    readonly property bool wanted: Flags.musicViz && available && Players.playing
 
     /**
      * autosens is off so a silent browser holding the sink stays at zero bars
@@ -42,7 +46,15 @@ Singleton {
         + "channels = mono\nmono_option = average\n"
         + "[smoothing]\nnoise_reduction = 0.77\n"
 
-    onWantedChanged: cavaProc.running = wanted
+    onWantedChanged: {
+        cavaProc.running = wanted;
+        if (!wanted) {
+            idle.stop();
+            relaunch.stop();
+            root.active = false;
+            root.levels = [];
+        }
+    }
     Component.onCompleted: cavaProc.running = wanted
 
     Process {

@@ -2,15 +2,14 @@ import QtQuick
 import "Singletons"
 
 /**
- * Shared morph-surface base for the pill's standard surfaces. Each surface fills
- * the pill body inset by its own margins (scaled by `s`), fades in with the morph
- * as it nears full openness, and is only enabled while open. The host sets `open`,
- * `s` and `morphCloseness`; the surface sets its own `mTop`/`mLeft`/`mRight`/
- * `mBottom` insets. `active` mirrors `open` for the older `onActiveChanged` hooks.
- * `requestClose()` asks the pill to dismiss. Osd and Toast use a different
- * lifecycle and do not derive from this base.
+ * Shared morph-surface base. It is a Flickable so every panel gets one reliable
+ * viewport: content taller than the host is clipped, wheel/drag scrolling stops
+ * exactly at the last child, and the host can draw a scrollbar from contentY.
+ *
+ * Deriving surfaces set implicitHeight and add their content as normal children;
+ * Flickable reparents those children into its contentItem.
  */
-Item {
+Flickable {
     id: surface
 
     property real s: 1
@@ -24,42 +23,82 @@ Item {
 
     signal requestClose()
 
-    /**
-     * Ame anchor. Each surface declares the flame's form and dock point (in
-     * surface-local coords) for its open state; the host maps the point into
-     * pill space and feeds the active surface's pair to Ame. Left non-readonly
-     * so a deriving surface can re-bind. Base default is off at the centre.
-     */
     property string ameForm: "off"
     property point amePoint: Qt.point(width / 2, height / 2)
 
     readonly property bool active: open
 
-    /**
-     * Latched true once the open morph has first settled. The morphCloseness gate
-     * is only there for the rest-to-surface open fade. A relayout inside an open
-     * surface (a collapsible dropdown snapping its height into implicitHeight) also
-     * jumps the pill's target geometry, so closeness craters and the whole surface
-     * dims for one frame until the body height Behavior catches up. That one frame
-     * is the flicker on the Display, Recorder and Appearance collapsibles. After
-     * the surface has settled, hold full opacity and let the body morph alone do
-     * the reveal. Reset on close so the next open still fades in.
-     */
     property bool settled: false
-    onOpenChanged: if (!open) settled = false
-    onMorphClosenessChanged: if (open && morphCloseness > 0.92) settled = true
 
     anchors.fill: parent
     anchors.topMargin: mTop * s
-    anchors.leftMargin: mLeft * s
+    anchors.leftMargin: mLeft * s + SurfaceChrome.contentShift * s
     anchors.rightMargin: mRight * s
     anchors.bottomMargin: mBottom * s
 
+    contentWidth: width
+    /**
+     * Use the actual laid-out child bottom; implicitHeight can contain trailing
+     * padding or a fixed min-height and would leave an empty tail.
+     */
+    contentHeight: Math.max(height, contentItem ? contentItem.childrenRect.height : implicitHeight)
+    clip: true
+    boundsBehavior: Flickable.StopAtBounds
+    flickableDirection: Flickable.VerticalFlick
+    interactive: true
+
+    function scrollBy(delta) {
+        contentY = Math.max(0, Math.min(contentHeight - height, contentY + delta));
+    }
+
+    WheelHandler {
+        onWheel: (event) => {
+            var step = Math.max(20 * surface.s,
+                Math.min(140 * surface.s, surface.height * 0.16));
+            var raw = -event.angleDelta.y * 0.6;
+            surface.scrollBy(Math.max(-step, Math.min(step, raw)));
+            event.accepted = true;
+        }
+    }
+
     enabled: open
-    opacity: open ? (settled ? 1 : Math.pow(morphCloseness, 1.3)) : 0
+    opacity: open ? (settled ? 1 : Math.pow(morphCloseness, 0.9)) : 0
     visible: opacity > 0.01
 
     Behavior on opacity {
         NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard }
+    }
+
+    onOpenChanged: {
+        if (!open) {
+            settled = false;
+            contentY = 0;
+        }
+    }
+    onMorphClosenessChanged: if (open && morphCloseness > 0.92) settled = true
+
+    Binding {
+        target: SurfaceChrome
+        property: "scrollTarget"
+        value: surface
+        when: surface.active
+    }
+    Binding {
+        target: SurfaceChrome
+        property: "scrollMax"
+        value: Math.max(0, surface.contentHeight - surface.height)
+        when: surface.active
+    }
+    Binding {
+        target: SurfaceChrome
+        property: "scrollOffset"
+        value: surface.contentY
+        when: surface.active
+    }
+    Binding {
+        target: SurfaceChrome
+        property: "scrollViewH"
+        value: surface.height
+        when: surface.active
     }
 }

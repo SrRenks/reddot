@@ -13,6 +13,9 @@ Item {
     property bool expanded: false
     property bool flashing: false
     property string kind: "volume"
+    property string noticeIcon: "keyboard"
+    property string noticeLabel: ""
+    property string noticeValue: ""
     property bool armed: false
     property bool dirty: false
     property bool cooling: false
@@ -54,8 +57,26 @@ Item {
     readonly property real volume: sink && sink.audio ? Math.max(0, Math.min(Sound.limit, sink.audio.volume)) : 0
 
     readonly property real desiredW: kind === "workspace" ? Math.max(120 * s, wsIndicator.implicitWidth + 40 * s)
-        : (kind === "track" ? 344 * s : (kind === "record" ? 256 * s : 248 * s))
+        : (kind === "track" ? 344 * s : (kind === "record" ? 256 * s
+        : (kind === "notice" ? 252 * s : 248 * s)))
     readonly property real desiredH: kind === "track" ? 64 * s : 44 * s
+
+    /**
+     * Short-lived pill feedback for an expected keybind change. It is separate
+     * from the 1.8 s hardware OSD so a keyboard toggle can stay at 500 ms.
+     */
+    function showNotice(icon, label, value) {
+        if (!armed || suppressed || !onFocusedMonitor)
+            return false;
+        noticeIcon = icon.length > 0 ? icon : "keyboard";
+        noticeLabel = label;
+        noticeValue = value;
+        kind = "notice";
+        flashing = true;
+        hideTimer.interval = Math.max(200, Flags.keyNoticeMs);
+        hideTimer.restart();
+        return true;
+    }
 
     /**
      * Active workspace name on this monitor. Any switch (Super+arrow,
@@ -212,6 +233,13 @@ Item {
         target: Backlight
         function onChanged() {
             root.flash("brightness");
+        }
+    }
+
+    Connections {
+        target: KeyNotice
+        function onNotice(icon, label, value) {
+            root.showNotice(icon, label, value);
         }
     }
 
@@ -374,6 +402,65 @@ Item {
                 maximumLineCount: 1
                 elide: Text.ElideRight
                 visible: text.length > 0
+            }
+        }
+    }
+
+    Item {
+        id: noticeRow
+        anchors.fill: parent
+        opacity: root.kind === "notice" ? 1 : 0
+        visible: opacity > 0.01
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: 4 * root.s
+            height: 4 * root.s
+            radius: 2 * root.s
+            color: Theme.vermLit
+        }
+
+        GlyphIcon {
+            anchors.left: parent.left
+            anchors.leftMargin: 13 * root.s
+            anchors.verticalCenter: parent.verticalCenter
+            width: 17 * root.s
+            height: 17 * root.s
+            name: root.noticeIcon
+            color: Theme.iconDim
+            stroke: 1.7
+        }
+
+        Column {
+            anchors.left: parent.left
+            anchors.leftMargin: 41 * root.s
+            anchors.right: parent.right
+            anchors.rightMargin: 2 * root.s
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 1 * root.s
+
+            Text {
+                width: parent.width
+                text: root.noticeLabel
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 7.5 * root.s
+                font.weight: Font.Bold
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 1 * root.s
+                elide: Text.ElideRight
+            }
+
+            Text {
+                width: parent.width
+                text: root.noticeValue
+                color: Theme.cream
+                font.family: Theme.font
+                font.pixelSize: 11 * root.s
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
             }
         }
     }

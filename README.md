@@ -34,13 +34,28 @@ kept close to the original.
 - **System** — live CPU/IGPU/memory dials, native CPU/IGPU temperature and
   fan dials, compact Thermal/Power/Fan groups for every other sensor, and the
   ThinkPad fan curve. No Glances dependency.
+- **Pill toggle** — `Super+Shift+Space` opens or closes the pill and restores
+  the last visited surface. Escape backs out one level, closes at the root,
+  and the keybind parks the pointer on the pill so keyboard focus lands without
+  a mouse move.
 - **Startup hub** — Settings → Power & system → Startup lists the Hyprland
   autostart stack: KDE Connect is editable, system services are locked, and
   ↑/↓ reorder user commands. Changes apply on the next Hyprland start.
-- **UI blur** — Look → Blur separates **Quickshell blur** (pill/layer surfaces)
-  from **Window blur**, so toggling the UI does not touch Ghostty or other
-  terminals. `Super+Shift+F` toggles the general window blur (the same
-  `Window blur` switch) without rewriting any terminal config.
+- **Key notices** — Look → Key notices turns on brief pill feedback for expected
+  keybind changes. Keyboard-language switches are watched from Hyprland, so
+  `Super+Space` needs no wrapper; hold time defaults to 500 ms and is adjustable.
+  Any other bind can publish one with
+  `qs -c pill ipc call pill notice <icon> <label> <value>`.
+- **Keyboard languages** — Input → Keyboard separates the physical model
+  (Auto/ANSI/ISO/JIS, e.g. `pc104` for an ANSI laptop) from an ordered
+  language+variant list (`kb_layout`/`kb_variant`). Add or remove pairs, select
+  one directly, or keep cycling with `Super+Space`.
+- **UI blur** — Look → Blur has an independent **Pill / panel blur** switch for
+  every layer surface, plus a separate **Window blur + transparency** switch.
+  Panel blur works with window blur off: the generated layer module enables the
+  global blur prerequisite and adds a `no_blur` rule to ordinary windows, then
+  removes that rule when window blur returns. `Super+Shift+F` changes only
+  window blur and its opacity pair; panel blur survives it.
 - **Conventional keymap** — see `docs/KEYBINDS.md`; screenshots, mic mute and
   window movement are unified and the dangerous hibernate chord is gone.
 - ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and
@@ -142,7 +157,7 @@ screenshot tool) makes sense; grab it from [rishot](https://github.com/Gakuseei/
 | `Super` + `T` | toggle floating |
 | `Super` + `L` | lock |
 | `Super` + `Shift` + `B` | power surface |
-| `Print` | rishot |
+| `Print`, `Super+F9` | rishot |
 
 ## Notes
 

@@ -48,6 +48,25 @@ Singleton {
     property int kbdMax: 1
     property var leds: ({})
     property var ledsAll: []
+    /** Per-LED trigger/timer metadata, keyed by sysfs LED name. */
+    property var ledMeta: ({})
+    /** Live brightness overrides while the surface is open (caps lock, Fn keys, firmware). */
+    property var liveLeds: ({})
+    /**
+     * New-generation thinkpad-acpi LEDs are write-only: led_sysfs_get is only
+     * registered for the legacy LED-570 path, so brightness reads 0 after a
+     * successful write. Remember explicit UI writes so on/off is not inverted.
+     */
+    property var writtenLeds: ({})
+    /** Empty unless the sysfs trigger is readable; strings from the kernel. */
+    property var keyboardLangs: []
+    property int lapMode: -1
+    property string lidState: ""
+    /** Trigger modules available to load on demand (timer/heartbeat/...). */
+    property var extraTriggers: []
+    property string usbCSecurity: ""
+    /** True only while the ThinkPad surface is visible; drives the live LED poll. */
+    property bool liveWatch: false
     property var tp: ({})
     property var curve: []
     property int doubletap: -1
@@ -94,6 +113,67 @@ Singleton {
         return tp[name] !== undefined;
     }
 
+    /** Hardware state wins over the snapshot/UI's last write. */
+    function writeOnlyLed(name) {
+        return name.indexOf("tpacpi::") === 0;
+    }
+
+    function ledValue(name, fallback) {
+        if (writeOnlyLed(name) && writtenLeds[name] !== undefined)
+            return writtenLeds[name];
+        return liveLeds[name] !== undefined ? liveLeds[name] : fallback;
+    }
+
+    function markLed(name, value) {
+        var next = Object.assign({}, root.writtenLeds);
+        next[name] = value;
+        root.writtenLeds = next;
+    }
+
+    readonly property bool lidOpen: lidState !== "closed"
+
+    /**
+     * The power-button and lid-logo indicators are owned by the EC/firmware on
+     * this model: sysfs can read 0 while the physical LED is lit. Keep the UI
+     * honest by inferring those two from the machine/lid state instead of
+     * presenting a false "off".
+     */
+    function ledOn(name, fallback) {
+        if (writeOnlyLed(name) && writtenLeds[name] !== undefined)
+            return writtenLeds[name] > 0;
+        if (name === "tpacpi::power")
+            return true;
+        if (name === "tpacpi::lid_logo_dot" && lidOpen)
+            return true;
+        return ledValue(name, fallback) > 0;
+    }
+
+    function ledInfo(name) {
+        return ledMeta[name] !== undefined ? ledMeta[name] : ({});
+    }
+
+    function applyLiveLed(name, value) {
+        if (!name || isNaN(value))
+            return;
+        var next = Object.assign({}, root.liveLeds);
+        next[name] = value;
+        root.liveLeds = next;
+    }
+
+    function parseLive(text) {
+        var lines = text.split("\n");
+        var next = Object.assign({}, root.liveLeds);
+        for (var i = 0; i < lines.length; i++) {
+            var bits = lines[i].split("|");
+            if (bits.length !== 2 || bits[0].length === 0)
+                continue;
+            var v = parseInt(bits[1], 10);
+            if (!isNaN(v))
+                next[bits[0]] = v;
+        }
+        root.liveLeds = next;
+    }
+
     function refresh() {
         if (!present || statusProc.running || helperProbe.running)
             return;
@@ -112,11 +192,13 @@ Singleton {
         var nextTp = ({});
         var nextLeds = ({});
         var nextLedsAll = [];
+        var nextLedMeta = ({});
         var lines = text.split("\n");
         var next = {
             model: "", bios: "", fanRpm: -1, fanLevel: "", fanStatus: "",
             thinkfan: "", tempCpu: -1, tempGpu: -1, tempNvme: -1, tempAcpi: -1,
-            platform: "", kbd: -1, kbdMax: 1, doubletap: -1, fnLock: -1, curve: []
+            platform: "", kbd: -1, kbdMax: 1, doubletap: -1, fnLock: -1, curve: [],
+            keyboardLangs: [], lapMode: -1, lidState: "", usbCSecurity: "", extraTriggers: []
         };
 
         for (var i = 0; i < lines.length; i++) {
@@ -167,6 +249,29 @@ Singleton {
                     });
                 }
             }
+            else if (k === "LED_META") {
+                var metas = v.split(";");
+                for (var m = 0; m < metas.length; m++) {
+                    var bits = metas[m].split("|");
+                    if (bits.length < 7 || bits[0].length === 0)
+                        continue;
+                    nextLedMeta[bits[0]] = {
+                        max: parseInt(bits[1], 10) || 1,
+                        value: parseInt(bits[2], 10) || 0,
+                        trigger: bits[3] || "none",
+                        triggers: bits[4].length > 0 ? bits[4].split(",") : [],
+                        delayOn: parseInt(bits[5], 10) || 0,
+                        delayOff: parseInt(bits[6], 10) || 0
+                    };
+                }
+            }
+            else if (k === "KEYBOARD_LANGS")
+                next.keyboardLangs = v.length > 0 ? v.split(/\s+/) : [];
+            else if (k === "LAP_MODE") next.lapMode = parseInt(v, 10);
+            else if (k === "LID_STATE") next.lidState = v;
+            else if (k === "USB_C_SECURITY") next.usbCSecurity = v;
+            else if (k === "LED_EXTRA_TRIGGERS")
+                next.extraTriggers = v.length > 0 ? v.split(",") : [];
             else if (k.indexOf("LED_") === 0) nextLeds[k.substring(4)] = parseInt(v, 10);
             else if (k.indexOf("TP_") === 0)
                 nextTp[k.substring(3).toLowerCase()] = parseInt(v, 10);
@@ -189,6 +294,13 @@ Singleton {
         root.fnLock = next.fnLock;
         root.leds = nextLeds;
         root.ledsAll = nextLedsAll;
+        root.ledMeta = nextLedMeta;
+        root.liveLeds = ({});
+        root.keyboardLangs = next.keyboardLangs;
+        root.lapMode = next.lapMode;
+        root.lidState = next.lidState;
+        root.usbCSecurity = next.usbCSecurity;
+        root.extraTriggers = next.extraTriggers;
         root.tp = nextTp;
         root.curve = next.curve;
     }
@@ -238,6 +350,31 @@ Singleton {
             root.available = ok;
             if (!ok && root.error.length === 0)
                 root.error = "ThinkPad helper missing or failed (" + code + ")";
+        }
+    }
+
+    /**
+     * Live LED state while the surface is open. sysfs has no inotify contract
+     * for LED brightness, so this is a single 500 ms read of the class directory,
+     * not one watcher per LED and not a resident process. Closing the surface
+     * stops the timer; the snapshot is still read on every open.
+     */
+    Timer {
+        interval: 300
+        repeat: true
+        running: root.liveWatch && root.available && root.present
+        onTriggered: if (!liveProc.running) liveProc.running = true
+    }
+
+    Process {
+        id: liveProc
+        command: ["sh", "-c",
+            "for d in /sys/class/leds/*; do " +
+            "[ -r \"$d/brightness\" ] || continue; " +
+            "n=${d##*/}; v=$(cat \"$d/brightness\" 2>/dev/null) || continue; " +
+            "echo \"$n|$v\"; done"]
+        stdout: StdioCollector {
+            onStreamFinished: root.parseLive(this.text)
         }
     }
 

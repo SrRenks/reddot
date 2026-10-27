@@ -67,6 +67,11 @@ SettingsSurface {
             r.push({ item: opActRow, kind: "scrub", bump: function (d) { opActScrub.bump(d); } });
             r.push({ item: opInactRow, kind: "scrub", bump: function (d) { opInactScrub.bump(d); } });
         }
+        if (noticeGrp.open) {
+            r.push({ item: noticeEnRow, kind: "toggle", get: function () { return Flags.keyNoticeEnabled; }, set: function (v) { Flags.keyNoticeEnabled = v; } });
+            if (Flags.keyNoticeEnabled)
+                r.push({ item: noticeMsRow, kind: "scrub", bump: function (d) { noticeMsScrub.bump(d); } });
+        }
         if (pillGrp.open) {
             r.push({ item: pillModeRow, kind: "seg", vals: ["always", "auto"], get: function () { return Flags.pillMode; }, set: function (v) { Flags.pillMode = v; } });
             r.push({ item: pillReserveRow, kind: "toggle", get: function () { return Flags.pillReserve; }, set: function (v) { Flags.pillReserve = v; } });
@@ -361,8 +366,6 @@ SettingsSurface {
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
-        height: root.height + root.mBottom * root.s
-        clip: true
 
         SettingsHeader {
             s: root.s
@@ -617,8 +620,8 @@ SettingsSurface {
 
             FieldRow {
                 id: uiBlurRow
-                label: "Quickshell blur"
-                caption: "Pill and layer surfaces only; terminal blur is left alone. Requires Window blur enabled."
+                label: "Pill / panel blur"
+                caption: "Layer blur for the pill and every panel. Independent of window blur; while window blur is off, windows get a no-blur rule."
                 LinkToggle {
                     s: root.s
                     on: UiBlur.enabled
@@ -628,8 +631,8 @@ SettingsSurface {
 
             FieldRow {
                 id: blEnRow
-                label: "Window blur"
-                caption: "Regular windows and terminals; this is the engine behind UI blur too"
+                label: "Window blur + transparency"
+                caption: "Ordinary windows only. Turning it off leaves panel blur untouched and restores opacity to 100%."
                 LinkToggle {
                     s: root.s
                     on: WindowBlur.enabled
@@ -805,7 +808,7 @@ SettingsSurface {
             FieldRow {
                 id: pillOpRow
                 label: "Pill opacity"
-                caption: "How see-through the pill sits"
+                caption: "How see-through the pill sits; lower values let the panel blur show."
                 ScrubValue {
                     id: pillOpScrub
                     s: root.s
@@ -813,6 +816,36 @@ SettingsSurface {
                     openValue: root.base.pillOpacity
                     from: 0.55; to: 1.0; step: 0.05; decimals: 2
                     onEdited: v => Flags.pillOpacity = v
+                }
+            }
+
+            }
+
+            Group { id: noticeGrp; title: "Key notices"; open: true
+
+            FieldRow {
+                id: noticeEnRow
+                label: "Key notices"
+                caption: "Brief pill feedback for keybind changes, such as the keyboard layout."
+                LinkToggle {
+                    s: root.s
+                    on: Flags.keyNoticeEnabled
+                    onToggled: Flags.keyNoticeEnabled = !Flags.keyNoticeEnabled
+                }
+            }
+
+            FieldRow {
+                id: noticeMsRow
+                label: "Hold time"
+                caption: "How long the notice stays on screen"
+                collapsed: !Flags.keyNoticeEnabled
+                ScrubValue {
+                    id: noticeMsScrub
+                    s: root.s
+                    value: Flags.keyNoticeMs
+                    openValue: 500
+                    from: 200; to: 2000; step: 50; unit: "ms"
+                    onEdited: v => Flags.keyNoticeMs = v
                 }
             }
 

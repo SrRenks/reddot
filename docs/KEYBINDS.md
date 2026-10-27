@@ -20,8 +20,10 @@ same file so the Settings → Keybinds editor can see them; the old
 | `Super+Left/Right/Up/Down` | focus |
 | `Super+Shift+Left/Right/Up/Down` | move window |
 | `Super+Space` | keyboard layout |
+| `Super+Shift+Space` | open/close the pill, restoring the last surface; Escape backs out one level |
 | `Super` + LMB/RMB | drag/resize |
-| `Print`, `Shift+Print` | screenshot / monitor screenshot |
+| `Print`, `Super+F9` | rishot region/window |
+| `Shift+Print`, `Super+Shift+Print` | current monitor, no picker |
 
 ## Apps and media
 
@@ -31,7 +33,7 @@ same file so the Settings → Keybinds editor can see them; the old
 | `Super+Shift+R` | record |
 | `Super+Shift+C` | color picker |
 | `Super+Shift+E` | EasyEffects bypass |
-| `Super+Shift+F` | toggle general window blur |
+| `Super+Shift+F` | toggle window blur + transparency (pill/panel blur is separate) |
 | `Super+Shift+B` | TLP surface |
 | `Super+Shift+T` | ThinkPad surface |
 | `Super+G` | game mode |

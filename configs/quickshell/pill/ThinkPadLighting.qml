@@ -29,7 +29,7 @@ ThinkPadGroup {
             options: ThinkPad.kbdMax >= 2
                 ? [{ label: "Off", value: 0 }, { label: "Dim", value: 1 }, { label: "Full", value: 2 }]
                 : [{ label: "Off", value: 0 }, { label: "On", value: 1 }]
-            value: ThinkPad.kbd
+            value: ThinkPad.ledValue("tpacpi::kbd_backlight", ThinkPad.kbd)
             enabled: !lighting.surface.busy
             onPicked: (v) => lighting.surface.setKbd(v)
         }
@@ -74,13 +74,31 @@ ThinkPadGroup {
     SettingsField {
         surface: lighting.surface
         label: "Lid logo"
+        caption: "Firmware/EC may own this indicator; state follows the lit lid"
         visible: ThinkPad.leds.LIDLOGO !== undefined
 
         LinkToggle {
             s: lighting.s
-            on: (ThinkPad.leds.LIDLOGO || 0) > 0
+            on: ThinkPad.ledOn("tpacpi::lid_logo_dot", ThinkPad.leds.LIDLOGO || 0)
             enabled: !lighting.surface.busy
             onToggled: lighting.surface.setLed("lid", !on)
+        }
+    }
+
+    SettingsField {
+        surface: lighting.surface
+        label: "Lid logo brightness"
+        caption: "Software brightness; firmware may keep the logo lit independently"
+        visible: ThinkPad.leds.LIDLOGO !== undefined
+
+        ScrubValue {
+            s: lighting.s
+            value: ThinkPad.ledValue("tpacpi::lid_logo_dot", ThinkPad.leds.LIDLOGO || 0)
+            from: 0
+            to: Math.max(1, lighting.lidMax())
+            step: 1
+            enabled: !lighting.surface.busy
+            onEdited: (v) => lighting.surface.setLedRaw("tpacpi::lid_logo_dot", v)
         }
     }
 
@@ -91,7 +109,7 @@ ThinkPadGroup {
 
         LinkToggle {
             s: lighting.s
-            on: (ThinkPad.leds.VANTAGE || 0) > 0
+            on: ThinkPad.ledValue("tpacpi::thinkvantage", ThinkPad.leds.VANTAGE || 0) > 0
             enabled: !lighting.surface.busy
             onToggled: lighting.surface.setLed("vantage", !on)
         }
@@ -105,10 +123,15 @@ ThinkPadGroup {
             required property var modelData
             surface: lighting.surface
             label: lighting.ledLabel(ledRow.modelData.name)
+            caption: ledRow.modelData.name === "tpacpi::power"
+                ? "Firmware-controlled; sysfs can read 0 while the LED is lit"
+                : (ledRow.modelData.name === "tpacpi::lid_logo_dot"
+                    ? "Firmware/EC may own the lid logo on this model"
+                    : "")
 
             LinkToggle {
                 s: lighting.s
-                on: ledRow.modelData.value > 0
+                on: ThinkPad.ledOn(ledRow.modelData.name, ledRow.modelData.value)
                 enabled: !lighting.surface.busy
                 onToggled: lighting.surface.setLedRaw(
                     ledRow.modelData.name,
@@ -127,7 +150,7 @@ ThinkPadGroup {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.topMargin: 2 * lighting.s
-            text: "Mute LEDs follow the kernel trigger until you override them here; firmware or the NIC can also take an indicator back."
+            text: "LED state follows the kernel/hardware while this surface is open. Lock LEDs indicate the key state; writing the LED does not toggle Caps/Num/Scroll. Firmware or the NIC can reclaim an indicator."
             color: Theme.faint
             font.family: Theme.font
             font.pixelSize: 8.5 * lighting.s
@@ -136,15 +159,22 @@ ThinkPadGroup {
         }
     }
 
+    function lidMax() {
+        for (var i = 0; i < ThinkPad.ledsAll.length; i++)
+            if (ThinkPad.ledsAll[i].name === "tpacpi::lid_logo_dot")
+                return ThinkPad.ledsAll[i].max || 1;
+        return 1;
+    }
+
     function ledLabel(name) {
         switch (name) {
         case "platform::micmute": return "Mic mute LED";
         case "platform::mute": return "Speaker mute LED";
         case "tpacpi::power": return "Power LED";
         case "tpacpi::standby": return "Standby LED";
-        case "input3::capslock": return "Caps Lock";
-        case "input3::numlock": return "Num Lock";
-        case "input3::scrolllock": return "Scroll Lock";
+        case "input3::capslock": return "Caps Lock LED";
+        case "input3::numlock": return "Num Lock LED";
+        case "input3::scrolllock": return "Scroll Lock LED";
         case "tpacpi::fnlock": return "Fn lock";
         case "platform::fnlock": return "Fn lock";
         }

@@ -31,10 +31,11 @@ kept close to the original.
   edge-driven peripheral polling.
 - **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
   power and memory measurements.
-- ThinkPad extras (optional): on a ThinkPad only, fan/thermal telemetry, an
-  editable thinkfan curve, TrackPoint, double-tap and writable LEDs. Detection is
-  lazy and the helper is installed only on ThinkPad hardware, so other machines are
-  unchanged.
+- **System** — live CPU/GPU/memory dials, Glances sensor dials for CPU/GPU
+  temperature and fan RPM, a NVMe/RAM/power strip, and the ThinkPad fan curve.
+- ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and
+  writable LEDs. Detection is lazy and the helper is installed only on ThinkPad
+  hardware, so other machines are unchanged.
 
 Install runs the upstream Python installer and then `tools/install-extras.sh`
 for the root helper, polkit rule, TLP policy and user tools. On a ThinkPad it

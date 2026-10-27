@@ -1,0 +1,114 @@
+pragma Singleton
+
+import QtQuick
+import Quickshell
+import Quickshell.Io
+
+/**
+ * Glances sensors bridge for the System surface. One `glances --stop-after 1`
+ * read every five seconds while the surface is open; nothing runs while closed.
+ * Values are the same ones shown in Glances' Sensors tab: CPU, iGPU, SSD, RAM,
+ * fan RPM, fan level and package power.
+ */
+Singleton {
+    id: root
+
+    property bool open: false
+    property bool available: false
+    property int cpuTemp: -1
+    property int gpuTemp: -1
+    property int nvmeTemp: -1
+    property int ram0Temp: -1
+    property int ram1Temp: -1
+    property int fanRpm: -1
+    property int fanLevel: -1
+    property real powerW: -1
+    property var list: []
+
+    readonly property int fanMax: 5000
+
+    function refresh() {
+        if (sensorProc.running)
+            return;
+        sensorProc.running = true;
+    }
+
+    function parse(text) {
+        var lines = text.trim().split("\n");
+        var raw = null;
+        for (var i = lines.length - 1; i >= 0; i--) {
+            if (lines[i].charAt(0) === "{") {
+                raw = lines[i];
+                break;
+            }
+        }
+        if (!raw)
+            return;
+        var body;
+        try {
+            body = JSON.parse(raw);
+        } catch (e) {
+            return;
+        }
+        var items = body.sensors || [];
+        var next = {
+            cpu: -1, gpu: -1, nvme: -1, ram0: -1, ram1: -1,
+            rpm: -1, level: -1, power: -1
+        };
+        for (var j = 0; j < items.length; j++) {
+            var item = items[j] || {};
+            var label = String(item.label || "").toUpperCase();
+            var value = Number(item.value);
+            if (!isFinite(value))
+                continue;
+            if (label === "CPU" && item.type === "temperature_core")
+                next.cpu = Math.round(value);
+            else if ((label === "IGPU" || label === "GPU") && item.type === "temperature_core")
+                next.gpu = Math.round(value);
+            else if ((label === "SSD0" || label === "NVME") && item.type === "temperature_core")
+                next.nvme = Math.round(value);
+            else if (label === "RAM0")
+                next.ram0 = Math.round(value);
+            else if (label === "RAM1")
+                next.ram1 = Math.round(value);
+            else if (item.type === "fan_speed")
+                next.rpm = Math.round(value);
+            else if (item.type === "fan_level")
+                next.level = Math.round(value);
+            else if (item.type === "amd_ppt")
+                next.power = value;
+        }
+        root.cpuTemp = next.cpu;
+        root.gpuTemp = next.gpu;
+        root.nvmeTemp = next.nvme;
+        root.ram0Temp = next.ram0;
+        root.ram1Temp = next.ram1;
+        root.fanRpm = next.rpm;
+        root.fanLevel = next.level;
+        root.powerW = next.power;
+        root.list = items;
+        root.available = items.length > 0;
+    }
+
+    onOpenChanged: if (open) refresh()
+
+    Timer {
+        interval: 5000
+        running: root.open
+        repeat: true
+        onTriggered: root.refresh()
+    }
+
+    Process {
+        id: sensorProc
+        command: ["glances", "--stdout-json", "sensors", "--stop-after", "1"]
+        stdout: StdioCollector {
+            onStreamFinished: root.parse(this.text)
+        }
+        stderr: StdioCollector {}
+        onExited: (code) => {
+            if (code !== 0)
+                root.available = false;
+        }
+    }
+}

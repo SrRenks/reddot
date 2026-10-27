@@ -48,8 +48,9 @@ if [ -x "$lint" ]; then
         "$pill/ThinkPadGroup.qml" \
         "$pill/ThinkPadCurve.qml" \
         "$pill/ThinkPadLighting.qml" \
-        "$pill/ThinkPadHero.qml" \
-        "$pill/ThinkPadState.qml"
+        "$pill/ThinkPadState.qml" \
+        "$pill/FanCurvePanel.qml" \
+        "$pill/Singletons/Sensors.qml"
     do
         if [ ! -f "$f" ]; then
             bad "missing $f"

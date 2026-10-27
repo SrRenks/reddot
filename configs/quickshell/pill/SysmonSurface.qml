@@ -9,11 +9,12 @@ import "Singletons"
  * dials for CPU, GPU and memory load, each a 270deg arc stroked with the mixer's
  * vermLit-to-vermBurn gradient on a thread track and rounded caps, the sweep
  * eased over the value change; the centre shows the value, a unit and a sub line
- * (CPU/GPU temperature, memory total). A hairline stripe underneath reports
- * network throughput, root-disk fill, swap and VRAM with their units folded into
- * the faint labels so the values read bare. On a machine with no discrete GPU the
- * GPU dial and VRAM cell drop and the remaining dials recentre. Polling lives in
- * the singleton and only runs while this surface is open.
+ * (memory total). A second dial row reads CPU/GPU temperature and fan RPM from
+ * the Glances Sensors tab; a hairline strip carries NVMe, RAM and package power.
+ * A fan-curve group and a hairline stripe with network, disk, swap and VRAM
+ * follow. On a machine with no discrete GPU the GPU dial and VRAM cell drop and
+ * the remaining dials recentre. System polling lives in the singleton and only
+ * runs while this surface is open.
  */
 PillSurface {
     id: root
@@ -27,8 +28,70 @@ PillSurface {
 
     readonly property var dialKeys: Sysmon.hasGpu ? ["cpu", "gpu", "mem"] : ["cpu", "mem"]
     readonly property var cellKeys: Sysmon.hasVram ? ["net", "disk", "swap", "vram"] : ["net", "disk", "swap"]
+    readonly property var sensorKeys: {
+        var out = [];
+        if (!Sensors.available)
+            return out;
+        if (Sensors.cpuTemp >= 0)
+            out.push("cpuTemp");
+        if (Sensors.gpuTemp >= 0)
+            out.push("gpuTemp");
+        if (Sensors.fanRpm >= 0)
+            out.push("fan");
+        return out;
+    }
+    readonly property string sensorNote: {
+        var parts = [];
+        if (Sensors.nvmeTemp >= 0)
+            parts.push("NVMe " + Sensors.nvmeTemp + "°");
+        if (Sensors.ram0Temp >= 0)
+            parts.push("RAM " + Sensors.ram0Temp + (Sensors.ram1Temp >= 0 ? "/" + Sensors.ram1Temp : "") + "°");
+        if (Sensors.powerW >= 0)
+            parts.push(Sensors.powerW.toFixed(1) + " W");
+        return parts.join("  ·  ");
+    }
 
-    onActiveChanged: Sysmon.open = active
+    property var focusRowItem: null
+
+    function reportRowHover(row, hovered) {
+        if (hovered)
+            focusRowItem = row;
+        else if (focusRowItem === row)
+            focusRowItem = null;
+    }
+
+    function activateRow(row) {}
+
+    function sensorArc(key) {
+        if (key === "fan")
+            return Math.max(0, Math.min(100, Sensors.fanRpm * 100 / Sensors.fanMax));
+        return key === "cpuTemp" ? Sensors.cpuTemp : Sensors.gpuTemp;
+    }
+
+    function sensorBig(key) {
+        if (key === "fan")
+            return "" + Sensors.fanRpm;
+        return "" + (key === "cpuTemp" ? Sensors.cpuTemp : Sensors.gpuTemp);
+    }
+
+    function sensorLabel(key) {
+        return key === "fan" ? "FAN" : key === "cpuTemp" ? "CPU" : "GPU";
+    }
+
+    function sensorSub(key) {
+        if (key === "fan")
+            return "level " + Sensors.fanLevel;
+        return "TEMP";
+    }
+
+    onActiveChanged: {
+        Sysmon.open = active;
+        Sensors.open = active;
+        if (active) {
+            Sensors.refresh();
+            ThinkPad.refresh();
+        }
+    }
 
     /**
      * The soul ember rests with the 系 header kanji: the kanji is the lantern,
@@ -245,9 +308,36 @@ PillSurface {
                     unit: key === "mem" ? "" : "%"
                     shrink: key !== "mem" && val >= 100
                     label: key
-                    sub: key === "cpu" ? (Sysmon.cpuTemp >= 0 ? Sysmon.cpuTemp + "°" : "")
-                        : key === "gpu" ? (Sysmon.gpuTemp >= 0 ? Sysmon.gpuTemp + "°" : "")
-                        : "/ " + Sysmon.memTotalGb.toFixed(0) + " GB"
+                    sub: key === "mem" ? "/ " + Sysmon.memTotalGb.toFixed(0) + " GB" : ""
+                }
+            }
+        }
+
+        Item { width: 1; height: 12 * root.s }
+
+        Item {
+            width: parent.width
+            height: root.sensorKeys.length > 0 ? 110 * root.s : 0
+            visible: root.sensorKeys.length > 0
+
+            Repeater {
+                model: root.sensorKeys
+
+                Dial {
+                    required property int index
+                    required property var modelData
+                    readonly property string key: modelData
+
+                    x: root.sensorKeys.length > 1
+                        ? index * (parent.width - width) / (root.sensorKeys.length - 1)
+                        : (parent.width - width) / 2
+
+                    arc: root.sensorArc(key)
+                    big: root.sensorBig(key)
+                    unit: key === "fan" ? "RPM" : "°"
+                    shrink: false
+                    label: root.sensorLabel(key)
+                    sub: root.sensorSub(key)
                 }
             }
         }
@@ -346,6 +436,39 @@ PillSurface {
                     }
                 }
             }
+        }
+
+        Item {
+            width: parent.width
+            height: root.sensorNote.length > 0 ? 24 * root.s : 0
+            visible: root.sensorNote.length > 0
+
+            Text {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: "SENSORS"
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 8 * root.s
+                font.weight: Font.Bold
+                font.letterSpacing: 1 * root.s
+            }
+
+            Text {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.sensorNote
+                color: Theme.subtle
+                font.family: Theme.font
+                font.pixelSize: 9.5 * root.s
+                font.weight: Font.Medium
+                font.features: { "tnum": 1 }
+            }
+        }
+
+        FanCurvePanel {
+            s: root.s
+            surface: root
         }
     }
 }

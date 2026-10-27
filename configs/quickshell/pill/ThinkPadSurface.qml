@@ -5,13 +5,8 @@ import Quickshell.Io
 import "Singletons"
 
 /**
- * 思 THINKPAD. Three collapsible groups, in the same rhythm as Look:
- * Thermal (telemetry plus the thinkfan curve), Lighting (the LEDs that are
- * writable) and Pointing (TrackPoint and double-tap).
- *
- * The fan curve is the only fan write. It replaces the levels block in
- * /etc/thinkfan.yaml through the helper, which backs the file up and sends
- * SIGHUP. Raw levels, pwm1_enable and /proc/acpi/ibm/fan are never touched here.
+ * 思 THINKPAD. Lighting and Pointing; fan telemetry and the thinkfan curve
+ * live in System next to the CPU/GPU/memory dials.
  */
 PillSurface {
     id: root
@@ -26,31 +21,12 @@ PillSurface {
 
     readonly property string helper: ThinkPad.helper
     readonly property bool showData: ThinkPad.present && ThinkPad.available
-    readonly property string fanText: ThinkPad.fanRpm >= 0 ? String(ThinkPad.fanRpm) : "—"
-    readonly property string fanState: ThinkPad.thinkfan === "active"
-        ? "thinkfan · level " + (ThinkPad.fanLevel.length > 0 ? ThinkPad.fanLevel : "?")
-        : (ThinkPad.fanStatus.length > 0 ? "EC " + ThinkPad.fanStatus : "no fan control")
-    readonly property string sensorText: {
-        var parts = [];
-        if (ThinkPad.tempCpu >= 0) parts.push("CPU " + ThinkPad.tempCpu + "°");
-        if (ThinkPad.tempGpu >= 0) parts.push("GPU " + ThinkPad.tempGpu + "°");
-        if (ThinkPad.tempNvme >= 0) parts.push("NVMe " + ThinkPad.tempNvme + "°");
-        return parts.length > 0 ? parts.join("  ·  ") : "—";
-    }
     readonly property bool hasPointing: ThinkPad.tpList.length > 0 || ThinkPad.doubletap >= 0
-    readonly property bool curveReady: ThinkPad.curve.length === 8
-    readonly property string curveSummary: root.curveDirty
-        ? "8 levels · edited"
-        : "8 levels · thinkfan"
 
     property bool busy: false
     property string notice: ""
     property var actionDone: null
     property var focusRowItem: null
-
-    property bool curveOpen: false
-    property var curveDraft: []
-    property bool curveDirty: false
 
     function reportRowHover(row, hovered) {
         if (hovered)
@@ -60,44 +36,6 @@ PillSurface {
     }
 
     function activateRow(row) {}
-
-    function syncCurve(force) {
-        if (!force && curveDirty)
-            return;
-        var next = [];
-        for (var i = 0; i < ThinkPad.curve.length; i++)
-            next.push({
-                level: ThinkPad.curve[i].level,
-                low: ThinkPad.curve[i].low,
-                high: ThinkPad.curve[i].high
-            });
-        curveDraft = next;
-    }
-
-    function setCurve(index, edge, value) {
-        if (index < 0 || index >= curveDraft.length)
-            return;
-        var next = curveDraft.slice();
-        var item = {
-            level: next[index].level,
-            low: next[index].low,
-            high: next[index].high
-        };
-        item[edge] = value;
-        next[index] = item;
-        curveDraft = next;
-        curveDirty = true;
-    }
-
-    function applyCurve() {
-        var parts = [];
-        for (var i = 0; i < curveDraft.length; i++)
-            parts.push(curveDraft[i].level + ":" + curveDraft[i].low + ":" + curveDraft[i].high);
-        root.run(["curve", "set", parts.join(";")], function () {
-            root.curveDirty = false;
-            root.syncCurve(true);
-        });
-    }
 
     function run(args, done) {
         if (actionProc.running)
@@ -145,21 +83,8 @@ PillSurface {
         return name;
     }
 
-    onOpenChanged: if (open) {
+    onOpenChanged: if (open)
         ThinkPad.refresh();
-        if (!curveDirty)
-            syncCurve(true);
-    }
-
-    Component.onCompleted: syncCurve(true)
-
-    Connections {
-        target: ThinkPad
-        function onCurveChanged() {
-            if (!root.curveDirty)
-                root.syncCurve(true);
-        }
-    }
 
     Process {
         id: actionProc
@@ -212,14 +137,6 @@ PillSurface {
             }
         }
 
-        ThinkPadHero {
-            s: root.s
-            visible: ThinkPad.present
-            fanText: root.fanText
-            fanState: root.fanState
-            sensorText: root.sensorText
-        }
-
         ThinkPadState {
             s: root.s
             present: ThinkPad.present
@@ -232,63 +149,6 @@ PillSurface {
             width: parent.width
             visible: root.showData
             spacing: 0
-
-            ThinkPadGroup {
-                s: root.s
-                title: "Thermal"
-                open: true
-
-                SettingsField {
-                    surface: root
-                    label: "Fan curve"
-                    visible: root.curveReady
-
-                    Row {
-                        spacing: 8 * root.s
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: root.curveSummary
-                            color: root.curveDirty ? Theme.flameCore : Theme.faint
-                            font.family: Theme.font
-                            font.pixelSize: 9.5 * root.s
-                            font.weight: Font.Medium
-                        }
-
-                        ChipButton {
-                            s: root.s
-                            text: root.curveOpen ? "Close" : "Edit"
-                            enabled: !root.busy
-                            onClicked: root.curveOpen = !root.curveOpen
-                        }
-                    }
-                }
-
-                Item {
-                    width: parent.width
-                    height: root.curveOpen ? curveItem.implicitHeight : 0
-                    clip: true
-                    Behavior on height {
-                        NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic }
-                    }
-
-                    ThinkPadCurve {
-                        id: curveItem
-                        visible: root.curveOpen
-                        s: root.s
-                        surface: root
-                        rows: root.curveDraft
-                        busy: root.busy
-                        dirty: root.curveDirty
-                        onEdited: (index, edge, value) => root.setCurve(index, edge, value)
-                        onApplied: root.applyCurve()
-                        onReset: {
-                            root.curveDirty = false;
-                            root.syncCurve(true);
-                        }
-                    }
-                }
-            }
 
             ThinkPadLighting {
                 s: root.s
@@ -410,7 +270,7 @@ PillSurface {
                     anchors.topMargin: 6 * root.s
                     text: root.notice.length > 0
                         ? root.notice
-                        : "Changes ask for authentication; mic/power LEDs follow the hardware."
+                        : "Changes ask for authentication; mute LEDs follow the hardware until you override them."
                     color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 9 * root.s

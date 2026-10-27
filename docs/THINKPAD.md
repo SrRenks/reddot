@@ -126,39 +126,58 @@ Surface width 396. Header glyph `思`, title `THINKPAD`, model on the right.
 +--------------------------------------------------+
 | 思  THINKPAD                    E14 G7 · BIOS 1.27|
 |                                                  |
-|   2200 rpm             49 CPU · 47 GPU · 42 NVMe |
-|   thinkfan · level 2                             |
-|                                                  |
-|  THERMAL                                         |
-|  Fan            thinkfan · level 2               |
-|  Sensors        49 / 47 / 42 C                   |
-|  Fan curve      8 levels · thinkfan       [Edit] |
-|  ----------------------------------------------  |
 |  LIGHTING                                        |
 |  Keyboard light        [ Off ][ Dim ][ Full ]    |
+|  Mic mute                          [toggle]      |
+|  Speaker mute                      [toggle]      |
+|  Mic mute LED                      [toggle]      |
+|  Speaker mute LED                  [toggle]      |
 |  Lid logo                          [toggle]      |
 |  Vantage                           [toggle]      |
-|  ----------------------------------------------  |
+|  Power LED / Standby / Caps / ...  [toggles]     |
+|                                                  |
 |  POINTING                                        |
 |  Sensitivity                       [ 128 ]       |
 |  Press to select                   [toggle]      |
 |  Double-tap                        [toggle]      |
 |  ----------------------------------------------  |
-|  Battery and power >             helper: ready   |
+|  Battery and power >                             |
 +--------------------------------------------------+
 ```
 
+Fan RPM, temperatures, Glances sensor gauges and the fan curve live in
+**System**, not here. Keeping them next to CPU/GPU/memory avoids a second
+telemetry stack and removes the duplicate temperature readout.
+
 Why this order:
 
-1. Thermal first: the reason to open the surface is usually fan or temperature.
-2. Lighting and Pointing second and third: they are the personal settings that
-   survive reboots.
-3. Pointing last and collapsed: it is the least frequent edit.
-4. Battery and power is a link to the Power surface, not a duplicate.
+1. Lighting first: the reason to open this surface is usually a LED or the
+   keyboard light.
+2. Pointing second and collapsed: it is the least frequent edit.
+3. Battery and power is a link to the Power surface, not a duplicate.
 
 Rows that do not apply are hidden, not disabled: no `speed` row on the E14, no
-fan row when the EC telemetry is absent. The fan curve editor opens only when
-the helper found eight thinkfan levels.
+Fn lock row without `fn_lock`. Every LED in `/sys/class/leds` is read from the
+same `LEDS` status block and exposed as a row; mute LEDs are editable like the
+rest.
+
+## Controls and data flow
+
+| Row | Read | Write | Fallback |
+|---|---|---|---|
+| Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `ricelin-thinkpad led kbd 0-2` | hide if absent |
+| Mute LEDs | `platform::micmute`, `platform::mute` | `ricelin-thinkpad led platform::micmute|mute 0|1` | trigger is cleared by the manual write |
+| Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `ricelin-thinkpad led lid|vantage 0|1` | hide if absent |
+| Every LED | every LED in `/sys/class/leds` | `ricelin-thinkpad led <name> 0..max` | firmware or NIC may take it back |
+| TrackPoint | `serio*/sensitivity`, `press_to_select` | `ricelin-thinkpad trackpoint ...` | detect attrs, hide missing |
+| Double-tap | `thinkpad_acpi/doubletap_enable` | `ricelin-thinkpad doubletap 0|1` | hide if absent |
+
+Refresh: one `status` read when the surface opens, and one after a write. There
+is no timer, watcher or background poll. The hardware state wins when the
+surface opens; manual LED writes are the override.
+
+The fan curve editor moved to **System**. It still writes only the eight
+thinkfan level bands, backs up `/etc/thinkfan.yaml` and sends SIGHUP.
 
 ## Privileges and polkit
 
@@ -173,24 +192,7 @@ for LEDs and TrackPoint on some machines, but it cannot write
 and distribution. Polkit covers both cases with one policy and no permanent
 passwordless rule.
 
-## Controls and data flow
-
-| Row | Read | Write | Fallback |
-|---|---|---|---|
-| Fan RPM / level | `/proc/acpi/ibm/fan`, `hwmon5/fan1_input` | none | hide if absent |
-| Fan curve | 8 thinkfan level bands from `/etc/thinkfan.yaml` | `ricelin-thinkpad curve set ...`, backup + SIGHUP | hide without 8 levels |
-| Temperatures | hwmon `k10temp`, `amdgpu`, `nvme`, `acpitz` | none | hide missing sensors |
-| TrackPoint | `serio*/sensitivity`, `press_to_select` | `ricelin-thinkpad trackpoint ...` | detect attrs, hide missing |
-| Double-tap | `thinkpad_acpi/doubletap_enable` | `ricelin-thinkpad doubletap 0|1` | hide if absent |
-| Keyboard backlight | `tpacpi::kbd_backlight/brightness` | `ricelin-thinkpad led kbd 0-2` | hide if absent |
-| Lid logo / Vantage | `tpacpi::lid_logo_dot`, `tpacpi::thinkvantage` | `ricelin-thinkpad led lid|vantage 0|1` | hide if absent |
-| Every LED | every LED in `/sys/class/leds` | `ricelin-thinkpad led <name> 0..max` | firmware or NIC may take it back |
-
-Refresh: one `status` read when the surface opens, and one after a write. There
-is no timer, watcher or background poll. The Power and Presets surfaces follow
-the same model.
-
-Privilege: a root-owned helper `ricelin-thinkpad`, invoked with
+The helper is a root-owned helper `ricelin-thinkpad`, invoked with
 `pkexec /usr/local/bin/ricelin-thinkpad ...`. Reads work unprivileged; writes ask
 the session polkit agent, `hyprpolkitagent`, for authentication. There is no
 passwordless sudoers rule for either helper.
@@ -209,22 +211,23 @@ silent fallback to sudo.
 
 ## What ships now
 
-The surface is a telemetry view with three collapsible sections: Thermal,
-Lighting and Pointing.
+The surface has two collapsible sections, Lighting and Pointing, plus the
+Battery and power link. Fan telemetry and the curve are in System.
 
 - `configs/quickshell/pill/Singletons/ThinkPad.qml` detects
   `/sys/devices/platform/thinkpad_acpi` with one `test -d` and calls the helper
   only when it exists.
-- `ThinkPadSurface.qml` and its `ThinkPadGroup`, `ThinkPadCurve`,
-  `ThinkPadHero` and `ThinkPadState` components render the sections, with the
-  battery link back to Power. The curve editor shows an eight-bar preview above
-  the threshold table.
+- `ThinkPadSurface.qml` and its `ThinkPadGroup`, `ThinkPadLighting` and
+  `ThinkPadState` components render the LEDs and pointing rows, with the battery
+  link back to Power. The curve editor lives in System.
 - The surface reads one status snapshot when it opens and after a write. There
   is no timer, graph history, watcher or background poll. A keyboard-driven LED
   change is reflected on the next open; the hardware value always wins over the
   panel's last view.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
+- `FanCurvePanel.qml` lives in System; `Singletons/Sensors.qml` reads the
+  Glances Sensors tab while System is open.
 - `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
   `curve set` and `led kbd|lid|vantage`. `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
@@ -233,8 +236,9 @@ Lighting and Pointing.
   the ThinkPad helper only when a ThinkPad is detected. The same rule covers the
   TLP helper, so battery writes use the same prompt.
 
-The surface never writes raw fan levels, `pwm1_enable` or `/proc/acpi/ibm/fan`.
-It edits the thinkfan curve, which is the policy that owns those levels.
+The ThinkPad surface never writes raw fan levels, `pwm1_enable` or
+`/proc/acpi/ibm/fan`. The fan curve editor in System edits the thinkfan policy
+that owns those levels.
 
 ## Base compatibility
 
@@ -309,8 +313,9 @@ Phase 1, read-only surface: shipped.
 Phase 2, input and LED writes: shipped, guarded by the helper allowlist and the
 polkit rule.
 
-Phase 3, fan curve editor: shipped. It edits the eight level bands in place and
-leaves sensors and fans untouched.
+Phase 3, fan curve editor: shipped in System, next to the fan gauges and
+Glances temperatures. It edits the eight level bands in place and leaves raw fan
+levels untouched.
 
 Phase 4, other ThinkPads: capability detection hides rows that do not exist.
 Per-model presets remain out of scope without a confirmed thinkfan config.

@@ -5,16 +5,16 @@ import Quickshell
 import Quickshell.Io
 
 /**
- * Glances sensors bridge for the System surface. One `glances --stop-after 1`
- * read every five seconds while the surface is open; nothing runs while closed.
- * Values are the same ones shown in Glances' Sensors tab: CPU, iGPU, SSD, RAM,
- * fan RPM, fan level and package power.
+ * Native sensor snapshot for the System surface. One short Python scan of
+ * hwmon, power_supply and the ThinkPad fan interface every five seconds while
+ * the surface is open; nothing runs while closed. No Glances process.
  */
 Singleton {
     id: root
 
     property bool open: false
     property bool available: false
+    readonly property string reader: Quickshell.env("HOME") + "/.config/quickshell/pill/ricelin-sensors.py"
     property string cpuLabel: "CPU"
     property string gpuLabel: "IGPU"
     property int cpuTemp: -1
@@ -106,12 +106,12 @@ Singleton {
 
     Process {
         id: sensorProc
-        command: ["glances", "--stdout-json", "sensors", "--stop-after", "1"]
+        command: ["python3", root.reader]
         stdout: StdioCollector {
             onStreamFinished: root.parse(this.text)
         }
         stderr: StdioCollector {}
-        // Keep the last complete snapshot if a transient Glances run fails;
+        // Keep the last complete snapshot if a transient sensor scan fails;
         // clearing it makes the whole sensor block disappear and reappear.
     }
 }

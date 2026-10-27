@@ -145,7 +145,7 @@ Surface width 396. Header glyph `思`, title `THINKPAD`, model on the right.
 +--------------------------------------------------+
 ```
 
-Fan RPM, temperatures, Glances sensor gauges and the fan curve live in
+Fan RPM, temperatures, native sensor gauges and the fan curve live in
 **System**, not here. Keeping them next to CPU/IGPU/memory avoids a second
 telemetry stack and removes the duplicate temperature readout.
 
@@ -227,7 +227,7 @@ Battery and power link. Fan telemetry and the curve are in System.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `FanCurvePanel.qml` lives in System; `Singletons/Sensors.qml` reads the
-  Glances Sensors tab while System is open.
+  native hwmon/power_supply scan while System is open.
 - `tools/ricelin-thinkpad` implements `status`, `trackpoint`, `doubletap`,
   `curve set` and `led kbd|lid|vantage`. `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to
@@ -314,7 +314,7 @@ Phase 2, input and LED writes: shipped, guarded by the helper allowlist and the
 polkit rule.
 
 Phase 3, fan curve editor: shipped in System, next to the fan gauges and
-Glances temperatures. It edits the eight level bands in place and leaves raw fan
+native temperatures. It edits the eight level bands in place and leaves raw fan
 levels untouched.
 
 Phase 4, other ThinkPads: capability detection hides rows that do not exist.

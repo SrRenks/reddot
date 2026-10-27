@@ -11,6 +11,7 @@ Singleton {
     property int lastPct: -1
     property string dev: ""
     property int max: 0
+    property bool polling: false
     property string lastRaw: ""
 
     signal changed()
@@ -49,8 +50,13 @@ Singleton {
         }
     }
 
+    function refresh() {
+        if (root.dev !== "")
+            level.reload();
+    }
+
     Timer {
-        running: root.dev !== ""
+        running: root.dev !== "" && root.polling
         interval: 1000
         repeat: true
         onTriggered: level.reload()

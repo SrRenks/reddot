@@ -31,9 +31,9 @@ kept close to the original.
   edge-driven peripheral polling.
 - **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
   power and memory measurements.
-- **System** — live CPU/IGPU/memory dials, Glances sensor dials for CPU/IGPU
-  temperature and fan RPM, compact Thermal/Power/Fan groups for every other
-  sensor, and the ThinkPad fan curve.
+- **System** — live CPU/IGPU/memory dials, native CPU/IGPU temperature and
+  fan dials, compact Thermal/Power/Fan groups for every other sensor, and the
+  ThinkPad fan curve. No Glances dependency.
 - ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and
   writable LEDs. Detection is lazy and the helper is installed only on ThinkPad
   hardware, so other machines are unchanged.

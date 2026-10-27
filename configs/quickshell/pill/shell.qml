@@ -45,7 +45,6 @@ ShellRoot {
         Devices.restore();
         void GameMode.active;
         void Sound.eq;
-        Sensors.refresh();
     }
 
     /**

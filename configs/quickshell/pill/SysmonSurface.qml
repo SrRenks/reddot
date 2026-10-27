@@ -10,8 +10,8 @@ import "Singletons"
  * vermLit-to-vermBurn gradient on a thread track and rounded caps, the sweep
  * eased over the value change; the centre shows the value, a unit and a sub line
  * (memory total). A second dial row reads CPU/IGPU temperature and fan RPM from
- * the Glances Sensors tab. Thermal, Power and Fan groups list every remaining
- * Glances sensor, followed by the network/disk/swap/VRAM stripe. A fan-curve
+ * the native sensor scan. Thermal, Power and Fan groups list every remaining
+ * sensor, followed by the network/disk/swap/VRAM stripe. A fan-curve
  * group closes the card. On a machine with no IGPU telemetry the IGPU dial and
  * VRAM cell drop and the remaining dials recentre. System polling lives in the
  * singleton and only runs while this surface is open.

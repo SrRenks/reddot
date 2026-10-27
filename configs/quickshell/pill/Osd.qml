@@ -44,6 +44,12 @@ Item {
     readonly property real brightness: Backlight.brightness
     property bool recordStarted: false
 
+    function syncBacklightPolling() {
+        Backlight.polling = flashing && kind === "brightness";
+    }
+    onFlashingChanged: syncBacklightPolling()
+    onKindChanged: syncBacklightPolling()
+
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
     readonly property real volume: sink && sink.audio ? Math.max(0, Math.min(Sound.limit, sink.audio.volume)) : 0

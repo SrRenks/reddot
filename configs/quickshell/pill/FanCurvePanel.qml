@@ -74,7 +74,6 @@ Column {
     ThinkPadGroup {
         s: panel.s
         title: "Fan curve"
-        open: false
         visible: panel.ready
 
         onOpenChanged: if (open) {

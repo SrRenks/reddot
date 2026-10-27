@@ -314,10 +314,13 @@ SettingsSurface {
         id: grp
         property string title: ""
         property bool open: false
+        property bool initialOpen: false
         default property alias rows: body.data
 
         width: parent ? parent.width : 0
         spacing: 0
+
+        Component.onCompleted: if (initialOpen) open = true
 
         Item {
             width: parent.width
@@ -381,7 +384,7 @@ SettingsSurface {
             anchors.rightMargin: 12 * root.s
             spacing: 0
 
-            Group { id: winGrp; title: "Window"; open: true
+            Group { id: winGrp; title: "Window"; initialOpen: true
 
             FieldRow {
                 id: gapsInRow
@@ -821,7 +824,7 @@ SettingsSurface {
 
             }
 
-            Group { id: noticeGrp; title: "Key notices"; open: true
+            Group { id: noticeGrp; title: "Key notices"; initialOpen: true
 
             FieldRow {
                 id: noticeEnRow

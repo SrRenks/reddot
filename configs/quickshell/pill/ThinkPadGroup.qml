@@ -10,11 +10,16 @@ Column {
     property real s: 1
     property string title: ""
     property bool open: false
+    /** Initial state only; assigning `open` from a parent as a binding would
+     *  reassert the old value after the header toggles it. */
+    property bool initialOpen: false
     property bool accent: false
     default property alias rows: body.data
 
     width: parent ? parent.width : 0
     spacing: 0
+
+    Component.onCompleted: if (initialOpen) open = true
 
     Item {
         width: parent.width

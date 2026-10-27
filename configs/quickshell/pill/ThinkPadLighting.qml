@@ -10,7 +10,6 @@ ThinkPadGroup {
     property var surface: null
 
     title: "Lighting"
-    open: false
 
     Timer {
         id: muteRefresh

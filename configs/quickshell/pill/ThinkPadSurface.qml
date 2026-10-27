@@ -190,15 +190,14 @@ PillSurface {
             ThinkPadLighting {
                 s: root.s
                 surface: root
-                open: true
+                initialOpen: true
                 visible: ThinkPad.present
             }
 
             ThinkPadGroup {
                 s: root.s
                 title: "LED engine"
-                open: false
-                accent: true
+                        accent: true
                 visible: root.showData && ThinkPad.ledsAll.length > 0
 
                 ThinkPadLedEditor {
@@ -210,8 +209,7 @@ PillSurface {
             ThinkPadGroup {
                 s: root.s
                 title: "Pointing"
-                open: false
-                accent: true
+                        accent: true
                 visible: root.hasPointing
 
                 Repeater {
@@ -274,8 +272,7 @@ PillSurface {
             ThinkPadGroup {
                 s: root.s
                 title: "Machine"
-                open: false
-                accent: true
+                        accent: true
 
                 Repeater {
                     model: root.machineRows

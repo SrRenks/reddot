@@ -8,13 +8,13 @@ import Quickshell.Io
  * network, disk and (when a discrete GPU is present) GPU load, temperature and
  * VRAM, exposing them as live properties the surface binds to. Polling only runs
  * while `open` is true, on three decoupled cadences so a slow source never
- * stalls the dials: the cheap /proc and hwmon reads refresh every 500ms, the GPU
- * query every 1s, and disk plus uptime every 5s. Opening the surface primes all
- * three at once so the dials are populated immediately.
+ * stalls the dials: one 2s tick refreshes CPU/memory, GPU, network, disk and
+ * uptime together. Opening the surface primes them all at once so the dials are
+ * populated immediately.
  *
  * CPU load is a two-sample delta of /proc/stat (busy vs total jiffies); network
  * rates are a two-sample delta of /proc/net/dev summed over every interface but
- * loopback, divided by the fast interval. CPU temperature resolves once to the
+ * loopback, divided by the refresh interval. CPU temperature resolves once to the
  * most accurate hwmon sensor available: AMD Tdie, else Intel "Package id 0",
  * else AMD Tctl, else the first temp1_input. The GPU path resolves once to
  * nvidia (nvidia-smi), AMD (sysfs gpu_busy_percent), Intel (i915 or xe) or
@@ -273,24 +273,19 @@ Singleton {
         }
     }
 
-    Timer {
-        interval: 500
-        running: root.open
-        repeat: true
-        onTriggered: if (!fastProc.running) fastProc.running = true
-    }
+    readonly property int refreshMs: 2000
 
     Timer {
-        interval: 1000
-        running: root.open && root.hasGpu
-        repeat: true
-        onTriggered: if (!gpuProc.running) gpuProc.running = true
-    }
-
-    Timer {
-        interval: 5000
+        interval: root.refreshMs
         running: root.open
         repeat: true
-        onTriggered: if (!slowProc.running) slowProc.running = true
+        onTriggered: {
+            if (!fastProc.running)
+                fastProc.running = true;
+            if (root.hasGpu && !gpuProc.running)
+                gpuProc.running = true;
+            if (!slowProc.running)
+                slowProc.running = true;
+        }
     }
 }

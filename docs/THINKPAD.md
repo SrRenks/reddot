@@ -227,7 +227,7 @@ Battery and power link. Fan telemetry and the curve are in System.
 - `configs/quickshell/pill/Pill.qml`, `shell.qml`, `TlpSurface.qml` and
   `binds.lua` wire the surface, the IPC verb and `Super+Shift+T`.
 - `FanCurvePanel.qml` lives in System; `Singletons/Sensors.qml` reads the
-  native hwmon/power_supply scan while System is open.
+  native hwmon/power_supply scan while System is open, now on a 2 s cadence.
 - `tools/reddot-thinkpad` implements `status`, `trackpoint`, `doubletap`,
   `curve set` and `led kbd|lid|vantage`. `curve set` backs up
   `/etc/thinkfan.yaml`, replaces only the levels block and sends SIGHUP to

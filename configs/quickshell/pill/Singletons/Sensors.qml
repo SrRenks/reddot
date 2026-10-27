@@ -6,7 +6,7 @@ import Quickshell.Io
 
 /**
  * Native sensor snapshot for the System surface. One short Rust scan of hwmon,
- * power_supply and the ThinkPad fan interface every five seconds while the
+ * power_supply and the ThinkPad fan interface every two seconds while the
  * surface is open; nothing runs while closed. No Glances process.
  */
 Singleton {
@@ -31,6 +31,7 @@ Singleton {
     property var list: []
 
     readonly property int fanMax: 5000
+    readonly property int refreshMs: 2000
 
     function refresh() {
         if (sensorProc.running)
@@ -115,7 +116,7 @@ Singleton {
     onOpenChanged: if (open) refresh()
 
     Timer {
-        interval: 5000
+        interval: root.refreshMs
         running: root.open
         repeat: true
         onTriggered: root.refresh()

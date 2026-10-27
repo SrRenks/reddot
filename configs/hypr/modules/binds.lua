@@ -50,6 +50,7 @@ hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hy
 hl.bind(mod .. " + SHIFT + C",  hl.dsp.exec_cmd("hyprpicker -a"))
 hl.bind(mod .. " + SHIFT + R",  hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/record.sh")) -- Record
 hl.bind(mod .. " + SHIFT + E",  hl.dsp.exec_cmd("easyeffects --bypass-toggle")) -- EasyEffects bypass
+hl.bind(mod .. " + SHIFT + F",  hl.dsp.exec_cmd("qs -c pill ipc call pill blur")) -- Toggle Quickshell blur
 
 hl.bind(mod .. " + A",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh launcher")) -- Open Apps
 hl.bind(mod .. " + W",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/open-surface.sh wallpaper")) -- Wallpaper Picker

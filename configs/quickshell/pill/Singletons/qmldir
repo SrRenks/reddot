@@ -24,3 +24,4 @@ singleton Peripherals Peripherals.qml
 singleton Sound Sound.qml
 singleton PresetStore PresetStore.qml
 singleton Sensors Sensors.qml
+singleton UiBlur UiBlur.qml

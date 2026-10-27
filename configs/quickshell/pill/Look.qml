@@ -54,7 +54,7 @@ SettingsSurface {
             }
         }
         if (blurGrp.open) {
-            r.push({ item: uiBlurRow, kind: "toggle", get: function () { return Flags.pillBlur; }, set: function (v) { Flags.pillBlur = v; root.applyPillBlur(v); } });
+            r.push({ item: uiBlurRow, kind: "toggle", get: function () { return UiBlur.enabled; }, set: function (v) { UiBlur.setEnabled(v); } });
             r.push({ item: blEnRow, kind: "toggle", get: function () { return root.blurOn; }, set: function (v) { root.blurOn = v; root.writeBlur("enabled", v ? "true" : "false"); } });
             if (root.blurOn) {
                 r.push({ item: blSizeRow, kind: "scrub", bump: function (d) { blSizeScrub.bump(d); } });
@@ -80,7 +80,6 @@ SettingsSurface {
     property string note: ""
 
     readonly property string decoPath: Quickshell.env("HOME") + "/.config/hypr/modules/decoration.lua"
-    readonly property string pillBlurRule: 'hl.layer_rule({ name = "pill-blur", match = { namespace = "pill" }, blur = true, ignore_alpha = 0.5 })\n'
 
     property int gapsIn: 6
     property int gapsOut: 12
@@ -165,7 +164,6 @@ SettingsSurface {
         var io = parseFloat(SetDeco.getField(t, "inactive_opacity"));
         root.inactiveOpacity = isNaN(io) ? 1.0 : io;
 
-        Flags.pillBlur = SetDeco.hasNamedRule(t, "pill-blur");
 
         root.base = {
             gapsIn: root.gapsIn,
@@ -254,29 +252,6 @@ SettingsSurface {
      */
     function writeShadow(name, literal) {
         var res = SetDeco.setBlockField(root.decoText, "shadow", name, literal);
-        if (!res.ok)
-            return;
-        root.decoText = res.text;
-        decoWriter.setText(res.text);
-        reloadTimer.restart();
-    }
-
-    /**
-     * Adds or removes the pill-blur layer_rule in decoration.lua and reloads
-     * Hyprland so the frosted-glass effect behind the pill turns on or off at
-     * once. The rule lives in the Lua source (the live config parser rejects a
-     * runtime `layerrule` keyword), so it has to be written, not pushed.
-     */
-    function applyPillBlur(on) {
-        var t = root.decoText;
-        var res;
-        if (on) {
-            if (SetDeco.hasNamedRule(t, "pill-blur"))
-                return;
-            res = SetDeco.addNamedRule(t, root.pillBlurRule);
-        } else {
-            res = SetDeco.removeNamedRule(t, "pill-blur");
-        }
         if (!res.ok)
             return;
         root.decoText = res.text;
@@ -647,11 +622,8 @@ SettingsSurface {
                 caption: "Pill and layer surfaces only; terminal blur is left alone. Requires Window blur enabled."
                 LinkToggle {
                     s: root.s
-                    on: Flags.pillBlur
-                    onToggled: {
-                        Flags.pillBlur = !Flags.pillBlur;
-                        root.applyPillBlur(Flags.pillBlur);
-                    }
+                    on: UiBlur.enabled
+                    onToggled: UiBlur.setEnabled(!UiBlur.enabled)
                 }
             }
 

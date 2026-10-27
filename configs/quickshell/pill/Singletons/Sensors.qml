@@ -25,6 +25,9 @@ Singleton {
     property int fanRpm: -1
     property int fanLevel: -1
     property real powerW: -1
+    property real batteryRate: -1
+    property int batteryTrend: 0
+    property int powerTrend: 0
     property var list: []
 
     readonly property int fanMax: 5000
@@ -33,6 +36,15 @@ Singleton {
         if (sensorProc.running)
             return;
         sensorProc.running = true;
+    }
+
+    function trend(previous, next) {
+        if (previous < 0 || next < 0)
+            return 0;
+        var delta = Math.abs(next) - Math.abs(previous);
+        if (Math.abs(delta) < 0.05)
+            return 0;
+        return delta > 0 ? 1 : -1;
     }
 
     function parse(text) {
@@ -55,7 +67,7 @@ Singleton {
         var items = body.sensors || [];
         var next = {
             cpu: -1, gpu: -1, nvme: -1, ram0: -1, ram1: -1,
-            rpm: -1, level: -1, power: -1
+            rpm: -1, level: -1, power: -1, rate: -1
         };
         for (var j = 0; j < items.length; j++) {
             var item = items[j] || {};
@@ -82,7 +94,11 @@ Singleton {
                 next.level = Math.round(value);
             else if (item.type === "amd_ppt")
                 next.power = value;
+            else if (item.type === "battery_power")
+                next.rate = value;
         }
+        root.batteryTrend = root.trend(root.batteryRate, next.rate);
+        root.powerTrend = root.trend(root.powerW, next.power);
         root.cpuTemp = next.cpu;
         root.gpuTemp = next.gpu;
         root.nvmeTemp = next.nvme;
@@ -91,6 +107,7 @@ Singleton {
         root.fanRpm = next.rpm;
         root.fanLevel = next.level;
         root.powerW = next.power;
+        root.batteryRate = next.rate;
         root.list = items;
         root.available = items.length > 0;
     }

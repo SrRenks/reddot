@@ -86,6 +86,15 @@ PillSurface {
         return item.unit === "C" ? "°C" : (item.unit || "");
     }
 
+    function sensorTrend(item) {
+        var label = String(item.label || "").toUpperCase();
+        if (label === "BAT RATE")
+            return Sensors.batteryTrend;
+        if (label === "POW RATE")
+            return Sensors.powerTrend;
+        return 0;
+    }
+
     property var focusRowItem: null
 
     function reportRowHover(row, hovered) {
@@ -454,7 +463,7 @@ PillSurface {
 
                                         Text {
                                             text: root.sensorValue(sensorCell.modelData)
-                                            color: Theme.cream
+                                            color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.cream
                                             font.family: Theme.font
                                             font.pixelSize: 11 * root.s
                                             font.weight: Font.DemiBold
@@ -467,6 +476,15 @@ PillSurface {
                                             font.family: Theme.font
                                             font.pixelSize: 8 * root.s
                                             font.weight: Font.Medium
+                                        }
+
+                                        Text {
+                                            visible: root.sensorTrend(sensorCell.modelData) !== 0
+                                            text: root.sensorTrend(sensorCell.modelData) > 0 ? "▲" : "▼"
+                                            color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.subtle
+                                            font.family: Theme.font
+                                            font.pixelSize: 7.5 * root.s
+                                            font.weight: Font.Bold
                                         }
                                     }
                                 }

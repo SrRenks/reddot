@@ -59,6 +59,7 @@ fn main() {
     let mut ssd = Vec::new();
     let mut ram = Vec::new();
     let mut fans = Vec::new();
+    let mut fan_seen = false;
     let mut cpu = None;
     let mut igpu = None;
     let mut power = None;
@@ -91,6 +92,7 @@ fn main() {
             }
             "acpi_fan" => {
                 if let Some(value) = number(&path.join("fan1_input"), 1.0) {
+                    fan_seen = true;
                     if value > 0.0 {
                         fans.push(value);
                     }
@@ -111,6 +113,7 @@ fn main() {
                 let name = entry.file_name().to_string_lossy().to_string();
                 if name.starts_with("fan") && name.ends_with("_input") {
                     if let Some(value) = number(&entry.path(), 1.0) {
+                        fan_seen = true;
                         if value > 0.0 {
                             fans.push(value);
                         }
@@ -175,13 +178,15 @@ fn main() {
     push(&mut out, "BAT", "%", battery, "battery");
     push(&mut out, "BAT RATE", "W", rate, "battery_power");
     push(&mut out, "POW RATE", "W", power, "amd_ppt");
-    push(
-        &mut out,
-        "FAN RPM",
-        "R",
-        fans.into_iter().reduce(f64::max),
-        "fan_speed",
-    );
+    if fan_seen || level.is_some() {
+        push(
+            &mut out,
+            "FAN RPM",
+            "R",
+            fans.into_iter().reduce(f64::max).or(Some(0.0)),
+            "fan_speed",
+        );
+    }
     push(&mut out, "FAN LEVEL", "", level, "fan_level");
 
     let json: Vec<String> = out

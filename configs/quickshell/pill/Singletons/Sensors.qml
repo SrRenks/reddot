@@ -15,6 +15,8 @@ Singleton {
 
     property bool open: false
     property bool available: false
+    property string cpuLabel: "CPU"
+    property string gpuLabel: "IGPU"
     property int cpuTemp: -1
     property int gpuTemp: -1
     property int nvmeTemp: -1
@@ -61,10 +63,13 @@ Singleton {
             var value = Number(item.value);
             if (!isFinite(value))
                 continue;
-            if (label === "CPU" && item.type === "temperature_core")
+            if (label === "CPU" && item.type === "temperature_core") {
                 next.cpu = Math.round(value);
-            else if ((label === "IGPU" || label === "GPU") && item.type === "temperature_core")
+                root.cpuLabel = item.label;
+            } else if ((label === "IGPU" || label === "GPU") && item.type === "temperature_core") {
                 next.gpu = Math.round(value);
+                root.gpuLabel = item.label;
+            }
             else if ((label === "SSD0" || label === "NVME") && item.type === "temperature_core")
                 next.nvme = Math.round(value);
             else if (label === "RAM0")

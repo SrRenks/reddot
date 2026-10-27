@@ -40,15 +40,51 @@ PillSurface {
             out.push("fan");
         return out;
     }
-    readonly property string sensorNote: {
-        var parts = [];
-        if (Sensors.nvmeTemp >= 0)
-            parts.push("NVMe " + Sensors.nvmeTemp + "°");
-        if (Sensors.ram0Temp >= 0)
-            parts.push("RAM " + Sensors.ram0Temp + (Sensors.ram1Temp >= 0 ? "/" + Sensors.ram1Temp : "") + "°");
-        if (Sensors.powerW >= 0)
-            parts.push(Sensors.powerW.toFixed(1) + " W");
-        return parts.join("  ·  ");
+    readonly property var sensorGroups: {
+        var groups = [
+            { title: "Thermal", items: [] },
+            { title: "Power", items: [] },
+            { title: "Fan", items: [] },
+            { title: "Other", items: [] }
+        ];
+        if (!Sensors.available)
+            return [];
+        for (let i = 0; i < Sensors.list.length; i++) {
+            const item = Sensors.list[i] || {};
+            const label = String(item.label || "").toUpperCase();
+            const type = String(item.type || "");
+            if (type === "temperature_core"
+                    && (label === Sensors.cpuLabel.toUpperCase()
+                        || label === Sensors.gpuLabel.toUpperCase()))
+                continue;
+            if ((type === "fan_speed" || type === "fan_level") && Sensors.fanRpm >= 0)
+                continue;
+            let index = 3;
+            if (type === "temperature_core")
+                index = 0;
+            else if (type === "battery" || type === "battery_power" || type === "amd_ppt")
+                index = 1;
+            else if (type === "fan_speed" || type === "fan_level")
+                index = 2;
+            groups[index].items.push(item);
+        }
+        var out = [];
+        for (let j = 0; j < groups.length; j++) {
+            if (groups[j].items.length > 0)
+                out.push(groups[j]);
+        }
+        return out;
+    }
+
+    function sensorValue(item) {
+        var v = Number(item.value);
+        if (!isFinite(v))
+            return "—";
+        return Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1);
+    }
+
+    function sensorUnit(item) {
+        return item.unit === "C" ? "°C" : (item.unit || "");
     }
 
     property var focusRowItem: null
@@ -75,7 +111,8 @@ PillSurface {
     }
 
     function sensorLabel(key) {
-        return key === "fan" ? "FAN" : key === "cpuTemp" ? "CPU" : "GPU";
+        return key === "fan" ? "FAN"
+            : key === "cpuTemp" ? Sensors.cpuLabel : Sensors.gpuLabel;
     }
 
     function sensorSub(key) {
@@ -342,6 +379,105 @@ PillSurface {
             }
         }
 
+        Item {
+            width: parent.width
+            height: root.sensorGroups.length > 0 ? card.implicitHeight + 12 * root.s : 0
+            visible: root.sensorGroups.length > 0
+            clip: true
+
+            Column {
+                id: card
+                width: parent.width
+                spacing: 9 * root.s
+
+                Repeater {
+                    model: root.sensorGroups
+
+                    Column {
+                        id: groupCol
+                        required property var modelData
+                        width: card.width
+                        spacing: 3 * root.s
+
+                        Row {
+                            width: parent.width
+                            spacing: 7 * root.s
+
+                            Text {
+                                text: groupCol.modelData.title
+                                color: Theme.faint
+                                font.family: Theme.font
+                                font.pixelSize: 7.5 * root.s
+                                font.weight: Font.Bold
+                                font.capitalization: Font.AllUppercase
+                                font.letterSpacing: 1 * root.s
+                            }
+
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - 52 * root.s
+                                height: 1
+                                color: Theme.hairSoft
+                            }
+                        }
+
+                        Flow {
+                            id: cells
+                            width: parent.width
+                            spacing: 5 * root.s
+
+                            Repeater {
+                                model: groupCol.modelData.items
+
+                                Item {
+                                    id: sensorCell
+                                    required property var modelData
+                                    width: (cells.width - 10 * root.s) / 3
+                                    height: 28 * root.s
+
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        text: sensorCell.modelData.label
+                                        color: Theme.faint
+                                        font.family: Theme.font
+                                        font.pixelSize: 7.5 * root.s
+                                        font.weight: Font.Medium
+                                        font.capitalization: Font.AllUppercase
+                                        elide: Text.ElideRight
+                                        width: parent.width
+                                    }
+
+                                    Row {
+                                        anchors.left: parent.left
+                                        anchors.bottom: parent.bottom
+                                        spacing: 2 * root.s
+
+                                        Text {
+                                            text: root.sensorValue(sensorCell.modelData)
+                                            color: Theme.cream
+                                            font.family: Theme.font
+                                            font.pixelSize: 11 * root.s
+                                            font.weight: Font.DemiBold
+                                            font.features: { "tnum": 1 }
+                                        }
+
+                                        Text {
+                                            text: root.sensorUnit(sensorCell.modelData)
+                                            color: Theme.subtle
+                                            font.family: Theme.font
+                                            font.pixelSize: 8 * root.s
+                                            font.weight: Font.Medium
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Item { width: 1; height: 18 * root.s }
 
         Rectangle {
@@ -435,34 +571,6 @@ PillSurface {
                         }
                     }
                 }
-            }
-        }
-
-        Item {
-            width: parent.width
-            height: root.sensorNote.length > 0 ? 24 * root.s : 0
-            visible: root.sensorNote.length > 0
-
-            Text {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: "SENSORS"
-                color: Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 8 * root.s
-                font.weight: Font.Bold
-                font.letterSpacing: 1 * root.s
-            }
-
-            Text {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.sensorNote
-                color: Theme.subtle
-                font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
-                font.weight: Font.Medium
-                font.features: { "tnum": 1 }
             }
         }
 

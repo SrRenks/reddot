@@ -12,6 +12,13 @@ ThinkPadGroup {
     title: "Lighting"
     open: false
 
+    Timer {
+        id: muteRefresh
+        interval: 180
+        repeat: false
+        onTriggered: ThinkPad.refresh()
+    }
+
     SettingsField {
         surface: lighting.surface
         label: "Keyboard light"
@@ -38,8 +45,11 @@ ThinkPadGroup {
             s: lighting.s
             on: Sound.source && Sound.source.audio ? Sound.source.audio.muted : false
             enabled: !lighting.surface.busy
-            onToggled: if (Sound.source && Sound.source.audio)
-                Sound.source.audio.muted = !on
+            onToggled: {
+                if (Sound.source && Sound.source.audio)
+                    Sound.source.audio.muted = !on;
+                muteRefresh.restart();
+            }
         }
     }
 
@@ -53,8 +63,11 @@ ThinkPadGroup {
             s: lighting.s
             on: Sound.sink && Sound.sink.audio ? Sound.sink.audio.muted : false
             enabled: !lighting.surface.busy
-            onToggled: if (Sound.sink && Sound.sink.audio)
-                Sound.sink.audio.muted = !on
+            onToggled: {
+                if (Sound.sink && Sound.sink.audio)
+                    Sound.sink.audio.muted = !on;
+                muteRefresh.restart();
+            }
         }
     }
 

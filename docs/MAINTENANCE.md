@@ -84,6 +84,8 @@ history of this fork see `git log`; each feature was committed separately.
   Always**, or edit `~/.local/state/ricelin/flags.json`.
 - **TLP helper**: root-owned `/usr/local/bin/ricelin-tlp`, called through
   `pkexec`. TLP has no unprivileged threshold API; TLPUI escalates the same way.
+- **Mute LEDs**: `tools/99-ricelin-leds.rules` selects `audio-mute` and
+  `audio-micmute` at boot. No daemon; the two LEDs are followers.
 - **ThinkPad helper**: `pkexec` plus polkit, not sudoers. The shared rule returns
   `AUTH_ADMIN_KEEP` only for `/usr/local/bin/ricelin-thinkpad` and
   `/usr/local/bin/ricelin-tlp`; reads do not prompt. This needs a running polkit

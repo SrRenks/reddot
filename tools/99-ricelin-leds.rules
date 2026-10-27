@@ -1,0 +1,3 @@
+# ThinkPad mute LEDs: let the kernel audio triggers follow ALSA automatically.
+ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
+ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"

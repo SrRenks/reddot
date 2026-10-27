@@ -54,9 +54,25 @@ ThinkPadGroup {
         }
     }
 
+    SettingsField {
+        surface: lighting.surface
+        label: "Mute LEDs"
+        caption: "Follows the system mute state"
+        visible: ThinkPad.leds.MUTE !== undefined || ThinkPad.leds.MICMUTE !== undefined
+
+        Text {
+            text: (ThinkPad.leds.MICMUTE > 0 ? "mic muted" : "mic live")
+                + "  ·  " + (ThinkPad.leds.MUTE > 0 ? "speaker muted" : "speaker live")
+            color: Theme.subtle
+            font.family: Theme.font
+            font.pixelSize: 9.5 * lighting.s
+            font.weight: Font.Medium
+        }
+    }
+
     ThinkPadGroup {
         s: lighting.s
-        title: "All LEDs"
+        title: "Other LEDs"
         open: false
         visible: ThinkPad.ledOther.length > 0
 

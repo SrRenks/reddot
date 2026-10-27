@@ -265,6 +265,32 @@ This proves the sysfs path accepts the write. It does not promise that the NIC,
 keyboard controller or EC will keep the value; the UI reads the value back after
 each write. Lock LEDs do not change the actual lock state.
 
+## Mute LEDs
+
+`platform::mute` and `platform::micmute` default to the `[none]` trigger. The
+kernel exposes `audio-mute` and `audio-micmute`, but nothing selects them, so
+muting ALSA changed the audio while the LEDs stayed off.
+
+`tools/99-ricelin-leds.rules` selects the triggers at boot:
+
+```udev
+ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::mute", ATTR{trigger}="audio-mute"
+ACTION=="add|change", SUBSYSTEM=="leds", KERNEL=="platform::micmute", ATTR{trigger}="audio-micmute"
+```
+
+Verified by toggling `wpctl set-mute` on the default sink and source:
+
+| State | `platform::mute` | `platform::micmute` |
+|---|---|---|
+| both muted | 1 | 1 |
+| both live | 0 | 0 |
+| muted again | 1 | 1 |
+
+No daemon, no polling and no polkit prompt runs on mute changes. The two LEDs
+are followers in the UI, not manual toggles: writing brightness directly would
+fight the kernel trigger and desync the indicator. The other 11 LEDs stay
+directly editable.
+
 ## Implementation phases
 
 Phase 1, read-only surface: shipped.

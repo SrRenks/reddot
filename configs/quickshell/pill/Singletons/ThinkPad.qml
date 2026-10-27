@@ -81,7 +81,8 @@ Singleton {
     }
     readonly property bool hasFan: fanRpm >= 0
     readonly property var primaryLeds: [
-        "tpacpi::kbd_backlight", "tpacpi::lid_logo_dot", "tpacpi::thinkvantage"
+        "tpacpi::kbd_backlight", "tpacpi::lid_logo_dot", "tpacpi::thinkvantage",
+        "platform::mute", "platform::micmute"
     ]
     readonly property var ledOther: {
         var out = [];

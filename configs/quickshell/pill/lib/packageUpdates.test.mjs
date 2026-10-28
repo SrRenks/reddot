@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
-const { isImportant, parse } = require("./packageUpdates.js");
+const { isImportant, parse } = require("../Singletons/PackageUpdatesParser.js");
 
 let failed = 0;
 function eq(actual, expected, msg) {

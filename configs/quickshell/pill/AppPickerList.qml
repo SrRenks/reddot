@@ -233,7 +233,7 @@ Column {
                     height: 24 * picker.s
                     radius: 6 * picker.s
                     color: Qt.rgba(1, 1, 1, 0.05)
-                    visible: !(appIcon.status === Image.Ready && appIcon.source != "")
+                    visible: !(appIcon.status === Image.Ready && String(appIcon.source) !== "")
                 }
                 Image {
                     id: appIcon
@@ -243,7 +243,7 @@ Column {
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     smooth: true
-                    visible: status === Image.Ready && source != ""
+                    visible: status === Image.Ready && String(source) !== ""
                     source: appRow.entry && appRow.entry.icon ? Quickshell.iconPath(appRow.entry.icon, true) : ""
                 }
 

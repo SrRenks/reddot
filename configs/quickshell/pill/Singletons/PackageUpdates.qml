@@ -2,7 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../lib/packageUpdates.js" as PackageParser
+import "PackageUpdatesParser.js" as PackageParser
 
 /**
  * Periodic system package counter: official repos, AUR via yay, and Flatpak.
@@ -34,7 +34,7 @@ Singleton {
     readonly property bool important: importantNames.length > 0
     readonly property bool hasError: errorText.length > 0
     readonly property bool stale: {
-        ageTick;
+        void root.ageTick;
         return lastCheckEpoch > 0
             && (Date.now() - lastCheckEpoch) > Math.max(5, minutes) * 120000;
     }
@@ -49,7 +49,7 @@ Singleton {
     readonly property bool aurAvailable: aurState !== "missing"
     readonly property bool flatpakAvailable: flatpakState !== "missing"
     readonly property string ageText: {
-        ageTick;
+        void root.ageTick;
         if (lastCheckEpoch <= 0)
             return "";
         var mins = Math.floor((Date.now() - lastCheckEpoch) / 60000);

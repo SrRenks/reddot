@@ -723,7 +723,7 @@ PillSurface {
                 AnimatedImage {
                     anchors.fill: parent
                     source: tile.showPreview && tile.isGif ? (tile.remote ? tile.modelData.image : "file://" + tile.modelData.path) : ""
-                    playing: source != ""
+                    playing: String(source) !== ""
                     visible: status === AnimatedImage.Ready
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true

@@ -101,7 +101,7 @@ Column {
 
                 Text {
                     anchors.centerIn: parent
-                    visible: !(icon.status === Image.Ready && icon.source != "")
+                    visible: !(icon.status === Image.Ready && String(icon.source) !== "")
                     text: erow.title.length > 0 ? erow.title.charAt(0).toUpperCase() : "?"
                     color: Theme.dim
                     font.family: Theme.font
@@ -118,7 +118,7 @@ Column {
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     smooth: true
-                    visible: status === Image.Ready && source != ""
+                    visible: status === Image.Ready && String(source) !== ""
                     source: erow.resolved && erow.resolved.icon ? Quickshell.iconPath(erow.resolved.icon, true) : ""
                 }
             }

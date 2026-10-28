@@ -20,7 +20,12 @@ Item {
     property real s: 1
     property bool live: true
     required property var notif
-    required property Item host
+    /**
+     * The host is a sibling pill item with animated swipe properties. QML cannot
+     * name those properties across components, so this boundary stays dynamic;
+     * the contract is documented in docs/conventions.md.
+     */
+    required property var host
 
     readonly property bool critical: notif.urgency === NotificationUrgency.Critical
     readonly property var acts: notif.actions.filter(function(a) { return a.text.length > 0; })

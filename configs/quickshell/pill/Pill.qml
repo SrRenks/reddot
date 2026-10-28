@@ -77,6 +77,7 @@ Item {
     readonly property bool maintenanceOpen: surface === "maintenance"
     readonly property bool clockOpen: surface === "clock"
     readonly property bool pillsettingsOpen: surface === "pillsettings"
+    readonly property bool packagesOpen: surface === "packages"
     readonly property bool keybindsOpen: surface === "keybinds"
     readonly property bool workspacesOpen: surface === "workspaces"
     readonly property bool startupOpen: surface === "startup"
@@ -219,6 +220,7 @@ Item {
     readonly property real maintenanceW: 392 * s
     readonly property real clockW: 392 * s
     readonly property real pillsettingsW: 392 * s
+    readonly property real packagesW: 392 * s
     readonly property real presetsW: 392 * s
     readonly property real idlelockW: 392 * s
     readonly property real animationW: 392 * s
@@ -290,6 +292,7 @@ Item {
         shell:     { size: () => Qt.size(shellW, surfaceItem(ldShell).implicitHeight + 29 * s), ame: () => surfaceItem(ldShell) },
         clock:     { size: () => Qt.size(clockW, surfaceItem(ldClock).implicitHeight + 29 * s), ame: () => surfaceItem(ldClock) },
         pillsettings: { size: () => Qt.size(pillsettingsW, surfaceItem(ldPillSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldPillSettings) },
+        packages:   { size: () => Qt.size(packagesW, surfaceItem(ldPackages).implicitHeight + 29 * s), ame: () => surfaceItem(ldPackages) },
         windows:   { size: () => Qt.size(windowsW, surfaceItem(ldWindows).implicitHeight + 29 * s), ame: () => surfaceItem(ldWindows) },
         powerhub:  { size: () => Qt.size(powerhubW, surfaceItem(ldPowerhub).implicitHeight + 29 * s), ame: () => surfaceItem(ldPowerhub) },
         shortcuts: { size: () => Qt.size(shortcutsW, surfaceItem(ldShortcuts).implicitHeight + 29 * s), ame: () => surfaceItem(ldShortcuts) },
@@ -602,7 +605,7 @@ Item {
         idlelock: ldIdlelock, animation: ldAnimation, fontpicker: ldFontpicker,
         shell: ldShell, windows: ldWindows, powerhub: ldPowerhub,
         shortcuts: ldShortcuts, maintenance: ldMaintenance,
-        clock: ldClock, pillsettings: ldPillSettings
+        clock: ldClock, pillsettings: ldPillSettings, packages: ldPackages
     })
 
     Timer {
@@ -1447,6 +1450,12 @@ Item {
 
     readonly property var statusOrder: {
         var base = Flags.barStatusOrder.split(",");
+        // Older flag files predate the package meter; append it before settings.
+        if (base.indexOf("updates") < 0) {
+            var at = base.indexOf("settings");
+            if (at < 0) base.push("updates");
+            else base.splice(at, 0, "updates");
+        }
         return Flags.barStatusReverse ? base.slice().reverse() : base;
     }
     readonly property real statusGap: 12 * s
@@ -1463,6 +1472,7 @@ Item {
         case "sound":      return soundIcon.width;
         case "thinkpad":   return thinkpadIcon.width;
         case "sysmon":     return sysmonIcon.width;
+        case "updates":    return updatesIcon.visible ? updatesIcon.width : 0;
         case "recorder":   return recorderIcon.width;
         case "settings":   return settingsIcon.width;
         case "power":      return powerIcon.width;
@@ -1996,6 +2006,50 @@ Item {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: pill.requestSurface("sysmon")
                         onContainsMouseChanged: if (containsMouse) pill.soulTarget = "sysmon"
+                    }
+                }
+
+                Item {
+                    id: updatesIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: pill.statusX("updates")
+                    visible: Flags.barUpdates && PackageUpdates.enabled && PackageUpdates.total > 0
+                    width: visible ? updatesLabel.implicitWidth + 17 * pill.s : 0
+                    height: 17 * pill.s
+
+                    GlyphIcon {
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 13 * pill.s
+                        height: 13 * pill.s
+                        name: "download"
+                        color: PackageUpdates.important ? Theme.verm
+                            : (updatesArea.containsMouse ? Theme.cream : Theme.iconDim)
+                        stroke: 1.8
+                    }
+
+                    Text {
+                        id: updatesLabel
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: PackageUpdates.total
+                        color: PackageUpdates.important ? Theme.verm
+                            : (updatesArea.containsMouse ? Theme.cream : Theme.subtle)
+                        font.family: Theme.font
+                        font.pixelSize: 9.5 * pill.s
+                        font.weight: Font.Bold
+                        font.features: { "tnum": 1 }
+                    }
+
+                    MouseArea {
+                        id: updatesArea
+                        anchors.fill: parent
+                        anchors.margins: -6 * pill.s
+                        hoverEnabled: true
+                        enabled: hover.live
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: pill.requestSurface("packages")
+                        onContainsMouseChanged: if (containsMouse) pill.soulTarget = "updates"
                     }
                 }
 
@@ -2634,8 +2688,22 @@ Item {
             hubIcon: "download"
             entries: [
                 { name: "Startup", sub: "Commands run when the session starts", icon: "play", surface: "startup" },
-                { name: "Updates", sub: "System packages and shell updates", icon: "download", surface: "updates" }
+                { name: "Updates", sub: "Shell updates and release notes", icon: "download", surface: "updates" },
+                { name: "System packages", sub: "pacman, AUR and Flatpak update meter", icon: "download", surface: "packages" }
             ]
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldPackages
+        active: false
+        anchors.fill: parent
+        sourceComponent: PackagesSurface {
+            s: pill.s
+            open: pill.packagesOpen
+            morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)
         }

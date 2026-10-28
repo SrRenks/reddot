@@ -33,6 +33,7 @@ var definitions = {
     powerhub:   { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldPowerhub" },
     shortcuts:  { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldShortcuts" },
     maintenance:{ parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldMaintenance" },
+    packages:   { parent: "maintenance", settingsLike: true, inlineBack: true, cold: true , loader: "ldPackages" },
     keybinds:   { parent: "shortcuts", settingsLike: false,  cold: true  , loader: "ldKeybinds" },
     workspaces: { parent: "shortcuts", settingsLike: false,  cold: true  , loader: "ldWorkspaces" },
     startup:    { parent: "maintenance", settingsLike: true, inlineBack: true, cold: true, loader: "ldStartup" },

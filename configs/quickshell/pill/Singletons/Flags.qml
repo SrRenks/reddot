@@ -85,6 +85,9 @@ Singleton {
     property alias barRecorder: adapter.barRecorder
     property alias barSettings: adapter.barSettings
     property alias barPower: adapter.barPower
+    property alias barUpdates: adapter.barUpdates
+    property alias packageUpdatesEnabled: adapter.packageUpdatesEnabled
+    property alias packageCheckMinutes: adapter.packageCheckMinutes
 
     FileView {
         id: file
@@ -167,7 +170,7 @@ Singleton {
             property string barOrder: "standard"
             property bool barStatusReverse: false
             /** Status-cluster order; the Bar page edits this list. */
-            property string barStatusOrder: "weather,minimized,tray,dnd,network,inbox,mixer,sound,thinkpad,sysmon,recorder,settings,power"
+            property string barStatusOrder: "weather,minimized,tray,dnd,network,inbox,mixer,sound,thinkpad,sysmon,updates,recorder,settings,power"
             property bool barWorkspaces: true
             property bool barClock: true
             property bool barDate: true
@@ -187,6 +190,9 @@ Singleton {
             property bool barRecorder: true
             property bool barSettings: true
             property bool barPower: true
+            property bool barUpdates: true
+            property bool packageUpdatesEnabled: true
+            property int packageCheckMinutes: 60
         }
     }
 }

@@ -9,9 +9,9 @@ focus/back changes. This is a map of the current seams, not a rewrite proposal.
 |---|---|
 | Pill QML | `Pill.qml` is ~2,650 lines |
 | Shell/overlay | `shell.qml` is ~800 lines |
-| Surface count | 39 catalog entries; 40 Loaders and 40 `surface == "..."` booleans |
+| Surface count | 40 catalog entries; 41 Loaders and 41 `surface == "..."` booleans |
 | Size rule | every surface is capped at the monitor's vertical midpoint; `PillSurface` is a Flickable that scrolls the overflow and reports its content height to the host scrollbar |
-| Surface sizes/morph | 38 entries in the `surfaces` map |
+| Surface sizes/morph | 39 entries in the `surfaces` map |
 | Surface metadata | `lib/surfaces.js` catalog |
 | Back routing | catalog parent + shared top-strip control + `Pill.surfaceBack()` special cases |
 | Persistent UI state | `Flags.lastSurface` |

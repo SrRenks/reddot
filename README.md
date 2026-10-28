@@ -46,6 +46,10 @@ kept close to the original.
   `Super+Space` needs no wrapper; hold time defaults to 500 ms and is adjustable.
   Any other bind can publish one with
   `qs -c pill ipc call pill notice <icon> <label> <value>`.
+- **Package updates** — the bar can show a compact pacman/AUR/Flatpak update
+  count, checked every 60 minutes by default. Kernel, mkinitcpio, bootloader,
+  firmware, systemd, glibc and core graphics/hyprland updates turn the meter red.
+  Configure or check it now from **Maintenance → System packages**.
 - **Keyboard languages** — Input → Keyboard separates the physical model
   (Auto/ANSI/ISO/JIS, e.g. `pc104` for an ANSI laptop) from an ordered
   language+variant list (`kb_layout`/`kb_variant`). Add or remove pairs, select

@@ -14,7 +14,15 @@ Column {
     property real s: 1
     property int dragIndex: -1
     property real rowH: 24 * list.s
-    readonly property var order: Flags.barStatusOrder.split(",")
+    readonly property var order: {
+        var base = Flags.barStatusOrder.split(",");
+        if (base.indexOf("updates") < 0) {
+            var at = base.indexOf("settings");
+            if (at < 0) base.push("updates");
+            else base.splice(at, 0, "updates");
+        }
+        return base;
+    }
 
     function label(id) {
         switch (id) {
@@ -28,6 +36,7 @@ Column {
         case "sound": return "Sound";
         case "thinkpad": return "ThinkPad";
         case "sysmon": return "System monitor";
+        case "updates": return "Package updates";
         case "recorder": return "Recorder";
         case "settings": return "Settings";
         case "power": return "Power";
@@ -47,6 +56,7 @@ Column {
         case "sound": return Flags.barSound;
         case "thinkpad": return Flags.barThinkpad;
         case "sysmon": return Flags.barSysmon;
+        case "updates": return Flags.barUpdates;
         case "recorder": return Flags.barRecorder;
         case "settings": return Flags.barSettings;
         case "power": return Flags.barPower;
@@ -66,6 +76,7 @@ Column {
         case "sound": Flags.barSound = v; break;
         case "thinkpad": Flags.barThinkpad = v; break;
         case "sysmon": Flags.barSysmon = v; break;
+        case "updates": Flags.barUpdates = v; break;
         case "recorder": Flags.barRecorder = v; break;
         case "settings": Flags.barSettings = v; break;
         case "power": Flags.barPower = v; break;

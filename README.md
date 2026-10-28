@@ -34,6 +34,9 @@ kept close to the original.
 - **System** — live CPU/IGPU/memory dials, native CPU/IGPU temperature and
   fan dials, compact Thermal/Power/Fan groups for every other sensor, and the
   ThinkPad fan curve. No Glances dependency.
+- **Pill navigation** — wheel, scrollbar drag and `PageUp`/`PageDown` scroll long
+  pages; `Home`/`End` jump to the edges. Settings hubs and the status reorder
+  list follow the same arrow-key focus model.
 - **Pill toggle** — `Super+Shift+Space` opens or closes the pill and restores
   the last visited surface. Escape backs out one level, closes at the root,
   and the keybind parks the pointer on the pill so keyboard focus lands without
@@ -49,7 +52,8 @@ kept close to the original.
 - **Package updates** — the bar can show a compact pacman/AUR/Flatpak update
   count, checked every 60 minutes by default. Kernel, mkinitcpio, bootloader,
   firmware, systemd, glibc and core graphics/hyprland updates turn the meter red.
-  Configure or check it now from **Maintenance → System packages**.
+  A failed source keeps the last good count and is marked in the bar; the page
+  shows source health and check age. Configure it in **Maintenance → System packages**.
 - **Keyboard languages** — Input → Keyboard separates the physical model
   (Auto/ANSI/ISO/JIS, e.g. `pc104` for an ANSI laptop) from an ordered
   language+variant list (`kb_layout`/`kb_variant`). Add or remove pairs, select

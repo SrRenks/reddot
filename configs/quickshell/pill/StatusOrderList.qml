@@ -34,7 +34,7 @@ Item {
     property int autoDir: 0
 
     width: parent ? parent.width : 0
-    height: allIds.length * slotH
+    height: allIds.length * slotH + (allIds.length > 0 ? 20 * list.s : 0)
     implicitHeight: height
     focus: false
     activeFocusOnTab: true
@@ -106,8 +106,10 @@ Item {
         }
     }
     Keys.onEscapePressed: (event) => {
-        keyIndex = -1;
-        event.accepted = true;
+        if (keyIndex >= 0) {
+            keyIndex = -1;
+            event.accepted = true;
+        }
     }
 
     Timer {
@@ -401,4 +403,17 @@ Item {
             }
         }
     }
+    Text {
+        visible: list.allIds.length > 0
+        x: 8 * list.s
+        y: list.allIds.length * list.slotH + 2 * list.s
+        width: list.width - 16 * list.s
+        text: "Drag the grip · ↑↓ reorder · Space toggles visibility"
+        color: Theme.faint
+        font.family: Theme.font
+        font.pixelSize: 8.5 * list.s
+        font.weight: Font.Medium
+        elide: Text.ElideRight
+    }
+
 }

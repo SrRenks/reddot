@@ -32,53 +32,55 @@ SettingsSurface {
 
         SettingsRow {
             surface: root
-            name: "Official"
+            name: "Available"
+            sub: PackageUpdates.availabilityText
             icon: "download"
-            sub: PackageUpdates.officialState === "missing" ? "not installed"
-                : (PackageUpdates.officialState === "error" ? "last good count" : "")
-            Text {
-                text: PackageUpdates.officialCount
-                    + (PackageUpdates.officialState === "error" ? " !" : "")
-                color: PackageUpdates.officialState === "error" ? Theme.flameCore
-                    : (PackageUpdates.officialState === "missing" ? Theme.faint : Theme.cream)
-                font.family: Theme.font
-                font.pixelSize: 11 * root.s
-                font.weight: Font.DemiBold
-                font.features: { "tnum": 1 }
-            }
-        }
 
-        SettingsRow {
-            surface: root
-            name: "AUR"
-            icon: "download"
-            sub: PackageUpdates.aurState === "missing" ? "yay not installed"
-                : (PackageUpdates.aurState === "error" ? "last good count" : "")
-            Text {
-                text: PackageUpdates.aurCount
-                    + (PackageUpdates.aurState === "error" ? " !" : "")
-                color: PackageUpdates.aurState === "error" ? Theme.flameCore
-                    : (PackageUpdates.aurState === "missing" ? Theme.faint : Theme.cream)
-                font.family: Theme.font
-                font.pixelSize: 11 * root.s
-                font.weight: Font.DemiBold
-            }
-        }
+            Row {
+                spacing: 7 * root.s
 
-        SettingsRow {
-            surface: root
-            name: "Flatpak"
-            icon: "download"
-            sub: PackageUpdates.flatpakState === "missing" ? "flatpak not installed"
-                : (PackageUpdates.flatpakState === "error" ? "last good count" : "")
-            Text {
-                text: PackageUpdates.flatpakCount
-                    + (PackageUpdates.flatpakState === "error" ? " !" : "")
-                color: PackageUpdates.flatpakState === "error" ? Theme.flameCore
-                    : (PackageUpdates.flatpakState === "missing" ? Theme.faint : Theme.cream)
-                font.family: Theme.font
-                font.pixelSize: 11 * root.s
-                font.weight: Font.DemiBold
+                Text {
+                    text: PackageUpdates.officialCount
+                        + (PackageUpdates.officialState === "error" ? "!" : "")
+                    color: PackageUpdates.officialState === "error" ? Theme.flameCore
+                        : Theme.cream
+                    font.family: Theme.font
+                    font.pixelSize: 11 * root.s
+                    font.weight: Font.DemiBold
+                    font.features: { "tnum": 1 }
+                }
+                Text {
+                    text: "·"
+                    color: Theme.faint
+                    font.family: Theme.font
+                    font.pixelSize: 11 * root.s
+                }
+                Text {
+                    text: PackageUpdates.aurCount
+                        + (PackageUpdates.aurState === "error" ? "!" : "")
+                    color: PackageUpdates.aurState === "error" ? Theme.flameCore
+                        : Theme.cream
+                    font.family: Theme.font
+                    font.pixelSize: 11 * root.s
+                    font.weight: Font.DemiBold
+                    font.features: { "tnum": 1 }
+                }
+                Text {
+                    text: "·"
+                    color: Theme.faint
+                    font.family: Theme.font
+                    font.pixelSize: 11 * root.s
+                }
+                Text {
+                    text: PackageUpdates.flatpakCount
+                        + (PackageUpdates.flatpakState === "error" ? "!" : "")
+                    color: PackageUpdates.flatpakState === "error" ? Theme.flameCore
+                        : Theme.cream
+                    font.family: Theme.font
+                    font.pixelSize: 11 * root.s
+                    font.weight: Font.DemiBold
+                    font.features: { "tnum": 1 }
+                }
             }
         }
 

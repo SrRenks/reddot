@@ -38,6 +38,13 @@ Singleton {
             && (Date.now() - lastCheckEpoch) > Math.max(5, minutes) * 120000;
     }
     readonly property bool officialAvailable: officialState !== "missing"
+    readonly property string availabilityText: {
+        var parts = [];
+        parts.push("official" + (officialState === "missing" ? " unavailable" : ""));
+        parts.push("AUR" + (aurState === "missing" ? " unavailable" : ""));
+        parts.push("Flatpak" + (flatpakState === "missing" ? " unavailable" : ""));
+        return parts.join(" · ");
+    }
     readonly property bool aurAvailable: aurState !== "missing"
     readonly property bool flatpakAvailable: flatpakState !== "missing"
     readonly property string ageText: {

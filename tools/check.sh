@@ -35,42 +35,28 @@ else
     printf '  skip  node not found\n'
 fi
 
+echo "== qml contract =="
+if command -v node >/dev/null 2>&1; then
+    if node "$here/check-ui-contract.mjs"; then ok "UI contract"; else bad "UI contract"; fi
+else
+    printf '  skip  node not found\n'
+fi
+
 echo "== qml =="
 lint=$(command -v qmllint 2>/dev/null || true)
 [ -n "$lint" ] || lint=/usr/lib/qt6/bin/qmllint
 if [ -x "$lint" ]; then
-    for f in \
-        "$pill/TlpSurface.qml" \
-        "$pill/BatterySurface.qml" \
-        "$pill/Pill.qml" \
-        "$pill/shell.qml" \
-        "$pill/Look.qml" \
-        "$pill/Singletons/Flags.qml" \
-        "$pill/Singletons/Peripherals.qml" \
-        "$pill/Singletons/PowerHistory.qml" \
-        "$pill/Singletons/ThinkPad.qml" \
-        "$pill/Singletons/PresetStore.qml" \
-        "$pill/PresetsSurface.qml" \
-        "$pill/StartupSurface.qml" \
-        "$pill/ThinkPadSurface.qml" \
-        "$pill/ThinkPadGroup.qml" \
-        "$pill/ThinkPadCurve.qml" \
-        "$pill/ThinkPadLighting.qml" \
-        "$pill/ThinkPadState.qml" \
-        "$pill/FanCurvePanel.qml" \
-        "$pill/Singletons/Sensors.qml"
-    do
-        if [ ! -f "$f" ]; then
-            bad "missing $f"
-            continue
-        fi
-        n=$("$lint" -I /usr/lib/qt6/qml "$f" 2>&1 | grep -c "Error:")
-        if [ "$n" -eq 0 ]; then
-            ok "$(basename "$f")"
-        else
-            bad "$(basename "$f") ($n errors)"
+    before=$fail
+    n=0
+    for f in "$pill"/*.qml "$pill"/Singletons/*.qml; do
+        [ -f "$f" ] || continue
+        n=$((n + 1))
+        errors=$("$lint" -I /usr/lib/qt6/qml "$f" 2>&1 | grep -c "Error:")
+        if [ "$errors" -ne 0 ]; then
+            bad "$(basename "$f") ($errors errors)"
         fi
     done
+    [ "$fail" -eq "$before" ] && ok "$n QML files"
 else
     bad "qmllint not found"
 fi

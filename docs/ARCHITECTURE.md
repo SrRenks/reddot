@@ -17,7 +17,7 @@ focus/back changes. This is a map of the current seams, not a rewrite proposal.
 | Persistent UI state | `Flags.lastSurface` |
 | Focus routing | `shell.qml` + `PillSurface` + `HyprlandFocusGrab` |
 | QML lint | 109 warnings (mostly unqualified access), zero errors |
-| Tests | `tools/check.sh` validates QML/lua/helpers + `check-surfaces.mjs`; no QML behavior tests |
+| Tests | `tools/check.sh` validates every QML file, lua/helpers, the surface catalog and the UI contract; behavior still needs a Qt Quick test harness |
 
 ## Where adding a surface touches code
 

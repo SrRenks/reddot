@@ -9,3 +9,4 @@
 - [ADR 0008: Rust GRUB theme steps](0008-rust-grub-theme.md)
 - [ADR 0009: Rust deploy ownership core](0009-rust-deploy-core.md)
 - [ADR 0010: Rust neutralize core](0010-rust-neutralize.md)
+- [ADR 0011: Rust TUI renderer](0011-rust-tui-renderer.md)

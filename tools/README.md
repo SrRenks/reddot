@@ -43,6 +43,8 @@
 | `reddot-grub.rs` | Rust dry-plan for the torii GRUB theme |
 | `reddot-deploy.rs` | Rust deploy ownership, backup, preserve and uninstall core |
 | `reddot-neutralize.rs` | Rust monitors/env/hypridle/fish/fastfetch neutralization |
+| `reddot-tui.rs` | Rust renderer for the installer banner, menus and closing summary |
+| `test-reddot-tui-rust.sh` | fixed-width TUI render parity |
 | `test-reddot-neutralize-rust.sh` | neutralize plan and applied-tree parity |
 | `test-reddot-deploy-rust.sh` | deploy tree and uninstall parity |
 | `test-reddot-grub-rust.sh` | GRUB dry-plan parity |

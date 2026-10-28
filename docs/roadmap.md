@@ -22,7 +22,7 @@ Status of the main follow-ups after the Settings, package and scroll work.
   headless output.
 - Physical pointer click on the panel back chip confirmed working by the user.
 - Navigation manifest, status hover labels and a Search surface with pure
-  alias/tag/typo ranking.
+  alias/tag/typo ranking. Enter activation was confirmed by the user.
 - `SUPER+SHIFT+F` opacity restoration, updater remote/branch migration and the
   Ubuntu CI portability fixes.
 

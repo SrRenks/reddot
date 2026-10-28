@@ -299,9 +299,10 @@ ShellRoot {
     }
 
     /**
-     * The single close timeline. `resetHistory` is false for the keybind toggle
-     * (which remembers the panel) and true for Escape/backdrop (which returns to
-     * home). Visual state is cleared by the overlay's closingMon connection.
+     * The single close timeline. `resetHistory` is false for the toggle and for
+     * backdrop closes, both of which remember the panel; only the explicit home
+     * action clears it. Visual state is cleared by the overlay's closingMon
+     * connection.
      */
     function closePill(mon, resetHistory) {
         if (!mon || mon.length === 0)
@@ -510,7 +511,7 @@ ShellRoot {
             WlrLayershell.namespace: "pill"
 
             /** Close an explicitly held pill without leaving a pinned/revealed state behind. */
-            function dismissPill() { root.closePill(modelData.name, true); }
+            function dismissPill() { root.closePill(modelData.name, false); }
 
             /**
              * HyprlandFocusGrab retains keyboard focus for the listed surface

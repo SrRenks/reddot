@@ -43,7 +43,14 @@ ShellRoot {
             surface.width = 300;
             surface.height = 100;
             surface.open = true;
-            if (surface.contentHeight < surface.height) failures.push("PillSurface content height is invalid");
+            var content = Qt.createQmlObject('import QtQuick; Item { width: 300; height: 400 }', surface);
+            content.parent = surface.contentItem;
+            surface.contentY = 0;
+            surface.scrollBy(1000);
+            var maxY = Math.max(0, surface.contentHeight - surface.height);
+            if (surface.contentY !== maxY) failures.push("scroll did not clamp to the last child: " + surface.contentY + "/" + maxY);
+            surface.scrollBy(-1000);
+            if (surface.contentY !== 0) failures.push("scroll did not clamp to the top: " + surface.contentY);
         } else {
             failures.push("PillSurface did not load");
         }

@@ -155,7 +155,7 @@ The Keybinds page can edit the active file. Dynamic workspace binds from `spaces
 | Sensor snapshot | Rust, built only when needed |
 | Configuration and helpers | POSIX shell and systemd user units |
 
-The installer uses the Python standard library. The update engine, palette engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`; they have no runtime crate dependency and fall back to Python only while the binaries are absent.
+The bootstrap installs git and rustc and runs the crate-free Rust installer. Python remains a rollout fallback and test harness, not the install prerequisite. The update engine, palette engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`; they have no runtime crate dependency and fall back to Python only while the binaries are absent.
 
 ## Project quality
 

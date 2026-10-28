@@ -4,7 +4,7 @@
 #
 # Thin entrypoint for `curl -fsSL .../install.sh | bash`. It does the bare
 # minimum to get the real installer running on a fresh machine: detect the
-# distro family (so it knows the package manager), make sure git and python3
+# distro family (so it knows the package manager), make sure git and rustc
 # are present, fetch the rice, then hand the whole flow to the Python installer.
 # The wizard, the package logic and the config deploy all live in
 # installer/reddot_install.py, not here.
@@ -67,24 +67,26 @@ run_root() {
 	die "need root to install packages; run as root or install sudo or doas first"
 }
 
-# git + python3 are all the Python installer needs to take over. Install them
-# with the family's manager only when something is actually missing.
+# git + rustc are what the Rust installer needs. Install them with the family's
+# manager only when something is actually missing. Python is no longer the
+# install prerequisite; it remains only as a rollout fallback on boxes that
+# already carry it.
 ensure_deps() {
-	have git && have python3 && return 0
-	step "Installing git and python3"
+	have git && have rustc && return 0
+	step "Installing git and rustc"
 	# Refresh metadata first; a fresh debian/fedora/suse box can ship an empty
-	# package list, so the git+python3 bootstrap fails before the real installer
+	# package list, so the git+rustc bootstrap fails before the real installer
 	# is reached. Best-effort (|| true) so one stale repo never blocks the install.
 	case "$1" in
-	arch) run_root pacman -Syu --needed --noconfirm git python ;;
-	debian) run_root apt-get update || true; run_root apt-get install -y git python3 ;;
-	fedora) run_root dnf makecache || true; run_root dnf install -y git python3 ;;
-	suse) run_root zypper --non-interactive refresh || true; run_root zypper --non-interactive install git python3 ;;
-	gentoo) run_root emerge --noreplace dev-vcs/git ;;
-	*) die "no supported package manager (arch/debian/fedora/suse/gentoo); install git and python3 yourself, then re-run" ;;
+	arch) run_root pacman -Syu --needed --noconfirm git rust ;;
+	debian) run_root apt-get update || true; run_root apt-get install -y git rustc ;;
+	fedora) run_root dnf makecache || true; run_root dnf install -y git rust cargo ;;
+	suse) run_root zypper --non-interactive refresh || true; run_root zypper --non-interactive install git rust cargo ;;
+	gentoo) run_root emerge --noreplace dev-vcs/git dev-lang/rust-bin ;;
+	*) die "no supported package manager (arch/debian/fedora/suse/gentoo); install git and rustc yourself, then re-run" ;;
 	esac
-	if ! have git || ! have python3; then
-		die "git and python3 are still missing after the install step"
+	if ! have git || ! have rustc; then
+		die "git and rustc are still missing after the install step"
 	fi
 }
 
@@ -154,6 +156,7 @@ main() {
 		fi
 	fi
 	if [ "$rust_ok" -eq 0 ]; then
+		have python3 || die "Rust installer unavailable and python3 is not installed"
 		python3 "$DIR/installer/reddot_install.py" --source "$DIR/configs" "$@" || exit $?
 	fi
 

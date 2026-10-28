@@ -25,3 +25,4 @@
 - [ADR 0024: Rust uninstall path](0024-rust-uninstall.md)
 - [ADR 0025: Basic Rust installer wizard](0025-rust-basic-wizard.md)
 - [ADR 0026: Reinstall through the Rust path](0026-rust-reinstall.md)
+- [ADR 0027: rustc bootstrap](0027-rust-bootstrap.md)

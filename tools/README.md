@@ -35,3 +35,5 @@
 `--skip-extras` is passed.
 
 | `reddot-sensors.rs` | one-shot native hwmon/thermal/power_supply scanner: every readable sensor for the System surface |
+| `reddot-update.rs` | Rust update engine: clone, merge, manifest, dependency scan and JSON contract |
+| `test-reddot-update-rust.sh` | integration parity for the Rust update engine |

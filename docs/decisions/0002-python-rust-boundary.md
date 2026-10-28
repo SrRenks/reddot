@@ -1,6 +1,6 @@
 # ADR 0002: keep the Python installer and updater, use Rust for the sensor probe
 
-- Status: accepted for the current scope
+- Status: accepted, partially superseded by ADR 0003 for the updater
 - Date: 2026-10-28
 
 ## Context

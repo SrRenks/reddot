@@ -150,11 +150,12 @@ The Keybinds page can edit the active file. Dynamic workspace binds from `spaces
 | Shell environment | fish |
 | Font | JetBrains Mono Nerd |
 | Palette | matugen, driven by the wallpaper |
-| Installer and updater | Python 3 |
+| Installer | Python 3 |
+| Update engine | Rust, built by the extras step |
 | Sensor snapshot | Rust, built only when needed |
 | Configuration and helpers | POSIX shell and systemd user units |
 
-The installer and updater use the Python standard library. The sensor scanner is a small Rust binary compiled by `tools/install-extras.sh`; it has no runtime crate dependency and is omitted when `rustc` is absent.
+The installer uses the Python standard library. The update engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`; the updater has no runtime crate dependency and falls back to the Python engine only while the binary is absent.
 
 ## Project quality
 
@@ -223,7 +224,7 @@ Do not expect large wins from timer cleanups or surface unloading: cold surfaces
 
 I keep the lock process resident. It costs roughly 50 MB PSS, but a lock that is warm starts immediately and does not depend on spawning a Qt process during the critical path. I chose that trade for a personal machine where unlock latency and fail-closed behavior matter more than the last few megabytes.
 
-I keep the installer and updater in Python, with the standard library as the only dependency. Rewriting them in Rust would add a build and distribution problem without a measured performance need. The sensor scanner is the exception because it reads hardware directly and already has a narrow process boundary. The reasoning and migration gate are in [ADR 0002](docs/decisions/0002-python-rust-boundary.md).
+I moved the updater to Rust as the first migration phase. It has a closed JSON contract and a git/merge test surface, so I could prove parity without rewriting the installer at the same time. The installer remains Python because its distro logic and terminal UI are a larger risk and do not affect idle memory. The remaining plan and the fallback are in [ADR 0003](docs/decisions/0003-rust-update-engine.md).
 
 I keep one scroll implementation and one navigation vocabulary. The pill, Settings, Search and the status order all use the same surface catalog and metadata, even when that leaves the Settings pages appearing to do similar work. Duplicated behavior was causing drift, and the shared model makes the contracts testable.
 
@@ -260,6 +261,7 @@ Start at [docs/index.md](docs/index.md). The most useful entry points:
 - [Validation checklist](docs/validation-checklist.md)
 - [Coverage and remaining gaps](docs/coverage.md)
 - [Architecture decisions](docs/decisions/index.md)
+- [Rust update engine](docs/decisions/0003-rust-update-engine.md)
 
 The project roadmap and open validation work live in [docs/roadmap.md](docs/roadmap.md).
 

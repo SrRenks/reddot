@@ -16,7 +16,7 @@
 #   reddot status                    what's running and the installed version
 
 SCRIPTS="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts"
-ENGINE="$SCRIPTS/reddot-update.py"
+ENGINE="$SCRIPTS/reddot-update"
 WATCHDOG="$SCRIPTS/watchdog.sh"
 SURFACES="pill lock"
 

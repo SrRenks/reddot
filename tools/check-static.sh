@@ -55,6 +55,33 @@ for module in deploy distro pkg fallbacks tui; do
     fi
 done
 
+echo "== rust updater =="
+if command -v rustc >/dev/null 2>&1; then
+    binary="${TMPDIR:-/tmp}/reddot-update-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-update.rs" -o "$binary" 2>/tmp/reddot-rust-build.log; then
+        ok "rust updater build"
+        unit="${TMPDIR:-/tmp}/reddot-update-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-update.rs" -o "$unit" 2>/tmp/reddot-rust-test-build.log && "$unit" >/tmp/reddot-rust-unit.log 2>&1; then
+            ok "rust updater unit tests"
+        else
+            bad "rust updater unit tests"
+            tail -n 12 /tmp/reddot-rust-test-build.log /tmp/reddot-rust-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-update-rust.sh" 2>&1); then ok "rust updater integration"; else bad "rust updater integration"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust updater build"
+        sed 's/^/        /' /tmp/reddot-rust-build.log | tail -n 12
+    fi
+    rm -f "$binary"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

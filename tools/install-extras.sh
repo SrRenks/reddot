@@ -57,6 +57,20 @@ else
     echo "warning: rustc not found; System sensor helper not installed" >&2
 fi
 
+if command -v rustc >/dev/null 2>&1; then
+    updater_tmp=$(mktemp)
+    if rustc --edition=2021 -O -C strip=symbols "$here/reddot-update.rs" -o "$updater_tmp"; then
+        install -d -m 0755 -o "$user" -g "$group" "$home/.local/bin"
+        install -m 0755 -o "$user" -g "$group" "$updater_tmp" "$home/.local/bin/reddot-update"
+        echo "  $home/.local/bin/reddot-update"
+    else
+        echo "warning: could not build reddot-update" >&2
+    fi
+    rm -f "$updater_tmp"
+else
+    echo "warning: rustc not found; updater keeps the Python fallback" >&2
+fi
+
 install -m 0755 -o root -g root "$here/reddot-tlp" /usr/local/bin/reddot-tlp
 install -Dm644 "$here/49-reddot.rules" \
     /etc/polkit-1/rules.d/49-reddot.rules

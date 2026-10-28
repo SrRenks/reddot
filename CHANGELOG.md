@@ -47,6 +47,8 @@ semantic versioning when it cuts a release.
   rootless refresh and hides sources that are not installed.
 - Fan RPM keeps the highest valid sensor value instead of being overwritten by a
   zeroed generic hwmon entry.
+- The update engine is implemented in Rust and selected through a wrapper; the
+  Python engine remains as a fallback until the extras build the binary.
 - CI portability fixes: bash-only scripts use bash for syntax, and the package
   selftest no longer assumes pacman is installed on the Ubuntu runner.
 

@@ -8,7 +8,7 @@ import "Singletons"
 /**
  * 更 UPDATES sub-surface: a terminal-free face for the reddot update engine. It
  * never touches git itself; it shells out to the python engine at
- * ~/.config/hypr/scripts/reddot-update.py, which prints one JSON object, and
+ * ~/.config/hypr/scripts/reddot-update, which prints one JSON object, and
  * renders that. `check` is a safe dry-run that reports how far behind the install
  * is, the changelog, and any protected file whose local edits clash with upstream;
  * `apply` performs the update, taking upstream wholesale only for the conflicting
@@ -27,7 +27,7 @@ SettingsSurface {
     implicitHeight: content.implicitHeight
     rows: []
 
-    readonly property string engine: Quickshell.env("HOME") + "/.config/hypr/scripts/reddot-update.py"
+    readonly property string engine: Quickshell.env("HOME") + "/.config/hypr/scripts/reddot-update"
 
     property string status: ""
     property string version: ""
@@ -253,7 +253,7 @@ SettingsSurface {
 
     Process {
         id: checkProc
-        command: ["python3", root.engine, "check"]
+        command: [root.engine, "check"]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.checking = false;
@@ -272,7 +272,7 @@ SettingsSurface {
         property string takeArg: ""
         property string installArg: ""
         command: {
-            var c = ["python3", root.engine, "apply"];
+            var c = [root.engine, "apply"];
             if (takeArg.length > 0)
                 c = c.concat(["--take", takeArg]);
             if (installArg.length > 0)

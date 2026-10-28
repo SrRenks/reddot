@@ -152,9 +152,16 @@ else
     bad "reddot-sensors (run tools/install-extras.sh)"
 fi
 
+echo "== updater =="
+if [ -x "$HOME/.local/bin/reddot-update" ]; then
+    ok "reddot-update (Rust)"
+else
+    bad "reddot-update (run tools/install-extras.sh)"
+fi
+
 echo "== shell =="
 before=$fail
-for f in "$cfg"/hypr/scripts/*.sh "$cfg"/hypr/scripts/reddot; do
+for f in "$cfg"/hypr/scripts/*.sh "$cfg"/hypr/scripts/reddot "$cfg"/hypr/scripts/reddot-update; do
     [ -f "$f" ] || continue
     sh -n "$f" 2>/dev/null || bad "sh -n $(basename "$f")"
 done

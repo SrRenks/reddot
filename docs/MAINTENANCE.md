@@ -31,6 +31,9 @@ broke.
   `lib/autostart.js`.
 - `tools/`: all new shell-side tooling, the TLP helper and the ThinkPad helper
   (installed only when a ThinkPad is detected).
+- `tools/reddot-update.rs`: Rust update engine built to
+  `~/.local/bin/reddot-update`; `configs/hypr/scripts/reddot-update` selects it and
+  keeps the Python engine as a rollout fallback.
 - `configs/hypr/scripts/reddot-update.py`: `DEFAULT_REMOTE` and `DEFAULT_BRANCH`
   point at `SrRenks/reddot` and `e14g7`. An existing pristine clone with the old
   Ricelin remote is retargeted in place on the next fetch.

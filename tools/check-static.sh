@@ -190,6 +190,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust grub =="
+if command -v rustc >/dev/null 2>&1; then
+    grub_bin="${TMPDIR:-/tmp}/reddot-grub-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-grub.rs" -o "$grub_bin" 2>/tmp/reddot-grub-build.log; then
+        ok "rust grub build"
+        grub_unit="${TMPDIR:-/tmp}/reddot-grub-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-grub.rs" -o "$grub_unit" 2>/tmp/reddot-grub-test-build.log && "$grub_unit" >/tmp/reddot-grub-unit.log 2>&1; then
+            ok "rust grub unit tests"
+        else
+            bad "rust grub unit tests"
+            tail -n 12 /tmp/reddot-grub-test-build.log /tmp/reddot-grub-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$grub_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-grub-rust.sh" 2>&1); then ok "rust grub parity"; else bad "rust grub parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust grub build"
+        sed 's/^/        /' /tmp/reddot-grub-build.log | tail -n 12
+    fi
+    rm -f "$grub_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

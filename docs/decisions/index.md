@@ -6,3 +6,4 @@
 - [ADR 0005: Rust distro core](0005-rust-distro-core.md)
 - [ADR 0006: Rust package argv core](0006-rust-package-argv-core.md)
 - [ADR 0007: Rust fallback steps](0007-rust-fallback-steps.md)
+- [ADR 0008: Rust GRUB theme steps](0008-rust-grub-theme.md)

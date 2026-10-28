@@ -137,7 +137,7 @@ main() {
 	# implements the quickstart flow; the Python installer stays as the rollout
 	# fallback for interactive/reinstall/uninstall flows.
 	rust_ok=0
-	if have rustc && ! has_flag --reinstall "$@"; then
+	if have rustc; then
 		if "$DIR/tools/build-rust.sh" "$HOME/.local/bin" >/dev/null 2>&1; then
 			if has_flag --uninstall "$@"; then
 				rust_args="--uninstall --source $DIR/configs --config-root ${XDG_CONFIG_HOME:-$HOME/.config} --bin-dir $HOME/.local/bin"

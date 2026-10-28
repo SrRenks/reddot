@@ -79,6 +79,7 @@ fn main() {
             "--quickstart" => quick=true,
             "--no-deps" => no_deps=true,
             "--apply" => apply=true,
+            "--reinstall" => apply=true,
             "--uninstall" => uninstall=true,
             "--full" => full=true,
             "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },

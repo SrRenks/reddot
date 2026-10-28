@@ -203,10 +203,10 @@ For a default session without the browser, private anonymous memory from `smaps_
 Measured on this ThinkPad E14 Gen 7:
 
 ```text
-Hyprland         90.0 MiB private
-qs -c pill      198.1 MiB private
-qs -c lock       75.1 MiB private
-hyprpolkitagent  33.8 MiB private
+Hyprland         87.9 MiB private
+qs -c pill      193.5 MiB private
+qs -c lock       73.3 MiB private
+hyprpolkitagent  33.0 MiB private
 ```
 
 The browser is deliberately excluded. Zen alone is larger than the complete shell, so including the browser would measure the tab workload, not reddot.

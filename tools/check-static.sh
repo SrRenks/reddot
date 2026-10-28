@@ -352,6 +352,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust post =="
+if command -v rustc >/dev/null 2>&1; then
+    post_bin="${TMPDIR:-/tmp}/reddot-post-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-post.rs" -o "$post_bin" 2>/tmp/reddot-post-build.log; then
+        ok "rust post build"
+        post_unit="${TMPDIR:-/tmp}/reddot-post-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-post.rs" -o "$post_unit" 2>/tmp/reddot-post-test-build.log && "$post_unit" >/tmp/reddot-post-unit.log 2>&1; then
+            ok "rust post unit tests"
+        else
+            bad "rust post unit tests"
+            tail -n 12 /tmp/reddot-post-test-build.log /tmp/reddot-post-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$post_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-post-rust.sh" 2>&1); then ok "rust post effects parity"; else bad "rust post effects parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust post build"
+        sed 's/^/        /' /tmp/reddot-post-build.log | tail -n 12
+    fi
+    rm -f "$post_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

@@ -46,6 +46,8 @@
 | `reddot-tui.rs` | Rust TUI renderer, raw terminal input and prompt state machines |
 | `reddot-detect.rs` | Rust installer detection record |
 | `reddot-plan.rs` | Rust installer plan: native, AUR, fallback and skip batches |
+| `reddot-post.rs` | Rust wallpapers, app-theme, bridge, CLI link and Brave seed |
+| `test-reddot-post-rust.sh` | post-install effects parity
 | `test-reddot-plan-rust.sh` | profile, AUR and overlay plan parity
 | `test-reddot-detect-rust.sh` | detection parity
 | `test-reddot-tui-rust.sh` | fixed-width TUI render parity |

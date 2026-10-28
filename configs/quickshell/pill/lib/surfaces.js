@@ -48,7 +48,7 @@ var definitions = {
     input:      { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldInput" },
     look:       { parent: "windows",   settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldLook" },
     presets:    { parent: "powerhub",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldPresets" },
-    idlelock:   { parent: "powerhub",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldIdlelock" },
+    idlelock:   { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldIdlelock" },
     animation:  { parent: "windows",   settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldAnimation" },
     fontpicker: { parent: "appearance", settingsLike: true,  cold: true  , loader: "ldFontpicker" }
 };

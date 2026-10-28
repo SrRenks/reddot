@@ -19,6 +19,7 @@ SettingsSurface {
         { item: windowsRow, kind: "nav", surface: "windows" },
         { item: displayRow, kind: "nav", surface: "display" },
         { item: inputRow, kind: "nav", surface: "input" },
+        { item: securityRow, kind: "nav", surface: "idlelock" },
         { item: shortcutsRow, kind: "nav", surface: "shortcuts" },
         { item: powerRow, kind: "nav", surface: "powerhub" },
         { item: systemRow, kind: "nav", surface: "sysmon" },
@@ -101,6 +102,16 @@ SettingsSurface {
         }
 
         SettingsRow {
+            id: securityRow
+            surface: root
+            captionOnFocus: true
+            icon: "lock"
+            name: "Security"
+            sub: "Fingerprint and idle lock"
+            Arrow {}
+        }
+
+        SettingsRow {
             id: shortcutsRow
             surface: root
             captionOnFocus: true
@@ -118,7 +129,7 @@ SettingsSurface {
             captionOnFocus: true
             icon: "bolt"
             name: "Power"
-            sub: "Profile, battery care, idle, session"
+            sub: "Profile, battery care, session"
             Arrow {}
         }
 

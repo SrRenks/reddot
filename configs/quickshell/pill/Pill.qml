@@ -2612,7 +2612,6 @@ Item {
             entries: [
                 { name: "Profile & battery care", sub: "Performance mode and charge window", icon: "bolt", surface: "tlp" },
                 { name: "Power presets", sub: "Saved profile and charge combinations", icon: "layers", surface: "presets" },
-                { name: "Idle & lock", sub: "Auto-lock, screen off and suspend", icon: "lock", surface: "idlelock" },
                 { name: "Session", sub: "Lock, logout, sleep, restart, shut down", icon: "logout", surface: "power" }
             ]
             onRequestClose: pill.requestClose()

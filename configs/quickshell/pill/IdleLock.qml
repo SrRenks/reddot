@@ -22,6 +22,8 @@ SettingsSurface {
 
     readonly property string confPath: Quickshell.env("HOME") + "/.config/hypr/hypridle.conf"
     readonly property string lockScript: Quickshell.env("HOME") + "/.config/hypr/scripts/lock.sh"
+    property bool fingerprintAvailable: false
+    property string fingerprintStatus: "Checking fingerprint reader…"
 
     readonly property var lockOptions: [
         { label: "Off", value: 0 }, { label: "1 min", value: 1 }, { label: "3 min", value: 3 },
@@ -37,6 +39,7 @@ SettingsSurface {
     ]
 
     rows: [
+        { item: fingerprintRow, kind: "toggle", get: function () { return Flags.lockFingerprint; }, set: function (v) { Flags.lockFingerprint = v; } },
         { item: lockRow, kind: "seg", vals: root.lockOptions.map(function (o) { return o.value; }), get: function () { return Flags.idleLockMin; }, set: function (v) { Flags.idleLockMin = v; root.apply(); } },
         { item: screenRow, kind: "seg", vals: root.screenOptions.map(function (o) { return o.value; }), get: function () { return Flags.idleScreenOffMin; }, set: function (v) { Flags.idleScreenOffMin = v; root.apply(); } },
         { item: suspendRow, kind: "seg", vals: root.suspendOptions.map(function (o) { return o.value; }), get: function () { return Flags.idleSuspendMin; }, set: function (v) { Flags.idleSuspendMin = v; root.apply(); } }
@@ -80,6 +83,21 @@ SettingsSurface {
     function apply() {
         confWriter.setText(buildConf());
         restartProc.running = true;
+    }
+
+    Process {
+        id: fingerprintProbe
+        running: true
+        command: ["sh", "-c", "command -v fprintd-list >/dev/null 2>&1 && fprintd-list \"$(id -un)\" >/dev/null 2>&1"]
+        onExited: code => {
+            root.fingerprintAvailable = code === 0;
+            if (code === 0)
+                root.fingerprintStatus = "Any enrolled finger can unlock the lock";
+            else if (code === 127)
+                root.fingerprintStatus = "fprintd is not installed";
+            else
+                root.fingerprintStatus = "No enrolled fingerprint on this machine";
+        }
     }
 
     FileView {
@@ -177,11 +195,28 @@ SettingsSurface {
         SettingsHeader {
             s: root.s
             glyph: "錠"
-            title: "IDLE / LOCK"
+            title: "SECURITY"
             showBack: true
         }
 
-        Item { width: 1; height: 12 * root.s }
+        SettingsLabel { s: root.s; text: "Lock" }
+
+        SettingsRow {
+            id: fingerprintRow
+            surface: root
+            name: "Fingerprint unlock"
+            sub: root.fingerprintStatus
+            icon: "lock"
+
+            LinkToggle {
+                s: root.s
+                on: Flags.lockFingerprint
+                enabled: root.fingerprintAvailable
+                onToggled: Flags.lockFingerprint = !on
+            }
+        }
+
+        SettingsLabel { s: root.s; text: "Idle" }
 
         IdleRow {
             id: lockRow

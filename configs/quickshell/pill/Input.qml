@@ -38,7 +38,6 @@ SettingsSurface {
         { item: rateRow, kind: "scrub", bump: function (d) { rateScrub.bump(d); } },
         { item: delayRow, kind: "scrub", bump: function (d) { delayScrub.bump(d); } },
         { item: numlockRow, kind: "toggle", get: function () { return root.numlockOn; }, set: function (v) { root.numlockOn = v; root.writeInputField("numlock_by_default", v ? "true" : "false"); } },
-        { item: fingerprintRow, kind: "toggle", get: function () { return Flags.lockFingerprint; }, set: function (v) { Flags.lockFingerprint = v; } },
         { item: naturalRow, kind: "toggle", get: function () { return root.naturalScroll; }, set: function (v) { root.naturalScroll = v; root.writeInputKey("natural_scroll", v ? "true" : "false"); } },
         { item: tapRow, kind: "toggle", get: function () { return root.tapToClick; }, set: function (v) { root.tapToClick = v; root.writeInputKey("tap_to_click", v ? "true" : "false"); } },
         { item: typingRow, kind: "toggle", get: function () { return root.disableWhileTyping; }, set: function (v) { root.disableWhileTyping = v; root.writeInputKey("disable_while_typing", v ? "true" : "false"); } },
@@ -75,8 +74,6 @@ SettingsSurface {
     property string cursorTheme: "Bibata-Modern-Ice"
     property var cursorThemes: []
     property bool themeOpen: false
-    property bool fingerprintAvailable: false
-    property string fingerprintStatus: "Checking fingerprint reader…"
 
     property string inputText: ""
     property string envText: ""
@@ -529,21 +526,6 @@ SettingsSurface {
     }
 
     Process {
-        id: fingerprintProbe
-        running: true
-        command: ["sh", "-c", "command -v fprintd-list >/dev/null 2>&1 && fprintd-list \"$(id -un)\" >/dev/null 2>&1"]
-        onExited: code => {
-            root.fingerprintAvailable = code === 0;
-            if (code === 0)
-                root.fingerprintStatus = "Any enrolled finger can unlock the lock";
-            else if (code === 127)
-                root.fingerprintStatus = "fprintd is not installed";
-            else
-                root.fingerprintStatus = "No enrolled fingerprint on this machine";
-        }
-    }
-
-    Process {
         id: themeProc
         command: ["sh", "-c", "{ printf '%s\\n' \"$HOME/.icons\" \"$HOME/.local/share/icons\" /usr/share/icons; printf '%s' \"${XDG_DATA_DIRS:-/usr/local/share:/usr/share}\" | tr ':' '\\n' | sed 's#/*$#/icons#'; } | sort -u | while IFS= read -r d; do [ -d \"$d\" ] || continue; for t in \"$d\"/*/; do [ -d \"$t/cursors\" ] && basename \"$t\"; done; done | sort -u"]
         stdout: StdioCollector {
@@ -814,22 +796,6 @@ SettingsSurface {
                 font.pixelSize: 8.5 * root.s
                 font.weight: Font.Medium
                 elide: Text.ElideRight
-            }
-
-            GroupLabel { text: "Fingerprint" }
-
-            FieldRow {
-                id: fingerprintRow
-                label: "Lock unlock"
-                caption: root.fingerprintStatus
-                icon: "lock"
-
-                LinkToggle {
-                    s: root.s
-                    on: Flags.lockFingerprint
-                    enabled: root.fingerprintAvailable
-                    onToggled: Flags.lockFingerprint = !on
-                }
             }
 
             GroupLabel { text: "Touchpad" }

@@ -9,7 +9,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Área | Cobertura | Evidência |
 |---|---|---|
 | QML das 40 superfícies | estática + módulos puros + runtime | lint em 126 arquivos, baseline de 180 ocorrências, testes Node, harness Quickshell e smoke de abertura |
-| Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML real e smoke de abertura |
+| Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML e Security com fingerprint/idle agrupados |
 | Barra e status | boa | contrato de status, smoke, reorder manual |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |

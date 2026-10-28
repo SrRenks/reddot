@@ -217,6 +217,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust deploy =="
+if command -v rustc >/dev/null 2>&1; then
+    deploy_bin="${TMPDIR:-/tmp}/reddot-deploy-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-deploy.rs" -o "$deploy_bin" 2>/tmp/reddot-deploy-build.log; then
+        ok "rust deploy build"
+        deploy_unit="${TMPDIR:-/tmp}/reddot-deploy-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-deploy.rs" -o "$deploy_unit" 2>/tmp/reddot-deploy-test-build.log && "$deploy_unit" >/tmp/reddot-deploy-unit.log 2>&1; then
+            ok "rust deploy unit tests"
+        else
+            bad "rust deploy unit tests"
+            tail -n 12 /tmp/reddot-deploy-test-build.log /tmp/reddot-deploy-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$deploy_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-deploy-rust.sh" 2>&1); then ok "rust deploy parity"; else bad "rust deploy parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust deploy build"
+        sed 's/^/        /' /tmp/reddot-deploy-build.log | tail -n 12
+    fi
+    rm -f "$deploy_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

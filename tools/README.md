@@ -41,6 +41,8 @@
 | `reddot-pkg.rs` | Rust package argv builder, parity-tested against installer/pkg.py |
 | `reddot-fallbacks.rs` | Rust source-build/download/Flatpak fallback steps |
 | `reddot-grub.rs` | Rust dry-plan for the torii GRUB theme |
+| `reddot-deploy.rs` | Rust deploy ownership, backup, preserve and uninstall core |
+| `test-reddot-deploy-rust.sh` | deploy tree and uninstall parity |
 | `test-reddot-grub-rust.sh` | GRUB dry-plan parity |
 | `test-reddot-fallbacks-rust.sh` | all-family fallback parity
 | `test-reddot-pkg-rust.sh` | native, repo, Portage and AUR argv parity |

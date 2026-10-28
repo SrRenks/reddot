@@ -23,7 +23,7 @@ hz=$(getconf CLK_TCK 2>/dev/null || echo 100)
 
 # The shell stack plus the helpers that live beside it. Names are comm names,
 # so pgrep -x matches them exactly (no substring hits on editors).
-names="qs Hyprland hypridle hyprpolkitagent xdg-desktop-portal-hyprland cava wl-paste cliphist kdeconnectd kdeconnect-indicator"
+names="qs Hyprland hypridle hyprpolkitagent xdg-desktop-por cava wl-paste cliphist kdeconnectd kdeconnect-indi"
 
 pss_kb() {
     awk '/^Pss:/{print $2; exit}' "/proc/$1/smaps_rollup" 2>/dev/null || echo 0

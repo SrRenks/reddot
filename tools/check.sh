@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# check.sh — read-only gate for a deployed reddot tree.
+# check.sh — checkout gate with deployed-tree drift checks.
 #
 #   ./tools/check.sh
 #
@@ -86,13 +86,30 @@ else
     printf '  skip  node not found\n'
 fi
 
+echo "== qml warnings =="
+if command -v node >/dev/null 2>&1; then
+    if out=$(node "$here/check-qml-warnings.mjs" 2>&1); then ok "$out"; else bad "QML warnings"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+else
+    printf '  skip  node not found\n'
+fi
+
+echo "== hypr api =="
+if out=$(sh "$here/check-hypr-api.sh" 2>&1); then ok "Hyprland API"; else bad "Hyprland API"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+
+echo "== docs =="
+if command -v node >/dev/null 2>&1; then
+    if out=$(node "$here/check-doc-links.mjs" 2>&1); then ok "$out"; else bad "docs links"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+else
+    printf '  skip  node not found\n'
+fi
+
 echo "== qml =="
 lint=$(command -v qmllint 2>/dev/null || true)
 [ -n "$lint" ] || lint=/usr/lib/qt6/bin/qmllint
 if [ -x "$lint" ]; then
     before=$fail
     n=0
-    for f in "$pill"/*.qml "$pill"/Singletons/*.qml "$cfg"/quickshell/lock/shell.qml; do
+    for f in "$pill"/*.qml "$pill"/Singletons/*.qml "$cfg"/quickshell/lock/*.qml "$cfg"/quickshell/lock/Singletons/*.qml; do
         [ -f "$f" ] || continue
         n=$((n + 1))
         errors=$("$lint" -I /usr/lib/qt6/qml "$f" 2>&1 | grep -c "Error:")

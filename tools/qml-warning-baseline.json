@@ -1,0 +1,243 @@
+{
+  "configs/quickshell/lock/GlyphIcon.qml": [
+    "Unqualified access [unqualified] @ property color color: Theme.dim#1"
+  ],
+  "configs/quickshell/lock/Singletons/Dyn.qml": [
+    "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
+    "Type Dyn not declared as singleton in qmldir but using pragma Singleton [import]#1",
+    "Unqualified access [unqualified] @ readonly property string bright: adapter.bright#1",
+    "Unqualified access [unqualified] @ readonly property string cream: adapter.cream#1",
+    "Unqualified access [unqualified] @ readonly property string dim: adapter.dim#1",
+    "Unqualified access [unqualified] @ readonly property string primary: adapter.primary#1"
+  ],
+  "configs/quickshell/lock/Singletons/Flags.qml": [
+    "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
+    "Type Flags not declared as singleton in qmldir but using pragma Singleton [import]#1",
+    "Unqualified access [unqualified] @ readonly property bool time12h: adapter.time12h#1",
+    "Unqualified access [unqualified] @ readonly property real topGap: adapter.topGap#1",
+    "Unqualified access [unqualified] @ readonly property string paletteMode: adapter.paletteMode#1"
+  ],
+  "configs/quickshell/lock/Singletons/Pw.qml": [
+    "Type Pw not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/lock/Singletons/Theme.qml": [
+    "Type Theme not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/lock/shell.qml": [
+    "Member \"height\" not found on type \"QuickshellScreenInfo\" [missing-property] @ s: lockSurface.screen ? lockSurface.screen.height / 1080 : 1#1",
+    "Member \"name\" not found on type \"QuickshellScreenInfo\" [missing-property] @ screenName: lockSurface.screen ? lockSurface.screen.name : \"\"#1"
+  ],
+  "configs/quickshell/pill/Appearance.qml": [
+    "Cannot assign binding of type QVariantMap to QVariantHash [incompatible-type] @ environment: ({ REDDOT_PALETTE: \"static\" })#1",
+    "Cannot assign binding of type QVariantMap to QVariantHash [incompatible-type] @ environment: ({ REDDOT_PALETTE: Flags.paletteMode })#1",
+    "Cannot assign binding of type QVariantMap to QVariantHash [incompatible-type] @ environment: ({ REDDOT_PALETTE: Flags.paletteMode })#2",
+    "Cannot assign binding of type QVariantMap to QVariantHash [incompatible-type] @ environment: ({ REDDOT_PALETTE: Flags.paletteMode })#3",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1"
+  ],
+  "configs/quickshell/pill/BatterySurface.qml": [
+    "Unqualified access [unqualified] @ ? Math.max(2 * root.s, (modelData / Math.max(1, PowerHistory.peak24h)) * parent.height)#1",
+    "Unqualified access [unqualified] @ color: modelData > 0 ? Theme.verm : Theme.threadBg#1",
+    "Unqualified access [unqualified] @ height: modelData > 0#1",
+    "Unqualified access [unqualified] @ opacity: modelData > 0 ? 0.55 + 0.45 * (modelData / Math.max(1, PowerHistory.peak24h)) : 0.5#1",
+    "Unqualified access [unqualified] @ opacity: modelData > 0 ? 0.55 + 0.45 * (modelData / Math.max(1, PowerHistory.peak24h)) : 0.5#2"
+  ],
+  "configs/quickshell/pill/Keybinds.qml": [
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#2",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#3",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#4",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#5"
+  ],
+  "configs/quickshell/pill/Mixer.qml": [
+    "Unqualified access [unqualified] @ focused: root.focusIndex === brRep.count#1",
+    "Unqualified access [unqualified] @ focused: root.focusIndex === brRep.count#2",
+    "Unqualified access [unqualified] @ focused: root.focusIndex === index#1",
+    "Unqualified access [unqualified] @ height: 15 * root.s#1",
+    "Unqualified access [unqualified] @ height: 15 * root.s#2",
+    "Unqualified access [unqualified] @ height: 26 * root.s#1",
+    "Unqualified access [unqualified] @ height: 26 * root.s#2",
+    "Unqualified access [unqualified] @ onCommitted: (v) => { root.pendingBacklight = Math.max(1, Math.min(100, Math.round(v * 100))); blDebounce.restart(); }#1",
+    "Unqualified access [unqualified] @ onCommitted: (v) => { root.pendingBacklight = Math.max(1, Math.min(100, Math.round(v * 100))); blDebounce.restart(); }#2",
+    "Unqualified access [unqualified] @ radius: 8 * root.s#1",
+    "Unqualified access [unqualified] @ radius: 8 * root.s#2",
+    "Unqualified access [unqualified] @ s: root.s#1",
+    "Unqualified access [unqualified] @ s: root.s#2",
+    "Unqualified access [unqualified] @ s: root.s#3",
+    "Unqualified access [unqualified] @ s: root.s#4",
+    "Unqualified access [unqualified] @ width: 15 * root.s#1",
+    "Unqualified access [unqualified] @ width: 15 * root.s#2",
+    "Unqualified access [unqualified] @ width: 26 * root.s#1",
+    "Unqualified access [unqualified] @ width: 26 * root.s#2",
+    "Unqualified access [unqualified] @ width: faderRow.colW#1",
+    "Unqualified access [unqualified] @ width: faderRow.colW#2"
+  ],
+  "configs/quickshell/pill/Pill.qml": [
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#10",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#11",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#12",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#13",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#14",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#15",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#16",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#17",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#2",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#3",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#4",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#5",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#6",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#7",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#8",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#9"
+  ],
+  "configs/quickshell/pill/ScrubValue.qml": [
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1"
+  ],
+  "configs/quickshell/pill/Singletons/Backlight.qml": [
+    "Type Backlight not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/Battery.qml": [
+    "Type Battery not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/Dyn.qml": [
+    "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
+    "Type Dyn not declared as singleton in qmldir but using pragma Singleton [import]#1",
+    "Unqualified access [unqualified] @ readonly property string bright: adapter.bright#1",
+    "Unqualified access [unqualified] @ readonly property string cream: adapter.cream#1",
+    "Unqualified access [unqualified] @ readonly property string dim: adapter.dim#1",
+    "Unqualified access [unqualified] @ readonly property string faint: adapter.faint#1",
+    "Unqualified access [unqualified] @ readonly property string iconDim: adapter.icon_dim#1",
+    "Unqualified access [unqualified] @ readonly property string onPrimaryContainer: adapter.on_primary_container#1",
+    "Unqualified access [unqualified] @ readonly property string outlineVariant: adapter.outline_variant#1",
+    "Unqualified access [unqualified] @ readonly property string primary: adapter.primary#1",
+    "Unqualified access [unqualified] @ readonly property string primaryContainer: adapter.primary_container#1",
+    "Unqualified access [unqualified] @ readonly property string subtle: adapter.subtle#1",
+    "Unqualified access [unqualified] @ readonly property string surface: adapter.surface#1",
+    "Unqualified access [unqualified] @ readonly property string surfaceContainerHigh: adapter.surface_container_high#1",
+    "Unqualified access [unqualified] @ readonly property string surfaceContainerHighest: adapter.surface_container_highest#1",
+    "Unqualified access [unqualified] @ readonly property string surfaceContainerLow: adapter.surface_container_low#1",
+    "Unqualified access [unqualified] @ readonly property string tickRest: adapter.tick_rest#1"
+  ],
+  "configs/quickshell/pill/Singletons/Flags.qml": [
+    "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
+    "Type Flags not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/GameMode.qml": [
+    "Type GameMode not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/Motion.qml": [
+    "Type Motion not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/NightLight.qml": [
+    "Type NightLight not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/Notifs.qml": [
+    "Member \"values\" not found on type \"UntypedObjectModel\" [missing-property] @ var l = trackedNotifications.values;#1"
+  ],
+  "configs/quickshell/pill/Singletons/PackageUpdates.qml": [
+    "Type PackageUpdates not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/Peripherals.qml": [
+    "Member \"values\" not found on type \"UntypedObjectModel\" [missing-property] @ var devs = (typeof Bluetooth !== \"undefined\" && Bluetooth && Bluetooth.devices) ? Bluetooth.devices.values : [];#1",
+    "Unqualified access [unqualified] @ function onConnectedChanged() { root.recount() }#1",
+    "Unqualified access [unqualified] @ function onPercentageChanged() { root.refresh() }#1",
+    "Unqualified access [unqualified] @ function onStateChanged() { root.refresh() }#1"
+  ],
+  "configs/quickshell/pill/Singletons/Players.qml": [
+    "Member \"active\" not found on type \"Players\" [missing-property] @ if (Players.ready && title.length > 0 && (playing || modelData === Players.active))#1",
+    "Member \"active\" not found on type \"Players\" [missing-property] @ } else if (modelData === Players.active) {#1",
+    "Member \"announce\" not found on type \"Players\" [missing-property] @ Players.announce(modelData);#1",
+    "Member \"announce\" not found on type \"Players\" [missing-property] @ Players.announce(modelData);#2",
+    "Member \"announce\" not found on type \"Players\" [missing-property] @ Players.announce(modelData);#3",
+    "Member \"isIdle\" not found on type \"Players\" [missing-property] @ if (!Players.isIdle(modelData) && !Players.otherPlaying(modelData))#1",
+    "Member \"isProxy\" not found on type \"Players\" [missing-property] @ readonly property bool real: modelData && !Players.isProxy(modelData)#1",
+    "Member \"otherPlaying\" not found on type \"Players\" [missing-property] @ if (!Players.isIdle(modelData) && !Players.otherPlaying(modelData))#1",
+    "Member \"preferred\" not found on type const QMetaObject [missing-property] @ Players.preferred = modelData;#1",
+    "Member \"ready\" not found on type \"Players\" [missing-property] @ if (!Players.ready)#1",
+    "Member \"ready\" not found on type \"Players\" [missing-property] @ if (Players.ready && title.length > 0 && (playing || modelData === Players.active))#1"
+  ],
+  "configs/quickshell/pill/Singletons/PresetStore.qml": [
+    "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
+    "Type \"FileViewAdapter\" of property \"adapter\" not found. This is likely due to a missing dependency entry or a type not being exposed declaratively. [unresolved-type] @ adapter.presets = root.defaults;#1",
+    "Type PresetStore not declared as singleton in qmldir but using pragma Singleton [import]#1",
+    "Unqualified access [unqualified] @ adapter.presets = list;#1"
+  ],
+  "configs/quickshell/pill/Singletons/Sound.qml": [
+    "Type Sound not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/SurfaceChrome.qml": [
+    "Type SurfaceChrome not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/Theme.qml": [
+    "Type Theme not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/UiBlur.qml": [
+    "Type UiBlur not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/WindowBlur.qml": [
+    "Type WindowBlur not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Tray.qml": [
+    "Member \"values\" not found on type \"UntypedObjectModel\" [missing-property] @ visible: SystemTray.items.values.length > 0#1",
+    "Type PanelWindow is not creatable. [uncreatable-type] @ PanelWindow {#1"
+  ],
+  "configs/quickshell/pill/shell.qml": [
+    "Member \"settingsActivate\" not found on type \"Pill\" [missing-property] @ if (!e.isAutoRepeat) pill.settingsActivate();#1",
+    "Member \"settingsAdjust\" not found on type \"Pill\" [missing-property] @ else if (pill.settingsLike) { pill.settingsAdjust(-1); e.accepted = true; }#1",
+    "Member \"settingsAdjust\" not found on type \"Pill\" [missing-property] @ else if (pill.settingsLike) { pill.settingsAdjust(1); e.accepted = true; }#1",
+    "Member \"settingsMove\" not found on type \"Pill\" [missing-property] @ e.accepted = pill.mixerStep(-1) || pill.recorderStep(-5) || pill.settingsMove(1);#1",
+    "Member \"settingsMove\" not found on type \"Pill\" [missing-property] @ e.accepted = pill.mixerStep(1) || pill.recorderStep(5) || pill.settingsMove(-1);#1",
+    "Unqualified access [unqualified] @ && root.closingMon !== modelData.name#1",
+    "Unqualified access [unqualified] @ && root.closingMon !== modelData.name)#1",
+    "Unqualified access [unqualified] @ && root.closingMon !== modelData.name)#2",
+    "Unqualified access [unqualified] @ && root.forceHiddenMon !== modelData.name#1",
+    "Unqualified access [unqualified] @ && root.forceHiddenMon !== modelData.name#2",
+    "Unqualified access [unqualified] @ && root.peekMon !== modelData.name && root.revealMon !== modelData.name#1",
+    "Unqualified access [unqualified] @ && root.peekMon !== modelData.name && root.revealMon !== modelData.name#2",
+    "Unqualified access [unqualified] @ else if (pill.held || pill.hoverLatch || root.peekMon === modelData.name)#1",
+    "Unqualified access [unqualified] @ else if (pill.held || pill.hoverLatch || root.peekMon === modelData.name)#2",
+    "Unqualified access [unqualified] @ forcePinned: root.peekMon === overlay.modelData.name#1",
+    "Unqualified access [unqualified] @ function dismissPill() { root.closePill(modelData.name, false); }#1",
+    "Unqualified access [unqualified] @ if (root.closingMon === modelData.name) {#1",
+    "Unqualified access [unqualified] @ if (root.closingMon === modelData.name) {#2",
+    "Unqualified access [unqualified] @ if (root.forceHiddenMon !== overlay.modelData.name) {#1",
+    "Unqualified access [unqualified] @ if (root.forceHiddenMon === modelData.name) {#1",
+    "Unqualified access [unqualified] @ if (root.forceHiddenMon === modelData.name) {#2",
+    "Unqualified access [unqualified] @ if (root.forceHiddenMon === overlay.modelData.name && !autoHover.hovered)#1",
+    "Unqualified access [unqualified] @ if (root.forceHiddenMon === overlay.modelData.name)#1",
+    "Unqualified access [unqualified] @ if (root.openMon === modelData.name) root.close();#1",
+    "Unqualified access [unqualified] @ if (root.openMon === modelData.name) root.close();#2",
+    "Unqualified access [unqualified] @ if (root.peekMon === modelData.name) root.peekMon = \"\";#1",
+    "Unqualified access [unqualified] @ if (root.peekMon === modelData.name) root.peekMon = \"\";#2",
+    "Unqualified access [unqualified] @ if (root.pendingWarpMon === modelData.name) {#1",
+    "Unqualified access [unqualified] @ if (root.pendingWarpMon === modelData.name) {#2",
+    "Unqualified access [unqualified] @ if (root.revealMon === modelData.name) root.revealMon = \"\";#1",
+    "Unqualified access [unqualified] @ if (root.revealMon === modelData.name) root.revealMon = \"\";#2",
+    "Unqualified access [unqualified] @ if (root.revealMon === overlay.modelData.name)#1",
+    "Unqualified access [unqualified] @ implicitHeight: (tall || root.layerHoldMon === modelData.name)#1",
+    "Unqualified access [unqualified] @ maskSource: wall#1",
+    "Unqualified access [unqualified] @ onRequestBack: root.back()#1",
+    "Unqualified access [unqualified] @ onRequestClose: root.closeWithAnimation(overlay.modelData.name)#1",
+    "Unqualified access [unqualified] @ onRequestSurface: (name) => root.toggleSurface(overlay.modelData.name, name)#1",
+    "Unqualified access [unqualified] @ onTriggered: if (root.revealMon === overlay.modelData.name)#1",
+    "Unqualified access [unqualified] @ readonly property bool summoned: modal || root.peekMon === modelData.name#1",
+    "Unqualified access [unqualified] @ root.forceHiddenMon = \"\";#1",
+    "Unqualified access [unqualified] @ root.peekMon = \"\";#1",
+    "Unqualified access [unqualified] @ root.peekMon = \"\";#2",
+    "Unqualified access [unqualified] @ root.pendingWarpMon = \"\";#1",
+    "Unqualified access [unqualified] @ root.revealMon = \"\";#1",
+    "Unqualified access [unqualified] @ root.revealMon = \"\";#2",
+    "Unqualified access [unqualified] @ root.revealMon = \"\";#3",
+    "Unqualified access [unqualified] @ root.revealMon = overlay.modelData.name;#1",
+    "Unqualified access [unqualified] @ root.togglePill(overlay.modelData.name);#1",
+    "Unqualified access [unqualified] @ root.warpToPill(modelData.name, 1);#1",
+    "Unqualified access [unqualified] @ root.warpToPill(modelData.name, 1);#2",
+    "Unqualified access [unqualified] @ target: root#1",
+    "Unqualified access [unqualified] @ || root.peekMon === modelData.name#1",
+    "Unqualified access [unqualified] @ || root.peekMon === modelData.name#2",
+    "Unqualified access [unqualified] @ || root.revealMon === modelData.name) {#1",
+    "Unqualified access [unqualified] @ || root.revealMon === modelData.name) {#2",
+    "Unqualified access [unqualified] @ } else if (root.closingMon.length === 0) {#1",
+    "Unqualified access [unqualified] @ } else if (root.forceHiddenMon.length === 0) {#1"
+  ]
+}

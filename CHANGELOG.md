@@ -21,6 +21,7 @@ semantic versioning when it cuts a release.
 - Five-family synthetic installer matrix and a static session-target contract.
 - QML runtime harness, detailed lock/multi-monitor checks and a broader
   performance procedure.
+- First real PSS/RSS measurements for pill states and the resident lock.
 
 ### Changed
 

@@ -39,6 +39,27 @@ Package checks add a separate transient: run one snapshot immediately after
 `Check now` and another after the process exits. Do not compare them as if they
 were steady state.
 
+## Session snapshot, 2026-10-28
+
+Host: ThinkPad E14 Gen 7, 1920x1200, Quickshell 0.3.2.
+Values in kB, rounded to the nearest kB.
+
+| State | PSS | RSS |
+|---|---:|---:|
+| Pill closed, first sample | 249853 | 340568 |
+| Shell open | 250158 | 341524 |
+| System open | 255633 | 349540 |
+| Packages open | 254749 | 348656 |
+| All 40 surfaces opened | 348915 | 450376 |
+| Closed, 32 s later | 317874 | 420672 |
+| Closed, 64 s later | 290775 | 384784 |
+| Lock process, resident | 51764 | 108884 |
+
+The all-surfaces sample is not a steady state. Cold surfaces unload after 30 s
+and the allocator releases memory gradually; the 32 s and 64 s rows show that
+the process does not return immediately to the first closed sample. These are
+diagnostic values, not a release threshold.
+
 ## What to compare
 
 - closed pill versus one settings hub;

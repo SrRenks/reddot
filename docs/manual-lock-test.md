@@ -3,6 +3,11 @@
 This test requires a real PAM prompt and can leave the session locked. Run it
 from a TTY or a disposable session, with a second terminal available.
 
+## Status
+
+The static flow is covered by `tools/check-lock-static.sh`. A real PAM/unlock run
+still requires a supervised TTY session and has not been executed automatically.
+
 ## Preconditions
 
 - save all work;

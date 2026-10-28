@@ -18,9 +18,9 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
-| Lock shell | estático + checklist | QML lint, `check-lock-static.sh` e roteiro manual de PAM; execução automática continua fora |
+| Lock shell | estático + checklist, aguardando PAM real | QML lint, `check-lock-static.sh` e roteiro manual; execução supervisionada pendente |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |
-| Performance/RAM | diagnóstico host-only | `perf-snapshot.sh` e procedimento detalhado; sem threshold universal |
+| Performance/RAM | medida real nesta máquina | PSS/RSS de pill, lock e estados de Settings; sem threshold universal |
 | Segurança dos helpers | parcial | allowlist, polkit, sudoers e guards verificados; sem fuzz adversarial |
 
 O lock shell foi revisado estaticamente. Ele cria `WlSessionLock` e só chama
@@ -54,8 +54,8 @@ documentação e drift entre checkout e deploy.
 
 ## Próximos alvos, se houver outro ciclo
 
-1. teste de gesto Qt Quick em compositor real;
-2. execução manual de PAM/unlock em sessão de teste;
+1. gesto físico final de drag/back em compositor real;
+2. execução supervisionada de PAM/unlock em sessão de teste;
 3. matriz de instalação em VMs por distro;
 4. fuzz adversarial mais agressivo dos helpers e do updater;
 5. orçamento de PSS definido a partir de medições reais;

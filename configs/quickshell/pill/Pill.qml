@@ -10,6 +10,7 @@ import Quickshell.Bluetooth
 import Quickshell.Hyprland
 import "Singletons"
 import "lib/surfaces.js" as SurfaceCatalog
+import "lib/navigation.js" as Navigation
 
 /**
  * The pill body. One element carries every state. Width/height driven by `state`
@@ -1579,6 +1580,7 @@ Item {
                     spacing: 5 * pill.s
 
                     HoverHandler {
+                        id: weatherHover
                         cursorShape: Qt.PointingHandCursor
                         enabled: hover.live
                     }
@@ -1683,6 +1685,11 @@ Item {
                             startX: 3.2; startY: 2.8
                             PathLine { x: 13.0; y: 13.4 }
                         }
+                    }
+                    HoverHandler {
+                        id: dndHover
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: hover.live
                     }
                 }
 
@@ -1809,6 +1816,90 @@ Item {
                             onContainsMouseChanged: if (containsMouse) pill.soulTarget = "battery"
                         }
                     }
+                }
+
+                StatusTooltip {
+                    nodeId: "weather"
+                    s: pill.s
+                    anchorItem: weatherGlance
+                    show: weatherHover.hovered
+                }
+
+                StatusTooltip {
+                    nodeId: "dnd"
+                    s: pill.s
+                    anchorItem: dndIcon
+                    show: dndHover.hovered
+                }
+
+                StatusTooltip {
+                    nodeId: "network"
+                    s: pill.s
+                    anchorItem: networkGroup
+                    show: wifiArea.containsMouse || btArea.containsMouse || batteryArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "inbox"
+                    s: pill.s
+                    anchorItem: inboxIcon
+                    show: inboxArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "mixer"
+                    s: pill.s
+                    anchorItem: mixerIcon
+                    show: mixerArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "sound"
+                    s: pill.s
+                    anchorItem: soundIcon
+                    show: soundArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "thinkpad"
+                    s: pill.s
+                    anchorItem: thinkpadIcon
+                    show: thinkpadArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "sysmon"
+                    s: pill.s
+                    anchorItem: sysmonIcon
+                    show: sysmonArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "updates"
+                    s: pill.s
+                    anchorItem: updatesIcon
+                    show: updatesArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "recorder"
+                    s: pill.s
+                    anchorItem: recorderIcon
+                    show: recorderArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "settings"
+                    s: pill.s
+                    anchorItem: settingsIcon
+                    show: settingsArea.containsMouse
+                }
+
+                StatusTooltip {
+                    nodeId: "power"
+                    s: pill.s
+                    anchorItem: powerIcon
+                    show: powerArea.containsMouse
                 }
 
                 Item {

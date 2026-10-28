@@ -23,6 +23,7 @@
 | `check-hypr-api.sh` | rejects legacy Hyprland syntax and validates Lua |
 | `check-doc-links.mjs` | validates required docs and relative links |
 | `check-ui-contract.mjs` | surface references, debug leftovers, wheel path and status coverage |
+| `check-navigation.mjs` | manifest coverage for catalog, status row, Settings index and hubs |
 | `test-reddot-tlp.sh` | 25 assertions with fake sysfs and fake tlp/ppd/systemctl |
 | `test-reddot-thinkpad.sh` | fake ThinkPad sysfs: status and allowlisted writes |
 | `reddot-bench.sh` | PSS/CPU + session cgroup anon/file snapshot |

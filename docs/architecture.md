@@ -17,6 +17,7 @@ focus/back changes. This is a map of the current seams, not a rewrite proposal.
 | Persistent UI state | `Flags.lastSurface` |
 | Focus routing | `shell.qml` + `PillSurface` + `HyprlandFocusGrab` |
 | QML lint | 180 warning occurrences in the reviewed baseline, zero errors |
+| Navigation metadata | `lib/navigation.js`: titles, subtitles, aliases, tags and status targets; checked against the catalog and status order by `check-navigation.mjs` |
 | Tests | `tools/check.sh` validates every QML file, the warning baseline, lua/helpers, the surface catalog, the UI contract and the documentation links; behavior still needs a Qt Quick test harness |
 
 ## Where adding a surface touches code
@@ -75,6 +76,16 @@ validation and the cold-unload set now all read `lib/surfaces.js`.
 - Remaining P0 follow-ups: width/loader/Settings-row generation, and a check
   that every catalog id maps to a Loader.
 
+### P0.5 — navigation metadata (applied)
+
+- `lib/navigation.js` names every catalog page and every status item.
+- Status labels and hover tooltips read that manifest; the manifest is checked
+  against `lib/surfaces.js`, `StatusOrderList.qml`, `Settings.qml` and the hub
+  entries.
+- `StatusTooltip.qml` is the shared hover label for the status row.
+- The next step is P1: generate the Settings index and hubs from this metadata,
+  then add the Search surface on the same model.
+
 ### P1 — SurfaceHost
 
 - Extract Loader creation and cold-unload into `SurfaceHost.qml`.
@@ -86,7 +97,8 @@ validation and the cold-unload set now all read `lib/surfaces.js`.
   qs -c pill ipc call pill open <name>
   ```
   while keeping aliases for the old verbs.
-- Generate Settings rows from catalog metadata.
+- Generate Settings rows and hub entries from navigation metadata.
+- Add Search over the same nodes, with page-first and row-focus results.
 
 This removes the eight-touch-point problem without introducing a framework.
 

@@ -55,8 +55,8 @@ if (known.length === 0)
     failures.push("StatusOrderList.qml: knownIds is empty");
 for (const id of known) {
     const hits = (order.match(new RegExp(`case "${id}"`, "g")) || []).length;
-    if (hits < 3)
-        failures.push(`StatusOrderList.qml: ${id} lacks label/visible/set cases`);
+    if (hits < 2)
+        failures.push(`StatusOrderList.qml: ${id} lacks visible/set cases`);
     const pill = read(pillDir + "Pill.qml");
     if (!pill.includes(`case "${id}":`))
         failures.push(`Pill.qml: status width is missing for ${id}`);

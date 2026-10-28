@@ -71,6 +71,13 @@ else
     printf '  skip  node not found\n'
 fi
 
+echo "== navigation =="
+if command -v node >/dev/null 2>&1; then
+    if node "$here/check-navigation.mjs"; then ok "navigation manifest"; else bad "navigation manifest"; fi
+else
+    printf '  skip  node not found\n'
+fi
+
 echo "== integration =="
 if out=$(sh "$here/check-integration.sh" 2>&1); then
     ok "installer and system files"

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import "Singletons"
 import "lib/statusOrder.js" as StatusOrder
+import "lib/navigation.js" as Navigation
 
 /**
  * Drag-to-reorder status cluster. The grip is the drag handle; the following
@@ -146,23 +147,7 @@ Item {
     }
 
     function label(id) {
-        switch (id) {
-        case "weather": return "Weather";
-        case "minimized": return "Minimized apps";
-        case "tray": return "System tray";
-        case "dnd": return "Do not disturb";
-        case "network": return "Network group";
-        case "inbox": return "Notifications";
-        case "mixer": return "Mixer";
-        case "sound": return "Sound";
-        case "thinkpad": return "ThinkPad";
-        case "sysmon": return "System monitor";
-        case "updates": return "Package updates";
-        case "recorder": return "Recorder";
-        case "settings": return "Settings";
-        case "power": return "Power";
-        }
-        return id;
+        return Navigation.statusLabel(id);
     }
 
     function visibleOf(id) {

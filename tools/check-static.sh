@@ -16,6 +16,7 @@ run_node() {
 echo "== static contracts =="
 run_node "$here/check-surfaces.mjs"
 run_node "$here/check-ui-contract.mjs"
+run_node "$here/check-navigation.mjs"
 run_node "$here/check-doc-links.mjs"
 for test in "$repo"/configs/quickshell/pill/lib/*.test.mjs; do
     [ -f "$test" ] && run_node "$test"

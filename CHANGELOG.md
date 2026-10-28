@@ -34,6 +34,8 @@ semantic versioning when it cuts a release.
   surface.
 - IPC `back` and `surface` controls for supervised surface-routing tests.
 - `lastSurface` reopen validated with the real Super+Shift+Space binding.
+- Navigation manifest with aliases/tags, status hover tooltips and a contract
+  tying catalog, status order, Settings index and hubs together.
 
 ### Changed
 

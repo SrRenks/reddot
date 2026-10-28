@@ -402,6 +402,21 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust report =="
+if command -v rustc >/dev/null 2>&1; then
+    report_bin="${TMPDIR:-/tmp}/reddot-report-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-report.rs" -o "$report_bin" 2>/tmp/reddot-report-build.log; then
+        ok "rust report build"
+        if out=$(sh "$repo/tools/test-reddot-report-rust.sh" 2>&1); then ok "rust report parity"; else bad "rust report parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+    else
+        bad "rust report build"
+        sed 's/^/        /' /tmp/reddot-report-build.log | tail -n 12
+    fi
+    rm -f "$report_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

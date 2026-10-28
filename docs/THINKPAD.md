@@ -109,9 +109,9 @@ writable; writing one clears its kernel trigger, which is the manual override.
 
 ## Layout proposal
 
-One surface, not tabs. The pill already morphs vertically, and Look uses
-collapsible groups. Groups keep status and controls in one field of view; tabs
-would hide the fan temperature while changing a TrackPoint value.
+The ThinkPad surface keeps lighting, the LED engine and machine data together.
+TrackPoint, double-tap and Fn-lock moved to **INPUT → TrackPoint** so pointer
+behavior has one home; the ThinkPad surface stays hardware telemetry and LEDs.
 
 Entry points:
 
@@ -153,8 +153,8 @@ Why this order:
 
 1. Lighting first: the reason to open this surface is usually a LED or the
    keyboard light.
-2. Pointing second and collapsed: it is the least frequent edit.
-3. Battery and power is a link to the Power surface, not a duplicate.
+2. Machine data and the battery/power link at the end.
+3. Pointer behavior lives in Input, not here.
 
 Rows that do not apply are hidden, not disabled: no `speed` row on the E14, no
 Fn lock row without `fn_lock`. Every LED in `/sys/class/leds` is read from the
@@ -211,8 +211,8 @@ silent fallback to sudo.
 
 ## What ships now
 
-The surface has Lighting, LED engine, Pointing and Machine groups, plus the
-Battery and power link. Fan telemetry and the curve stay in System.
+The surface has Lighting, LED engine and Machine groups, plus the Battery and
+power link. TrackPoint lives in Input; fan telemetry and the curve stay in System.
 
 `LED engine` is a generic capability-driven editor: pick any LED from
 `/sys/class/leds`, set brightness, choose any trigger the kernel advertises, and

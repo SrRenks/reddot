@@ -51,7 +51,7 @@ restart.
 
 ## What a preset does not change
 
-The ThinkPad fan curve, LEDs and TrackPoint stay separate. A preset changes the
+The ThinkPad fan curve, LEDs and Input's TrackPoint stay separate. A preset changes the
 TLP profile and charge window only; this matches the actual desktop/laptop
 difference on this machine. A future schema can add a fan curve snapshot
 without changing the current file format.

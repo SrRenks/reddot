@@ -62,9 +62,9 @@ kept close to the original.
   window blur and its opacity pair; panel blur survives it.
 - **Conventional keymap** — see `docs/KEYBINDS.md`; screenshots, mic mute and
   window movement are unified and the dangerous hibernate chord is gone.
-- ThinkPad extras (optional): on a ThinkPad only, TrackPoint, double-tap and
-  writable LEDs. Detection is lazy and the helper is installed only on ThinkPad
-  hardware, so other machines are unchanged.
+- ThinkPad extras (optional): on a ThinkPad only, writable LEDs in `THINKPAD`,
+  and TrackPoint/double-tap/Fn-lock in `INPUT → TrackPoint`. Detection is lazy
+  and the helper is installed only on ThinkPad hardware.
 
 The System sensor snapshot is a small Rust binary built by
 `tools/install-extras.sh` from `tools/reddot-sensors.rs`; it has no runtime

@@ -207,69 +207,6 @@ PillSurface {
 
             ThinkPadGroup {
                 s: root.s
-                title: "Pointing"
-                        accent: true
-                visible: root.hasPointing
-
-                Repeater {
-                    model: ThinkPad.tpList
-
-                    SettingsField {
-                        id: tpRow
-                        required property var modelData
-                        surface: root
-                        label: root.tpLabel(tpRow.modelData.name)
-
-                        LinkToggle {
-                            visible: tpRow.modelData.bool
-                            s: root.s
-                            on: tpRow.modelData.value === 1
-                            enabled: !root.busy
-                            onToggled: root.setTp(tpRow.modelData.name, !on ? 1 : 0)
-                        }
-
-                        ScrubValue {
-                            visible: !tpRow.modelData.bool
-                            s: root.s
-                            value: tpRow.modelData.value
-                            from: 0
-                            to: tpRow.modelData.max
-                            step: tpRow.modelData.name === "drift_time" ? 50 : 4
-                            enabled: !root.busy
-                            onEdited: (v) => root.setTp(tpRow.modelData.name, v)
-                        }
-                    }
-                }
-
-                SettingsField {
-                    surface: root
-                    label: "Double-tap"
-                    visible: ThinkPad.doubletap >= 0
-
-                    LinkToggle {
-                        s: root.s
-                        on: ThinkPad.doubletap === 1
-                        enabled: !root.busy
-                        onToggled: root.setDoubletap(!on)
-                    }
-                }
-
-                SettingsField {
-                    surface: root
-                    label: "Fn lock"
-                    visible: ThinkPad.fnLock >= 0
-
-                    LinkToggle {
-                        s: root.s
-                        on: ThinkPad.fnLock === 1
-                        enabled: !root.busy
-                        onToggled: root.setFnLock(!on)
-                    }
-                }
-            }
-
-            ThinkPadGroup {
-                s: root.s
                 title: "Machine"
                         accent: true
 

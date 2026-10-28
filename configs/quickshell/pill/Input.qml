@@ -67,6 +67,9 @@ SettingsSurface {
     property bool disableWhileTyping: true
     property bool clickfinger: false
     property bool middleButton: false
+    property bool tpBusy: false
+    property string tpNotice: ""
+    readonly property bool hasPointing: ThinkPad.tpList.length > 0 || ThinkPad.doubletap >= 0
     property int cursorSize: 24
     property string cursorTheme: "Bibata-Modern-Ice"
     property var cursorThemes: []
@@ -138,6 +141,7 @@ SettingsSurface {
             seed();
             kbStatus.running = true;
             themeProc.running = true;
+            ThinkPad.refresh();
         } else {
             themeOpen = false;
             focusRowItem = null;
@@ -307,6 +311,39 @@ SettingsSurface {
         root.selectLanguage(next);
     }
 
+    function tpRun(args) {
+        if (tpActionProc.running)
+            return;
+        tpBusy = true;
+        tpNotice = "authentication required…";
+        tpActionProc.command = ["/usr/bin/pkexec", ThinkPad.helper].concat(args);
+        tpActionProc.running = true;
+    }
+
+    function setTp(name, value) {
+        root.tpRun(["trackpoint", name, String(value)]);
+    }
+
+    function setDoubletap(value) {
+        root.tpRun(["doubletap", value ? "1" : "0"]);
+    }
+
+    function setFnLock(value) {
+        root.tpRun(["fnlock", value ? "1" : "0"]);
+    }
+
+    function tpLabel(name) {
+        switch (name) {
+        case "sensitivity": return "Sensitivity";
+        case "speed": return "Speed";
+        case "press_to_select": return "Press to select";
+        case "dragging": return "Dragging";
+        case "drift_time": return "Drift time";
+        case "inertia": return "Inertia";
+        }
+        return name;
+    }
+
     function setKbModel(v) {
         root.kbModel = v;
         root.writeInputField("kb_model", JSON.stringify(v === "auto" ? "" : v));
@@ -469,6 +506,23 @@ SettingsSurface {
         property string theme: ""
         property int size: 24
         command: ["hyprctl", "setcursor", theme, String(size)]
+    }
+
+    Process {
+        id: tpActionProc
+        stderr: StdioCollector {
+            onStreamFinished: if (this.text.trim().length > 0)
+                root.tpNotice = this.text.trim();
+        }
+        onExited: (code) => {
+            root.tpBusy = false;
+            if (code === 0) {
+                root.tpNotice = "saved";
+                ThinkPad.refresh();
+            } else if (root.tpNotice.length === 0) {
+                root.tpNotice = "authentication cancelled or helper failed (" + code + ")";
+            }
+        }
     }
 
     Process {
@@ -675,6 +729,73 @@ SettingsSurface {
                         root.writeInputField("numlock_by_default", root.numlockOn ? "true" : "false");
                     }
                 }
+            }
+
+            GroupLabel { text: "TrackPoint"; visible: root.hasPointing }
+
+            Repeater {
+                model: ThinkPad.tpList
+
+                FieldRow {
+                    id: tpRow
+                    required property var modelData
+                    label: root.tpLabel(tpRow.modelData.name)
+                    visible: root.hasPointing
+
+                    LinkToggle {
+                        visible: tpRow.modelData.bool
+                        s: root.s
+                        on: tpRow.modelData.value === 1
+                        enabled: !root.tpBusy
+                        onToggled: root.setTp(tpRow.modelData.name, !on ? 1 : 0)
+                    }
+
+                    ScrubValue {
+                        visible: !tpRow.modelData.bool
+                        s: root.s
+                        value: tpRow.modelData.value
+                        from: 0; to: tpRow.modelData.max
+                        step: tpRow.modelData.name === "drift_time" ? 50 : 4
+                        enabled: !root.tpBusy
+                        onEdited: (v) => root.setTp(tpRow.modelData.name, v)
+                    }
+                }
+            }
+
+            FieldRow {
+                label: "Double-tap"
+                icon: "mouse"
+                visible: root.hasPointing && ThinkPad.doubletap >= 0
+                LinkToggle {
+                    s: root.s
+                    on: ThinkPad.doubletap === 1
+                    enabled: !root.tpBusy
+                    onToggled: root.setDoubletap(!on)
+                }
+            }
+
+            FieldRow {
+                label: "Fn lock"
+                icon: "lock"
+                visible: root.hasPointing && ThinkPad.fnLock >= 0
+                LinkToggle {
+                    s: root.s
+                    on: ThinkPad.fnLock === 1
+                    enabled: !root.tpBusy
+                    onToggled: root.setFnLock(!on)
+                }
+            }
+
+            Text {
+                width: parent.width
+                visible: root.tpNotice.length > 0
+                topPadding: 4 * root.s
+                text: root.tpNotice
+                color: root.tpNotice === "saved" ? Theme.faint : Theme.flameCore
+                font.family: Theme.font
+                font.pixelSize: 8.5 * root.s
+                font.weight: Font.Medium
+                elide: Text.ElideRight
             }
 
             GroupLabel { text: "Touchpad" }

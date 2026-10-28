@@ -14,6 +14,10 @@ semantic versioning when it cuts a release.
 - Relative-link checker for committed documentation.
 - Project conventions for QML surfaces, singletons, loaders, scale and Hyprland
   modules.
+- Headless CI gate and reusable `check-static.sh`.
+- Node tests for scroll and status-order behavior.
+- Static lock-flow review and isolated deploy/re-deploy/uninstall test.
+- Host-only performance snapshot and privileged-boundary check.
 
 ### Changed
 

@@ -21,6 +21,7 @@ top-level README stays short; operational detail lives in the pages below.
 - [Startup](STARTUP.md)
 - [ThinkPad controls](THINKPAD.md)
 - [Measured memory and reductions](LIGHTWEIGHT.md)
+- [Performance snapshots](performance.md)
 
 ## Reference
 

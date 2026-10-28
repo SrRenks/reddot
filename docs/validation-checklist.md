@@ -6,6 +6,7 @@ Run these checks before declaring a change complete. The full gate is
 ## Default gate
 
 - [ ] `sh tools/check.sh`
+- [ ] `sh tools/check-static.sh`
 - [ ] `qml-warning-baseline` has no new warnings.
 - [ ] `Hyprland --verify-config` reports `config ok`.
 - [ ] `hyprctl configerrors` is empty.
@@ -32,6 +33,8 @@ Run these checks before declaring a change complete. The full gate is
 - [ ] installer dry-run completes;
 - [ ] deploy/distro/pkg/fallbacks/tui selftests pass;
 - [ ] udev, polkit, session target and TLP checks pass.
+- [ ] `python3 tools/test_deploy_sandbox.py` passes.
+- [ ] `sh tools/check-lock-static.sh` and `sh tools/check-privileged.sh` pass.
 
 ## Documentation
 

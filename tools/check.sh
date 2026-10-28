@@ -92,6 +92,9 @@ if out=$(sh "$here/check-lock-static.sh" 2>&1); then ok "lock static flow"; else
 echo "== deploy sandbox =="
 if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad "deploy sandbox"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 
+echo "== privileged boundary =="
+if out=$(sh "$here/check-privileged.sh" 2>&1); then ok "privileged boundary"; else bad "privileged boundary"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+
 echo "== qml warnings =="
 if command -v node >/dev/null 2>&1; then
     if out=$(node "$here/check-qml-warnings.mjs" 2>&1); then ok "$out"; else bad "QML warnings"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi

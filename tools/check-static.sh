@@ -21,6 +21,11 @@ for test in "$repo"/configs/quickshell/pill/lib/*.test.mjs; do
     [ -f "$test" ] && run_node "$test"
 done
 
+echo "== lock and privileged boundaries =="
+for check in check-lock-static.sh check-privileged.sh; do
+    if out=$(sh "$here/$check" 2>&1); then ok "$check"; else bad "$check"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+done
+
 echo "== deploy sandbox =="
 if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad "deploy sandbox"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 

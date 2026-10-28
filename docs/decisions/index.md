@@ -12,3 +12,4 @@
 - [ADR 0011: Rust TUI renderer](0011-rust-tui-renderer.md)
 - [ADR 0012: Rust TUI input](0012-rust-tui-input.md)
 - [ADR 0013: Rust installer detection](0013-rust-detect-core.md)
+- [ADR 0014: Rust installer plan](0014-rust-plan-core.md)

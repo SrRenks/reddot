@@ -325,6 +325,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust plan =="
+if command -v rustc >/dev/null 2>&1; then
+    plan_bin="${TMPDIR:-/tmp}/reddot-plan-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-plan.rs" -o "$plan_bin" 2>/tmp/reddot-plan-build.log; then
+        ok "rust plan build"
+        plan_unit="${TMPDIR:-/tmp}/reddot-plan-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-plan.rs" -o "$plan_unit" 2>/tmp/reddot-plan-test-build.log && "$plan_unit" >/tmp/reddot-plan-unit.log 2>&1; then
+            ok "rust plan unit tests"
+        else
+            bad "rust plan unit tests"
+            tail -n 12 /tmp/reddot-plan-test-build.log /tmp/reddot-plan-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$plan_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-plan-rust.sh" 2>&1); then ok "rust plan parity"; else bad "rust plan parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust plan build"
+        sed 's/^/        /' /tmp/reddot-plan-build.log | tail -n 12
+    fi
+    rm -f "$plan_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

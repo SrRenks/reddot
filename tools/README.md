@@ -45,6 +45,8 @@
 | `reddot-neutralize.rs` | Rust monitors/env/hypridle/fish/fastfetch neutralization |
 | `reddot-tui.rs` | Rust TUI renderer, raw terminal input and prompt state machines |
 | `reddot-detect.rs` | Rust installer detection record |
+| `reddot-plan.rs` | Rust installer plan: native, AUR, fallback and skip batches |
+| `test-reddot-plan-rust.sh` | profile, AUR and overlay plan parity
 | `test-reddot-detect-rust.sh` | detection parity
 | `test-reddot-tui-rust.sh` | fixed-width TUI render parity |
 | `test-reddot-neutralize-rust.sh` | neutralize plan and applied-tree parity |

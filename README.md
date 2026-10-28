@@ -78,10 +78,6 @@ The page shows the active backend and keeps the last good count when a source is
 
 matugen derives a palette from the current wallpaper and feeds it to the pill, terminal, borders, fastfetch and GTK apps. Window blur, transparency and panel blur are separate controls. `Super+Shift+F` toggles window blur and opacity; panel blur stays independent.
 
-![Wallpaper palette](assets/wallust.gif)
-
-![Wallpaper retheme](assets/retheme.gif)
-
 ### Recording and capture
 
 `Super+Shift+R` opens the recorder. `Print` or `Super+F9` starts rishot, and `Shift+Print` captures the current monitor. rishot lives in its own project.

@@ -10,7 +10,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 |---|---|---|
 | QML das 40 superfícies | estática + módulos puros + runtime | lint em 126 arquivos, baseline de 180 ocorrências, testes Node, harness Quickshell e smoke de abertura |
 | Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML e Security com fingerprint/idle agrupados |
-| Barra e status | boa | contrato de status, smoke, reorder físico e cancelamento com Escape |
+| Barra e status | boa | contrato, smoke, wheel no painel, reorder físico, Escape-cancel e uiScale 1.25 |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
 | Helpers TLP/ThinkPad | boa + adversarial | testes próprios, casos de metacaracteres/argumentos extras e selftest do installer |
@@ -54,10 +54,7 @@ documentação e drift entre checkout e deploy.
 
 ## Próximos alvos, se houver outro ciclo
 
-1. gesto físico final de drag/back em compositor real;
-2. lock sobre duas saídas em sessão supervisionada;
-3. matriz de instalação em VMs por distro;
-4. fuzz adversarial mais agressivo dos helpers e do updater;
-5. orçamento de PSS definido a partir de medições reais;
-6. decisão sobre remover dedos extras do `fprintd`;
-6. teste multi-monitor em hardware com duas saídas.
+1. matriz de instalação em VMs por distro;
+2. decisão sobre remover dedos extras do `fprintd`;
+3. teste multi-monitor em hardware físico com duas saídas;
+4. Escape/back de teclado no compositor com foco de camada confirmado.

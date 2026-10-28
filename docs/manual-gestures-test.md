@@ -30,7 +30,12 @@ exercised with `dotool` against the real `eDP-1`, whose global x offset is 8960.
 - Dragging **Weather** by the grip changed the order; the saved
   `barStatusOrder` was restored afterwards.
 - Starting another drag and pressing Escape left the order unchanged.
-- The first pointer-wheel attempt targeted the wrong global layout and is not
-  used as evidence; `PageDown` and physical drag are the validated paths.
-- `barStatusOrder` and `uiScale` were left at their original values
-  (`uiScale: 1`).
+- Pointer wheel over the panel initially did not scroll: the surface consumed the
+  event before the backdrop handler. `PillSurface` now forwards wheel input to
+  its own Flickable; the same wheel gesture over the panel then scrolled the Bar
+  list.
+- The Bar surface rendered correctly at `uiScale` 1.25; the original `uiScale`
+  (1) was restored.
+- `barStatusOrder`, `uiScale` and `lastSurface` were restored after the run.
+- Escape-back from Shell could not be validated with `dotool` because the
+  simulated key went to the focused browser instead of the layer surface.

@@ -30,6 +30,8 @@ semantic versioning when it cuts a release.
   path-like names.
 - `WlSessionLock.secure` diagnostic and a supervised two-output lock smoke.
 - Physical Bar drag and Escape-cancel validation against the real eDP-1 layout.
+- Wheel input over an open panel now scrolls instead of being swallowed by the
+  surface.
 
 ### Changed
 

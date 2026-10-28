@@ -92,4 +92,17 @@ Flickable {
         value: surface.height
         when: surface.active
     }
+
+    /**
+     * The surface is the topmost item under the pointer, so wheel events that
+     * arrive over a panel must scroll here instead of stopping at the Flickable
+     * and never reaching the backdrop handler.
+     */
+    WheelHandler {
+        enabled: surface.active && surface.contentHeight > surface.height
+        onWheel: (event) => {
+            surface.scrollBy(ScrollMath.stepFor(event.angleDelta.y, surface.height, surface.s));
+            event.accepted = true;
+        }
+    }
 }

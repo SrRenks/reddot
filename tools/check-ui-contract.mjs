@@ -39,8 +39,9 @@ for (const file of files) {
 }
 
 const surfaceBase = read(pillDir + "PillSurface.qml");
-if (/WheelHandler\s*\{/.test(surfaceBase))
-    failures.push("PillSurface.qml: a local WheelHandler reintroduces a competing scroll path");
+if (/WheelHandler\s*\{/.test(surfaceBase)
+    && !/surface\.scrollBy\(ScrollMath\.stepFor/.test(surfaceBase))
+    failures.push("PillSurface.qml: WheelHandler must forward to Surface.scrollBy(ScrollMath.stepFor)");
 
 const shell = read(pillDir + "shell.qml");
 const wheelCount = (shell.match(/\bonWheel\s*:/g) || []).length;

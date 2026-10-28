@@ -20,14 +20,10 @@ Status of the main follow-ups after the Settings, package and scroll work.
 - Adversarial argument cases for the TLP and ThinkPad helpers.
 - Two-output lock verified with `WlSessionLock.secure=true` on `eDP-1` plus a
   headless output.
+- Physical pointer click on the panel back chip confirmed working by the user.
 
 ## Next / deferred
 
-- **Physical pointer click on the lock/Bar header back chip.** The IPC
-  `pill back` control traverses the same `SurfaceCatalog.parent` path and was
-  verified, but `dotool` did not deliver the synthetic click to the layer
-  surface. Confirm with a real mouse: Settings → Shell → click the left
-  chevron; it must return to Settings rather than close the pill.
 - Updater adversarial fuzz: helper arguments were covered, the update helper was
   not fuzzed in this cycle.
 - Installer execution in VMs for the five package families.

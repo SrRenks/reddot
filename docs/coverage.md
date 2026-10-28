@@ -56,5 +56,4 @@ documentação e drift entre checkout e deploy.
 
 1. matriz de instalação em VMs por distro;
 2. decisão sobre remover dedos extras do `fprintd`;
-3. teste multi-monitor em hardware físico com duas saídas;
-4. clique físico no chip de back com foco de camada confirmado.
+3. teste multi-monitor em hardware físico com duas saídas.

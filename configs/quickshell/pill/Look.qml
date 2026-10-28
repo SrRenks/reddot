@@ -481,69 +481,6 @@ SettingsSurface {
 
             }
 
-            Group { id: nightGrp; visible: false; title: "Night light"
-
-            FieldRow {
-                id: nlModeRow
-                label: "Mode"
-                caption: "Off, always warm, or auto by time"
-                SettingsSeg {
-                    s: root.s
-                    options: root.nightModeOptions
-                    value: Flags.nightLightMode
-                    onPicked: v => NightLight.setMode(v)
-                }
-            }
-
-            FieldRow {
-                id: nlTempRow
-                label: "Temperature"
-                caption: "Lower is warmer"
-                collapsed: Flags.nightLightMode === "off"
-                ScrubValue {
-                    id: nlTempScrub
-                    s: root.s
-                    value: Flags.nightLightTemp
-                    openValue: root.base.nlTemp
-                    from: 2200; to: 6000; step: 100; unit: "K"
-                    onEdited: v => NightLight.setTemp(v)
-                }
-            }
-
-            FieldRow {
-                id: nlOnRow
-                label: "On at"
-                caption: "Warm tint starts"
-                collapsed: Flags.nightLightMode !== "scheduled"
-                ScrubValue {
-                    id: nlOnScrub
-                    s: root.s
-                    value: Flags.nightLightOnMin
-                    openValue: root.base.nlOnMin
-                    from: 0; to: 1425; step: 15
-                    fmt: root.fmtClock
-                    onEdited: v => NightLight.setOnMin(v)
-                }
-            }
-
-            FieldRow {
-                id: nlOffRow
-                label: "Off at"
-                caption: "Back to neutral"
-                collapsed: Flags.nightLightMode !== "scheduled"
-                ScrubValue {
-                    id: nlOffScrub
-                    s: root.s
-                    value: Flags.nightLightOffMin
-                    openValue: root.base.nlOffMin
-                    from: 0; to: 1425; step: 15
-                    fmt: root.fmtClock
-                    onEdited: v => NightLight.setOffMin(v)
-                }
-            }
-
-            }
-
             Group { id: shadowGrp; title: "Shadow"
 
             FieldRow {
@@ -599,18 +536,6 @@ SettingsSurface {
             }
 
             Group { id: blurGrp; title: "Blur"
-
-            FieldRow {
-                id: uiBlurRow
-                visible: false
-                label: "Pill / panel blur"
-                caption: "Layer blur for the pill and every panel. Independent of window blur; while window blur is off, windows get a no-blur rule."
-                LinkToggle {
-                    s: root.s
-                    on: UiBlur.enabled
-                    onToggled: UiBlur.setEnabled(!UiBlur.enabled)
-                }
-            }
 
             FieldRow {
                 id: blEnRow
@@ -730,105 +655,6 @@ SettingsSurface {
                         root.inactiveOpacity = v;
                         root.writeOpacity("inactive_opacity", v.toFixed(2));
                     }
-                }
-            }
-
-            }
-
-            Group { id: pillGrp; visible: false; title: "Pill"
-
-            FieldRow {
-                id: pillModeRow
-                label: "Pill mode"
-                caption: "Always on screen, or hidden until the top edge is touched"
-                SettingsSeg {
-                    s: root.s
-                    options: [{ label: "Always", value: "always" }, { label: "Auto", value: "auto" }]
-                    value: Flags.pillMode
-                    onPicked: v => Flags.pillMode = v
-                }
-            }
-
-            FieldRow {
-                id: pillReserveRow
-                label: "Reserve space"
-                caption: "Windows start below the pill. Off frees the top edge. Auto mode ignores it."
-                LinkToggle {
-                    s: root.s
-                    on: Flags.pillReserve
-                    onToggled: Flags.pillReserve = !Flags.pillReserve
-                }
-            }
-
-            FieldRow {
-                id: pillGapRow
-                label: "Pill gap"
-                caption: "Space above the pill. Lower pulls windows up with it."
-                ScrubValue {
-                    id: pillGapScrub
-                    s: root.s
-                    value: Flags.topGap
-                    openValue: root.base.topGap
-                    from: 0; to: 2; step: 0.1; decimals: 1
-                    onEdited: v => Flags.topGap = v
-                }
-            }
-
-            FieldRow {
-                id: appGapRow
-                label: "App gap"
-                caption: "Space under the pill. Lower pulls windows up."
-                ScrubValue {
-                    id: appGapScrub
-                    s: root.s
-                    value: Flags.appGap
-                    openValue: root.base.appGap
-                    from: 0; to: 2; step: 0.1; decimals: 1
-                    onEdited: v => Flags.appGap = v
-                }
-            }
-
-            FieldRow {
-                id: pillOpRow
-                label: "Pill opacity"
-                caption: "How see-through the pill sits; lower values let the panel blur show."
-                ScrubValue {
-                    id: pillOpScrub
-                    s: root.s
-                    value: Flags.pillOpacity
-                    openValue: root.base.pillOpacity
-                    from: 0.55; to: 1.0; step: 0.05; decimals: 2
-                    onEdited: v => Flags.pillOpacity = v
-                }
-            }
-
-            }
-
-            Group { id: noticeGrp; visible: false; title: "Key notices"; initialOpen: true
-
-            FieldRow {
-                id: noticeEnRow
-                label: "Key notices"
-                caption: "Brief pill feedback for keybind changes, such as the keyboard layout."
-                LinkToggle {
-                    s: root.s
-                    on: Flags.keyNoticeEnabled
-                    onToggled: Flags.keyNoticeEnabled = !Flags.keyNoticeEnabled
-                }
-            }
-
-            FieldRow {
-                id: noticeMsRow
-                label: "Hold time"
-                caption: "How long the notice stays on screen"
-                collapsed: !Flags.keyNoticeEnabled
-                ScrubValue {
-                    id: noticeMsScrub
-                    s: root.s
-                    value: Flags.keyNoticeMs
-                    openValue: 500
-                    from: 200; to: 2000; step: 50; unit: "ms"
-                    onEdited: v => Flags.keyNoticeMs = v
                 }
             }
 

@@ -167,6 +167,44 @@ They cover QML lint with a reviewed warning baseline, surface and navigation con
 
 The live system was tested with real PAM unlock, password and fingerprint, two lock outputs, Bar drag and wheel, Search, host PSS measurements and a real package probe.
 
+## Performance and trade-offs
+
+Memory was measured on the live Arch session, not in CI. The host is the ThinkPad E14 Gen 7 at 1920x1200 with Quickshell 0.3.2. Values are in kB and come from `/proc/<pid>/smaps_rollup`; PSS includes shared pages in proportion to the process, while RSS is the larger resident figure.
+
+| State | PSS | RSS |
+|---|---:|---:|
+| Pill closed, cold sample | 249853 | 340568 |
+| Shell open | 250158 | 341524 |
+| System open | 255633 | 349540 |
+| Packages open | 254749 | 348656 |
+| All surfaces, diagnostic sweep | 348915 | 450376 |
+| Closed, 64 s after the sweep | 290775 | 384784 |
+| Lock process, resident | 51764 | 108884 |
+
+The all-surface row is not a steady state. Cold surfaces unload after 30 seconds and the allocator releases memory gradually. The current budget is deliberately above the measured medians so a cold-start sample does not make the check noisy:
+
+| State | PSS budget |
+|---|---:|
+| Fresh pill idle | 270000 |
+| Closed 60 s after a surface sweep | 310000 |
+| Resident lock | 60000 |
+
+The host-only checker is `tools/test-perf-budget.sh`. It fails when the sandbox hides `/proc` instead of reporting a false pass. The detailed procedure and measurements are in [docs/performance.md](docs/performance.md).
+
+### Notes on the decisions
+
+I keep the lock process resident. It costs roughly 50 MB PSS, but a lock that is warm starts immediately and does not depend on spawning a Qt process during the critical path. I chose that trade for a personal machine where unlock latency and fail-closed behavior matter more than the last few megabytes.
+
+I keep the installer and updater in Python, with the standard library as the only dependency. Rewriting them in Rust would add a build and distribution problem without a measured performance need. The sensor scanner is the exception because it reads hardware directly and already has a narrow process boundary. The reasoning and migration gate are in [ADR 0002](docs/decisions/0002-python-rust-boundary.md).
+
+I keep one scroll implementation and one navigation vocabulary. The pill, Settings, Search and the status order all use the same surface catalog and metadata, even when that leaves the Settings pages appearing to do similar work. Duplicated behavior was causing drift, and the shared model makes the contracts testable.
+
+I made Search page-first on purpose. Opening a section is stable and predictable; focusing a specific row needs a stable row key and a focus contract across every page. That is the next layer, not something to fake with an index.
+
+Fingerprint remains optional. Any enrolled finger can authenticate through `pam_fprintd`; that is the module's behavior, not a per-finger policy in the shell. Password and fingerprint are separate PAM contexts, so a failed password does not consume the fingerprint prompt.
+
+The numbers above are diagnostic for this machine. They are not a promise for another GPU, wallpaper pipeline, monitor layout or Qt build.
+
 ## Project layout
 
 | Path | Contents |

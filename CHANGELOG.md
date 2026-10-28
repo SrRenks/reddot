@@ -22,6 +22,8 @@ semantic versioning when it cuts a release.
 - QML runtime harness, detailed lock/multi-monitor checks and a broader
   performance procedure.
 - First real PSS/RSS measurements for pill states and the resident lock.
+- Password and fingerprint authentication split into independent PAM contexts;
+  fingerprint is started explicitly with Enter on an empty field.
 
 ### Changed
 

@@ -5,8 +5,21 @@ from a TTY or a disposable session, with a second terminal available.
 
 ## Status
 
-The static flow is covered by `tools/check-lock-static.sh`. A real PAM/unlock run
-still requires a supervised TTY session and has not been executed automatically.
+The static flow is covered by `tools/check-lock-static.sh`. A supervised run was
+completed on 2026-10-28 with the password and fingerprint split.
+
+### Result
+
+- correct password unlocked the session;
+- empty field + Enter + correct fingerprint unlocked the session;
+- wrong password returned a readable error and did not start fingerprint;
+- wrong fingerprint returned to the password state without an automatic loop;
+- Enter on an empty field started a new explicit fingerprint attempt.
+
+The enrolled-print list on the test machine contains four right-hand prints:
+little, ring, middle and index. `pam_fprintd` authenticates any enrolled print for
+the user; it has no per-finger selector. Remove extra prints with
+`fprintd-delete` if only the index finger should remain.
 
 ## Preconditions
 

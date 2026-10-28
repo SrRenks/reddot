@@ -316,8 +316,11 @@ Item {
             focus: true
             enabled: !content.authenticating
             onTextChanged: {
-                if (text.length > 0)
+                if (text.length > 0) {
                     content.showError = false;
+                    if (content.auth && content.auth.fingerprintActive)
+                        content.auth.cancelFingerprint();
+                }
                 if (Pw.text !== text)
                     Pw.text = text;
                 while (beadModel.count < text.length)
@@ -334,8 +337,12 @@ Item {
                 }
             }
             onAccepted: {
-                if (content.auth && text.length > 0)
+                if (!content.auth)
+                    return;
+                if (text.length > 0)
                     content.auth.submit(text);
+                else if (content.auth.fingerprintAvailable)
+                    content.auth.startFingerprint();
             }
 
             cursorDelegate: Rectangle {
@@ -358,12 +365,20 @@ Item {
             anchors.centerIn: parent
             visible: input.text.length === 0
             text: {
-                if (!content.showError)
-                    return "password";
-                var pamMsg = content.auth ? content.auth.lastError : "";
-                return pamMsg.length > 0 ? pamMsg.toLowerCase() : "wrong password";
+                if (content.showError) {
+                    var pamMsg = content.auth ? content.auth.lastError : "";
+                    return pamMsg.length > 0 ? pamMsg.toLowerCase() : "wrong password";
+                }
+                if (content.auth && content.auth.fingerprintActive)
+                    return "touch fingerprint…";
+                if (content.auth && content.auth.fingerprintError.length > 0)
+                    return "fingerprint not recognized · enter to retry";
+                if (content.auth && content.auth.fingerprintAvailable)
+                    return "password · enter for fingerprint";
+                return "password";
             }
-            color: content.showError ? Theme.error : Theme.dim
+            color: content.showError || (content.auth && content.auth.fingerprintError.length > 0)
+                ? Theme.error : Theme.dim
             font.family: Theme.font
             font.pixelSize: 14 * content.s
             font.letterSpacing: 1 * content.s

@@ -1,0 +1,4 @@
+# Fingerprint-only authentication for the reddot lock. Success is sufficient;
+# failure falls back to the separate password context in Auth.qml.
+#%PAM-1.0
+auth sufficient pam_fprintd.so max-tries=5 timeout=3

@@ -42,6 +42,7 @@ ShellRoot {
 
     function doLock(): void {
         Pw.text = "";
+        pamAuth.reset();
         root.revealed = false;
         sessionLock.locked = true;
         Cava.enabled = true;

@@ -1002,9 +1002,9 @@ def run_uninstall(args):
                   "terminal so it can confirm first."])
         return 1
 
-    wallcolors = Path(deploy.CONFIG_ROOT) / "hypr" / "scripts" / "wallcolors.py"
+    wallcolors = Path(deploy.CONFIG_ROOT) / "hypr" / "scripts" / "wallcolors"
     if wallcolors.is_file():
-        _run(["python3", str(wallcolors), "--apps", "off"], dry)
+        _run([str(wallcolors), "--apps", "off"], dry)
     for a in deploy.uninstall(config_root=deploy.CONFIG_ROOT, apply=True):
         if a["action"] == "remove":
             tail = f" (restored {a['restored']})" if a["restored"] else ""

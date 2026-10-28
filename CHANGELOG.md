@@ -49,6 +49,8 @@ semantic versioning when it cuts a release.
   zeroed generic hwmon entry.
 - The update engine is implemented in Rust and selected through a wrapper; the
   Python engine remains as a fallback until the extras build the binary.
+- The palette engine is implemented in Rust and selected through a wrapper;
+  wallpaper, Appearance and the installer call the same entry point.
 - CI portability fixes: bash-only scripts use bash for syntax, and the package
   selftest no longer assumes pacman is installed on the Ubuntu runner.
 

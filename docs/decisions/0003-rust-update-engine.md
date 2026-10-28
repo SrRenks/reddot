@@ -39,8 +39,9 @@ Migrated:
 
 Still Python:
 
-- `installer/` and its TUI, distro resolution, fallback handlers and deploy;
-- `configs/hypr/scripts/wallcolors.py`.
+- `installer/` and its TUI, distro resolution, fallback handlers and deploy.
+
+`wallcolors.py` moved in ADR 0004.
 
 Those modules are not on the boot path and do not affect the memory measurement.
 

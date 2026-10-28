@@ -159,6 +159,13 @@ else
     bad "reddot-update (run tools/install-extras.sh)"
 fi
 
+echo "== wallcolors =="
+if [ -x "$HOME/.local/bin/reddot-wallcolors" ]; then
+    ok "reddot-wallcolors (Rust)"
+else
+    bad "reddot-wallcolors (run tools/install-extras.sh)"
+fi
+
 echo "== shell =="
 before=$fail
 for f in "$cfg"/hypr/scripts/*.sh "$cfg"/hypr/scripts/reddot "$cfg"/hypr/scripts/reddot-update; do

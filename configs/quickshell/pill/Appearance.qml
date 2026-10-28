@@ -12,7 +12,7 @@ import "Singletons"
  * on an empty click or the back chevron.
  *
  * Manual palette mode reveals a rainbow hue strip and a dark/light choice; moving
- * either rebuilds the rice colour set from that hue through wallcolors.py --hue
+ * either rebuilds the rice colour set from that hue through the wallcolors engine --hue
  * and reloads Hyprland and the terminal, debounced so a drag does not spawn a
  * build per pixel.
  */
@@ -75,7 +75,7 @@ SettingsSurface {
     Process {
         id: appsProc
         environment: ({ REDDOT_PALETTE: Flags.paletteMode })
-        command: ["sh", "-c", "python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" --apps \"$1\"",
+        command: ["sh", "-c", "\"$HOME/.config/hypr/scripts/wallcolors\" --apps \"$1\"",
             "sh", Flags.appTheme ? "on" : "off"]
         onExited: {
             if (root.appsDirty) {
@@ -89,14 +89,14 @@ SettingsSurface {
         id: staticProc
         environment: ({ REDDOT_PALETTE: "static" })
         command: ["sh", "-c",
-            "python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" --static && hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com.mitchellh.ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
+            "\"$HOME/.config/hypr/scripts/wallcolors\" --static && hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com.mitchellh.ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
     }
 
     Process {
         id: paletteProc
         environment: ({ REDDOT_PALETTE: Flags.paletteMode })
         command: ["sh", "-c",
-            "python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" --hue \"$1\" \"$2\" \"$3\" && hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true",
+            "\"$HOME/.config/hypr/scripts/wallcolors\" --hue \"$1\" \"$2\" \"$3\" && hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true",
             "sh", root.hueArg, root.modeArg, root.satArg]
     }
 
@@ -104,7 +104,7 @@ SettingsSurface {
         id: dynamicProc
         environment: ({ REDDOT_PALETTE: Flags.paletteMode })
         command: ["sh", "-c",
-            "f=\"${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper\"; pic=$(cat \"$f\" 2>/dev/null); case \"$pic\" in *.[Mm][Pp]4|*.[Ww][Ee][Bb][Mm]|*.[Mm][Kk][Vv]|*.[Mm][Oo][Vv]) pic=\"${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-still.png\";; esac; [ -f \"$pic\" ] && python3 \"$HOME/.config/hypr/scripts/wallcolors.py\" \"$pic\" >/dev/null 2>&1; hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
+            "f=\"${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper\"; pic=$(cat \"$f\" 2>/dev/null); case \"$pic\" in *.[Mm][Pp]4|*.[Ww][Ee][Bb][Mm]|*.[Mm][Kk][Vv]|*.[Mm][Oo][Vv]) pic=\"${XDG_STATE_HOME:-$HOME/.local/state}/reddot-wallpaper-still.png\";; esac; [ -f \"$pic\" ] && \"$HOME/.config/hypr/scripts/wallcolors\" \"$pic\" >/dev/null 2>&1; hyprctl reload >/dev/null 2>&1; busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate \"sava{sv}\" reload-config 0 0 >/dev/null 2>&1 || true"]
     }
 
     Connections {

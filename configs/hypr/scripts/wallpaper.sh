@@ -212,11 +212,11 @@ palette_update() {
         mh=$(jq -r '.manualHue // 30' "$flags_file" 2>/dev/null || echo 30)
         md=$(jq -r 'if .manualDark == false then "light" else "dark" end' "$flags_file" 2>/dev/null || echo dark)
         ms=$(jq -r '.manualSat // 0.5' "$flags_file" 2>/dev/null || echo 0.5)
-        python3 "$(dirname "$0")/wallcolors.py" --hue "$mh" "$md" "$ms" >>"$WLOG" 2>&1 || true
+        "$(dirname "$0")/wallcolors" --hue "$mh" "$md" "$ms" >>"$WLOG" 2>&1 || true
     elif [ "$pmode" = "static" ]; then
-        python3 "$(dirname "$0")/wallcolors.py" --static >>"$WLOG" 2>&1 || true
+        "$(dirname "$0")/wallcolors" --static >>"$WLOG" 2>&1 || true
     else
-        python3 "$(dirname "$0")/wallcolors.py" "$show" >>"$WLOG" 2>&1 || true
+        "$(dirname "$0")/wallcolors" "$show" >>"$WLOG" 2>&1 || true
     fi
     hyprctl reload >/dev/null 2>&1 || true
     busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions \

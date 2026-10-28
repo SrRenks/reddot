@@ -82,6 +82,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust wallcolors =="
+if command -v rustc >/dev/null 2>&1; then
+    colors_bin="${TMPDIR:-/tmp}/reddot-wallcolors-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-wallcolors.rs" -o "$colors_bin" 2>/tmp/reddot-colors-build.log; then
+        ok "rust wallcolors build"
+        colors_unit="${TMPDIR:-/tmp}/reddot-wallcolors-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-wallcolors.rs" -o "$colors_unit" 2>/tmp/reddot-colors-test-build.log && "$colors_unit" >/tmp/reddot-colors-unit.log 2>&1; then
+            ok "rust wallcolors unit tests"
+        else
+            bad "rust wallcolors unit tests"
+            tail -n 12 /tmp/reddot-colors-test-build.log /tmp/reddot-colors-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$colors_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-wallcolors-rust.sh" 2>&1); then ok "rust wallcolors integration"; else bad "rust wallcolors integration"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust wallcolors build"
+        sed 's/^/        /' /tmp/reddot-colors-build.log | tail -n 12
+    fi
+    rm -f "$colors_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"
@@ -101,7 +128,11 @@ for f in "$repo"/configs/hypr/scripts/*.sh "$repo"/tools/*.sh "$repo/install.sh"
     esac
     "$syntax" -n "$f" 2>/dev/null || bad "$syntax -n $(basename "$f")"
 done
-ok "shell syntax"
+for f in "$repo"/configs/hypr/scripts/reddot "$repo"/configs/hypr/scripts/reddot-update "$repo"/configs/hypr/scripts/wallcolors; do
+    [ -f "$f" ] || continue
+    sh -n "$f" 2>/dev/null || bad "sh -n $(basename "$f")"
+done
+ok "wrapper syntax"
 luac_bin=
 for candidate in luac luac5.4 luac5.3; do
     if command -v "$candidate" >/dev/null 2>&1; then luac_bin=$(command -v "$candidate"); break; fi

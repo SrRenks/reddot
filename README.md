@@ -149,13 +149,13 @@ The Keybinds page can edit the active file. Dynamic workspace binds from `spaces
 | Terminal | Ghostty |
 | Shell environment | fish |
 | Font | JetBrains Mono Nerd |
-| Palette | matugen, driven by the wallpaper |
+| Palette | matugen and the Rust wallcolors engine |
 | Installer | Python 3 |
 | Update engine | Rust, built by the extras step |
 | Sensor snapshot | Rust, built only when needed |
 | Configuration and helpers | POSIX shell and systemd user units |
 
-The installer uses the Python standard library. The update engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`; the updater has no runtime crate dependency and falls back to the Python engine only while the binary is absent.
+The installer uses the Python standard library. The update engine, palette engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`; they have no runtime crate dependency and fall back to Python only while the binaries are absent.
 
 ## Project quality
 
@@ -262,6 +262,7 @@ Start at [docs/index.md](docs/index.md). The most useful entry points:
 - [Coverage and remaining gaps](docs/coverage.md)
 - [Architecture decisions](docs/decisions/index.md)
 - [Rust update engine](docs/decisions/0003-rust-update-engine.md)
+- [Rust palette engine](docs/decisions/0004-rust-palette-engine.md)
 
 The project roadmap and open validation work live in [docs/roadmap.md](docs/roadmap.md).
 

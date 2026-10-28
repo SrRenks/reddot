@@ -43,4 +43,28 @@ diff -u "$tmp/py-wp" "$tmp/rs-wp"
 [ -L "$py_home/.local/bin/awww" ] && [ -L "$rs_home/.local/bin/awww" ]
 [ -f "$rs_home/.config/BraveSoftware/Brave-Browser/Default/Preferences" ]
 echo 'ok - wallpapers, app theme, bridge and Brave effects'
+
+# Baseline: both implementations call the engine with the checked-out HEAD.
+py_root="$tmp/py-baseline"; rs_root="$tmp/rs-baseline"
+mkdir -p "$py_root/hypr/scripts" "$rs_root/hypr/scripts"
+cat > "$py_root/hypr/scripts/reddot-update.py" <<'PY'
+import os, pathlib, sys
+pathlib.Path(os.environ["BASELINE_LOG"]).write_text(" ".join(sys.argv[1:]))
+PY
+cat > "$rs_root/hypr/scripts/reddot-update" <<'SH'
+#!/bin/sh
+printf '%s' "$*" > "${BASELINE_LOG:?}"
+SH
+chmod +x "$rs_root/hypr/scripts/reddot-update"
+HEAD=$(git -C "$repo" rev-parse HEAD)
+BASELINE_LOG="$tmp/py-baseline.log" PYTHONPATH="$repo/installer" HOME="$py_home" python3 - "$repo/configs" "$py_root" >/dev/null <<'PY'
+import sys
+import reddot_install as ri
+ok, detail = ri._seed_update_baseline(sys.argv[1], sys.argv[2], False)
+assert ok, detail
+PY
+BASELINE_LOG="$tmp/rs-baseline.log" HOME="$rs_home" "$bin" baseline --source "$repo/configs" --config-root "$rs_root" --updater "$rs_root/hypr/scripts/reddot-update" >/dev/null
+grep -q "baseline --sha $HEAD --config-root $py_root" "$tmp/py-baseline.log"
+grep -q "baseline --sha $HEAD --config-root $rs_root" "$tmp/rs-baseline.log"
+echo 'ok - update baseline handoff'
 echo 'all Rust post tests passed'

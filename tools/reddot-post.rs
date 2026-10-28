@@ -6,6 +6,7 @@ use std::env;
 use std::fs;
 use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 #[derive(Clone, Debug, PartialEq)]
 enum Json { Null, Bool(bool), Number(f64), String(String), Array(Vec<Json>), Object(BTreeMap<String, Json>) }
@@ -88,6 +89,23 @@ fn link_cli(config_root: &Path, dry: bool) -> Result<bool, String> {
     symlink(&target, &link).map_err(|e| e.to_string())?;
     Ok(true)
 }
+fn seed_baseline(source: &Path, config_root: &Path, updater: &Path, dry: bool) -> Result<bool, String> {
+    if dry { return Ok(true); }
+    let repo = source.canonicalize().map(|p| p.parent().unwrap_or(Path::new(".")).to_path_buf()).unwrap_or_else(|_| source.to_path_buf());
+    let head = Command::new("git").arg("-C").arg(&repo).args(["rev-parse", "HEAD"]).output()
+        .ok().filter(|o| o.status.success())
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+        .unwrap_or_default();
+    if head.is_empty() { return Ok(true); }
+    if !updater.exists() { return Ok(true); }
+    let out = Command::new(updater).args(["baseline", "--sha", &head, "--config-root"]).arg(config_root).output()
+        .map_err(|e| format!("{e}: baseline"))?;
+    if !out.status.success() {
+        let msg = if out.stderr.is_empty() { String::from_utf8_lossy(&out.stdout).trim().to_string() } else { String::from_utf8_lossy(&out.stderr).trim().to_string() };
+        return Err(if msg.is_empty() { "baseline failed".into() } else { msg });
+    }
+    Ok(true)
+}
 fn brave(dry: bool) -> Result<bool, String> {
     let native = home().join(".config/BraveSoftware/Brave-Browser");
     let flat = home().join(".var/app/com.brave.Browser/config/BraveSoftware/Brave-Browser");
@@ -105,11 +123,15 @@ fn main() {
     let mut starters = PathBuf::from("installer/starter-wallpapers");
     let mut config_root = home().join(".config");
     let mut dry = false;
+    let mut source = PathBuf::from("configs");
+    let mut updater = home().join(".config/hypr/scripts/reddot-update");
     let mut i = 1;
     while i < args.len() {
         match args[i].as_str() {
             "--starters" => { i += 1; starters = PathBuf::from(args.get(i).cloned().unwrap_or_default()); }
             "--config-root" => { i += 1; config_root = PathBuf::from(args.get(i).cloned().unwrap_or_default()); }
+            "--source" => { i += 1; source = PathBuf::from(args.get(i).cloned().unwrap_or_default()); }
+            "--updater" => { i += 1; updater = PathBuf::from(args.get(i).cloned().unwrap_or_default()); }
             "--dry-run" => dry = true,
             _ => {}
         }
@@ -121,7 +143,8 @@ fn main() {
         "bridge" => bridge(dry).map(|_| "ok".to_string()),
         "link-cli" => link_cli(&config_root, dry).map(|_| "ok".to_string()),
         "brave" => brave(dry).map(|_| "ok".to_string()),
-        _ => Err("usage: wallpapers|app-theme|bridge|link-cli|brave".into()),
+        "baseline" => seed_baseline(&source, &config_root, &updater, dry).map(|_| "ok".to_string()),
+        _ => Err("usage: wallpapers|app-theme|bridge|link-cli|brave|baseline".into()),
     };
     match result { Ok(out) => println!("{out}"), Err(e) => { eprintln!("{e}"); std::process::exit(1); } }
 }

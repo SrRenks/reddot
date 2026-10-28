@@ -3,6 +3,9 @@
 //! fixed width, which is what the parity test compares.
 
 use std::env;
+use std::fs::{File, OpenOptions};
+use std::io::{Read, Write};
+use std::process::Command;
 
 #[derive(Clone, Copy)]
 struct Rgb(u8, u8, u8);
@@ -273,15 +276,169 @@ fn sample(style: &Style, width: usize) -> String {
     out
 }
 
+struct Terminal {
+    tty: File,
+    saved: String,
+}
+
+impl Terminal {
+    fn open() -> Result<Self, String> {
+        let tty = OpenOptions::new().read(true).write(true).open("/dev/tty")
+            .map_err(|_| "no controlling terminal; use --quickstart".to_string())?;
+        let saved = Command::new("stty").args(["-F", "/dev/tty", "-g"]).output()
+            .ok().filter(|o| o.status.success())
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+            .filter(|s| !s.is_empty())
+            .ok_or_else(|| "no controlling terminal; use --quickstart".to_string())?;
+        let ok = Command::new("stty").args(["-F", "/dev/tty", "raw", "-echo", "min", "0", "time", "1"]).status()
+            .map(|s| s.success()).unwrap_or(false);
+        if !ok { return Err("cannot put the terminal in raw mode".into()); }
+        let mut tty = tty;
+        let _ = tty.write_all(b"\x1b[?25l");
+        Ok(Self { tty, saved })
+    }
+
+    fn read_key(&mut self) -> String {
+        let mut b = [0u8; 1];
+        let n = self.tty.read(&mut b).unwrap_or(0);
+        if n == 0 { return "eof".into(); }
+        if b[0] == 0x1b {
+            let mut nxt = [0u8; 1];
+            let n = self.tty.read(&mut nxt).unwrap_or(0);
+            if n == 0 { return "esc".into(); }
+            if nxt[0] != b'[' { return "esc".into(); }
+            let mut arrow = [0u8; 1];
+            if self.tty.read(&mut arrow).unwrap_or(0) == 0 { return "esc".into(); }
+            return match arrow[0] { b'A' => "up", b'B' => "down", b'C' => "right", b'D' => "left", _ => "esc" }.into();
+        }
+        match b[0] {
+            b'\r' | b'\n' => "enter".into(),
+            b' ' => "space".into(),
+            0x03 => "ctrl-c".into(),
+            c => char::from(c).to_string(),
+        }
+    }
+}
+
+impl Drop for Terminal {
+    fn drop(&mut self) {
+        let _ = self.tty.write_all(b"\x1b[?25h");
+        let _ = Command::new("stty").args(["-F", "/dev/tty", &self.saved]).status();
+    }
+}
+
+fn redraw(height: usize, lines: &[String]) {
+    let mut out = std::io::stdout();
+    if height > 0 { let _ = write!(out, "\x1b[{height}A\x1b[J"); }
+    let _ = writeln!(out, "{}", lines.join("\n"));
+    let _ = out.flush();
+}
+
+fn select_one(width: usize, title: &str, options: &[(&str, &str, bool)], default: usize) -> Result<usize, String> {
+    if options.is_empty() { return Err("select_one needs at least one option".into()); }
+    let style = Style { color: env::var_os("NO_COLOR").is_none() };
+    let mut term = Terminal::open()?;
+    let mut idx = default.min(options.len().saturating_sub(1));
+    let mut height = 0;
+    loop {
+        let lines = menu_block(&style, title, options, idx, &[idx], false, width);
+        redraw(height, &lines);
+        height = lines.len();
+        match term.read_key().as_str() {
+            "up" | "k" => idx = (idx + options.len() - 1) % options.len(),
+            "down" | "j" => idx = (idx + 1) % options.len(),
+            "enter" => {
+                redraw(height, &collapsed_block(&style, title, options[idx].0, width));
+                return Ok(idx);
+            }
+            "ctrl-c" | "q" | "eof" => return Err("cancelled".into()),
+            _ => {}
+        }
+    }
+}
+
+fn select_many(width: usize, title: &str, options: &[(&str, &str, bool)], preselect: &[usize]) -> Result<Vec<usize>, String> {
+    if options.is_empty() { return Ok(Vec::new()); }
+    let style = Style { color: env::var_os("NO_COLOR").is_none() };
+    let mut term = Terminal::open()?;
+    let mut idx = 0usize;
+    let mut checked: Vec<usize> = preselect.to_vec();
+    let mut height = 0;
+    loop {
+        let lines = menu_block(&style, title, options, idx, &checked, true, width);
+        redraw(height, &lines);
+        height = lines.len();
+        match term.read_key().as_str() {
+            "up" | "k" => idx = (idx + options.len() - 1) % options.len(),
+            "down" | "j" => idx = (idx + 1) % options.len(),
+            "space" => {
+                if let Some(pos) = checked.iter().position(|x| *x == idx) { checked.remove(pos); }
+                else { checked.push(idx); checked.sort(); }
+            }
+            "enter" => {
+                let value = if checked.is_empty() { "none".into() } else {
+                    checked.iter().map(|i| options[*i].0).collect::<Vec<_>>().join(", ")
+                };
+                redraw(height, &collapsed_block(&style, title, &value, width));
+                return Ok(checked);
+            }
+            "ctrl-c" | "q" | "eof" => return Err("cancelled".into()),
+            _ => {}
+        }
+    }
+}
+
+fn confirm(width: usize, title: &str, summary: &[&str]) -> Result<bool, String> {
+    let style = Style { color: env::var_os("NO_COLOR").is_none() };
+    let mut term = Terminal::open()?;
+    let mut idx = 0usize;
+    let mut height = 0;
+    loop {
+        let lines = confirm_block(&style, title, summary, idx, width);
+        redraw(height, &lines);
+        height = lines.len();
+        match term.read_key().as_str() {
+            "up" | "k" | "down" | "j" => idx ^= 1,
+            "enter" => {
+                redraw(height, &collapsed_block(&style, title, if idx == 0 { "Yes" } else { "No" }, width));
+                return Ok(idx == 0);
+            }
+            "y" => {
+                redraw(height, &collapsed_block(&style, title, "Yes", width));
+                return Ok(true);
+            }
+            "n" | "q" | "esc" | "eof" => {
+                redraw(height, &collapsed_block(&style, title, "No", width));
+                return Ok(false);
+            }
+            "ctrl-c" => return Err("cancelled".into()),
+            _ => {}
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut width = 80usize;
+    let mut mode = "sample";
     let mut i = 0;
     while i < args.len() {
-        if args[i] == "--width" { i += 1; width = args.get(i).and_then(|s| s.parse().ok()).unwrap_or(80); }
+        if args[i] == "--width" {
+            i += 1; width = args.get(i).and_then(|s| s.parse().ok()).unwrap_or(80);
+        } else if args[i] == "--demo" {
+            mode = "demo";
+        }
         i += 1;
     }
     let style = Style { color: env::var_os("NO_COLOR").is_none() };
+    if mode == "demo" {
+        let opts = [("Quick", "Core defaults, no questions", true), ("Full", "Everything, daily apps too", false)];
+        let _ = select_one(width, "Install profile", &opts, 0);
+        let apps = [("dolphin", "KDE file manager", false), ("zathura", "PDF viewer", false)];
+        let _ = select_many(width, "Optional apps", &apps, &[]);
+        let _ = confirm(width, "Ready", &["Install this?"]);
+        return;
+    }
     print!("{}", sample(&style, width));
 }
 

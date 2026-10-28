@@ -9,6 +9,7 @@
 | `49-reddot.rules` | polkit rule: admin auth kept for the TLP and ThinkPad helpers |
 | `99-reddot-leds.rules` | mute triggers at boot, plus the LED event file for the open panel |
 | `smoke-surfaces.sh` | optional runtime smoke: opens every pill surface and checks the layer |
+| `check-static.sh` | headless CI gate: contracts, JS/Python tests, shell and Lua syntax |
 | `check-integration.sh` | installer dry-run/selftests plus udev, polkit, systemd and TLP checks |
 | `check-qml-warnings.mjs` | QML warning baseline by file and occurrence |
 | `check-hypr-api.sh` | rejects legacy Hyprland syntax and validates Lua |

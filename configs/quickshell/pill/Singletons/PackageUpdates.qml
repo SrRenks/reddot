@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../lib/packageUpdates.js" as PackageParser
 
 /**
  * Periodic system package counter: official repos, AUR via yay, and Flatpak.
@@ -59,109 +60,27 @@ Singleton {
         return Math.floor(hours / 24) + " d ago";
     }
 
-    function isImportant(name) {
-        var n = name.toLowerCase();
-        if (n === "linux" || n.indexOf("linux-") === 0)
-            return true;
-        if (n === "mkinitcpio" || n.indexOf("mkinitcpio-") === 0)
-            return true;
-        if (n === "systemd" || n.indexOf("systemd-") === 0)
-            return true;
-        if (n === "glibc" || n === "gcc-libs" || n === "grub" || n === "grub-btrfs"
-                || n === "systemd-boot" || n === "limine" || n === "refind"
-                || n === "amd-ucode" || n === "intel-ucode"
-                || n === "mesa" || n === "hyprland" || n === "quickshell")
-            return true;
-        if (n.indexOf("nvidia") === 0 || n.indexOf("vulkan-radeon") === 0
-                || n.indexOf("vulkan-intel") === 0)
-            return true;
-        return false;
-    }
-
-    function namesFrom(text) {
-        var out = [];
-        var lines = String(text || "").split("\n");
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].trim();
-            if (line.length === 0)
-                continue;
-            var name = line.split(/\s+/)[0];
-            if (name.length > 0)
-                out.push(name);
-        }
-        return out;
-    }
-
     function parse(text) {
-        var off = [], aur = [], flat = [];
-        var section = "";
-        var states = ({ official: "pending", aur: "pending", flatpak: "pending" });
-        var errors = [];
-        var lines = String(text || "").split("\n");
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].trim();
-            if (line === "@@OFFICIAL@@") { section = "official"; continue; }
-            if (line === "@@AUR@@") { section = "aur"; continue; }
-            if (line === "@@FLATPAK@@") { section = "flatpak"; continue; }
-            if (line.indexOf("@@OK:") === 0) {
-                states[line.slice(5, line.length - 2)] = "ok";
-                continue;
-            }
-            if (line.indexOf("@@ERR:") === 0) {
-                var errSource = line.slice(6, line.length - 2);
-                states[errSource] = "error";
-                errors.push(errSource);
-                continue;
-            }
-            if (line.indexOf("@@MISSING:") === 0) {
-                states[line.slice(10, line.length - 2)] = "missing";
-                continue;
-            }
-            if (line.length === 0 || line.charAt(0) === "@@")
-                continue;
-            var name = line.split(/\s+/)[0];
-            if (name.length === 0)
-                continue;
-            if (section === "official") off.push(name);
-            else if (section === "aur") aur.push(name);
-            else if (section === "flatpak") flat.push(name);
-        }
-
-        // A failed source keeps the previous non-empty result instead of
-        // flashing a misleading zero while pacman/yay/flatpak are unavailable.
-        if (states.official === "error" && root.official.length > 0)
-            off = root.official.slice();
-        if (states.aur === "error" && root.aur.length > 0)
-            aur = root.aur.slice();
-        if (states.flatpak === "error" && root.flatpak.length > 0)
-            flat = root.flatpak.slice();
-        if (states.official === "missing")
-            off = [];
-        if (states.aur === "missing")
-            aur = [];
-        if (states.flatpak === "missing")
-            flat = [];
-
-        root.official = off;
-        root.aur = aur;
-        root.flatpak = flat;
-        root.officialState = states.official;
-        root.aurState = states.aur;
-        root.flatpakState = states.flatpak;
-        root.officialCount = off.length;
-        root.aurCount = aur.length;
-        root.flatpakCount = flat.length;
-        root.total = off.length + aur.length + flat.length;
-        var key = [];
-        for (var j = 0; j < off.length; j++)
-            if (root.isImportant(off[j])) key.push(off[j]);
-        for (var k = 0; k < aur.length; k++)
-            if (root.isImportant(aur[k])) key.push(aur[k]);
-        root.importantNames = key;
+        var result = PackageParser.parse(text, {
+            official: root.official,
+            aur: root.aur,
+            flatpak: root.flatpak
+        });
+        root.official = result.official;
+        root.aur = result.aur;
+        root.flatpak = result.flatpak;
+        root.officialState = result.states.official;
+        root.aurState = result.states.aur;
+        root.flatpakState = result.states.flatpak;
+        root.officialCount = result.official.length;
+        root.aurCount = result.aur.length;
+        root.flatpakCount = result.flatpak.length;
+        root.total = result.total;
+        root.importantNames = result.important;
         root.lastCheck = Qt.formatDateTime(new Date(), "HH:mm");
         root.lastCheckEpoch = Date.now();
-        root.errorText = errors.length > 0
-            ? "Check failed: " + errors.join(", ") + ". Showing the last good count."
+        root.errorText = result.errors.length > 0
+            ? "Check failed: " + result.errors.join(", ") + ". Showing the last good count."
             : "";
     }
 

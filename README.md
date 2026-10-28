@@ -177,7 +177,7 @@ Memory was measured on the live Arch session, not in CI. The host is the ThinkPa
 | Shell open | 250158 | 341524 |
 | System open | 255633 | 349540 |
 | Packages open | 254749 | 348656 |
-| All surfaces, diagnostic sweep | 348915 | 450376 |
+| All 40 surfaces, pre-Search diagnostic sweep | 348915 | 450376 |
 | Closed, 64 s after the sweep | 290775 | 384784 |
 | Lock process, resident | 51764 | 108884 |
 

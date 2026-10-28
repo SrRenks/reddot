@@ -50,6 +50,8 @@
 | `reddot-run.rs` | Rust fail-soft package runner, fallbacks and systemd/OpenRC services |
 | `reddot-report.rs` | Rust pre-deploy summary lines |
 | `build-rust.sh` | build all crate-free Rust helpers into one binary directory |
+| `reddot-install.rs` | quickstart dry-run entry point chaining the cores |
+| `test-reddot-install-rust.sh` | bundle + quickstart dry-run integration |
 | `test-reddot-report-rust.sh` | summary parity
 | `test-reddot-run-rust.sh` | dry-run package ordering
 | `test-reddot-post-rust.sh` | post-install effects parity

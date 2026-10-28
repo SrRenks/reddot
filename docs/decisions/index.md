@@ -19,3 +19,4 @@
 - [ADR 0018: Fallback execution in the runner](0018-rust-fallback-runner.md)
 - [ADR 0019: Rust install summary](0019-rust-summary-report.md)
 - [ADR 0020: Crate-free build bundle](0020-rust-build-bundle.md)
+- [ADR 0021: Rust quickstart entry point](0021-rust-install-entrypoint.md)

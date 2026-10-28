@@ -2989,32 +2989,17 @@ Item {
         }
     }
 
-    /** Host wheel target so controls cannot swallow scrolling. */
-    MouseArea {
-        anchors.fill: parent
-        z: 25
-        enabled: pill.surfaceOpen
-        acceptedButtons: Qt.NoButton
-        onWheel: (event) => {
-            if (SurfaceChrome.scrollMax <= 0 || SurfaceChrome.scrollTarget === null)
-                return;
-            var step = Math.max(20 * pill.s,
-                Math.min(140 * pill.s, SurfaceChrome.scrollViewH * 0.16));
-            SurfaceChrome.scrollBy(event.angleDelta.y > 0 ? -step : step);
-            event.accepted = true;
-        }
-    }
-
     /** Scrollbar appears only when the page overflows the half-screen cap. */
     Rectangle {
         id: surfaceScrollTrack
         readonly property real contentH: SurfaceChrome.scrollViewH + SurfaceChrome.scrollMax
         visible: pill.surfaceOpen && SurfaceChrome.scrollMax > 0
-        x: pill.width - 4 * pill.s
+            && pill.morphCloseness > 0.82
+        x: pill.width - 5 * pill.s
         y: 6 * pill.s
         width: 2 * pill.s
         radius: 1 * pill.s
-        height: Math.max(20 * pill.s, pill.height - 12 * pill.s)
+        height: Math.max(20 * pill.s, SurfaceChrome.scrollViewH - 12 * pill.s)
         color: Qt.alpha(Theme.onGlow, 0.035)
         z: 30
 

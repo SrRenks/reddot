@@ -648,9 +648,10 @@ ShellRoot {
                 onWheel: (event) => {
                     if (SurfaceChrome.scrollMax <= 0 || SurfaceChrome.scrollTarget === null)
                         return;
-                    var step = Math.max(20 * pill.s,
-                        Math.min(140 * pill.s, SurfaceChrome.scrollViewH * 0.16));
-                    SurfaceChrome.scrollBy(event.angleDelta.y > 0 ? -step : step);
+                    var limit = Math.max(24 * pill.s,
+                        Math.min(160 * pill.s, SurfaceChrome.scrollViewH * 0.22));
+                    var raw = -event.angleDelta.y * 0.55;
+                    SurfaceChrome.scrollBy(Math.max(-limit, Math.min(limit, raw)));
                     event.accepted = true;
                 }
                 onClicked: (mouse) => {

@@ -45,20 +45,11 @@ Flickable {
     clip: true
     boundsBehavior: Flickable.StopAtBounds
     flickableDirection: Flickable.VerticalFlick
-    interactive: true
+    interactive: false
 
     function scrollBy(delta) {
-        contentY = Math.max(0, Math.min(contentHeight - height, contentY + delta));
-    }
-
-    WheelHandler {
-        onWheel: (event) => {
-            var step = Math.max(20 * surface.s,
-                Math.min(140 * surface.s, surface.height * 0.16));
-            var raw = -event.angleDelta.y * 0.6;
-            surface.scrollBy(Math.max(-step, Math.min(step, raw)));
-            event.accepted = true;
-        }
+        var max = Math.max(0, contentHeight - height);
+        contentY = Math.max(0, Math.min(max, contentY + delta));
     }
 
     enabled: open

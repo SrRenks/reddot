@@ -13,6 +13,7 @@
 | `test-lock-multimonitor.sh` | supervised two-output lock smoke; leaves cleanup to the operator |
 | `check-privileged.sh` | polkit allowlist, sudoers absence and helper guards |
 | `perf-snapshot.sh` | host-only PSS/RSS and layer geometry snapshot |
+| `test-package-updates.sh` | fake pacman/dnf/zypper/apt backends for the package meter |
 | `test_deploy_sandbox.py` | isolated deploy, re-deploy and uninstall |
 | `check-qml-runtime.sh` | headless Quickshell runtime harness for PillSurface, SettingsSeg and ScrubValue |
 | `test-installer-matrix.py` | synthetic five-family installer plan/resolve matrix |

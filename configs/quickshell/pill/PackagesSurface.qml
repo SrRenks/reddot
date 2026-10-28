@@ -40,7 +40,7 @@ SettingsSurface {
                 spacing: 7 * root.s
 
                 Text {
-                    text: PackageUpdates.officialCount
+                    text: PackageUpdates.backendLabel + " " + PackageUpdates.officialCount
                         + (PackageUpdates.officialState === "error" ? "!" : "")
                     color: PackageUpdates.officialState === "error" ? Theme.flameCore
                         : Theme.cream
@@ -56,7 +56,7 @@ SettingsSurface {
                     font.pixelSize: 11 * root.s
                 }
                 Text {
-                    text: PackageUpdates.aurCount
+                    text: "AUR " + PackageUpdates.aurCount
                         + (PackageUpdates.aurState === "error" ? "!" : "")
                     color: PackageUpdates.aurState === "error" ? Theme.flameCore
                         : Theme.cream
@@ -72,7 +72,7 @@ SettingsSurface {
                     font.pixelSize: 11 * root.s
                 }
                 Text {
-                    text: PackageUpdates.flatpakCount
+                    text: "Flatpak " + PackageUpdates.flatpakCount
                         + (PackageUpdates.flatpakState === "error" ? "!" : "")
                     color: PackageUpdates.flatpakState === "error" ? Theme.flameCore
                         : Theme.cream

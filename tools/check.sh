@@ -19,7 +19,7 @@ ok()  { printf '  ok    %s\n' "$*"; }
 bad() { printf '  FAIL  %s\n' "$*"; fail=$((fail + 1)); }
 
 echo "== helper tests =="
-for test in test-reddot-tlp.sh test-reddot-thinkpad.sh; do
+for test in test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     if out=$(sh "$here/$test" 2>&1); then
         ok "$test"
     else

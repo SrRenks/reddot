@@ -2,7 +2,7 @@
 # Optional runtime smoke: open every settings-like surface in the running pill,
 # confirm the layer expands, then close it. Requires quickshell + Hyprland.
 set -u
-ids=${*:-"settings search shell clock pillsettings packages appearance windows look animation powerhub tlp presets idlelock shortcuts keybinds workspaces maintenance startup updates sysmon display input battery thinkpad thinkpadcurve"}
+ids=${*:-"mixer sound calendar launcher clipboard wallpaper power media link wifi bt battery tlp thinkpad settings search shell clock pillsettings windows powerhub shortcuts maintenance packages keybinds workspaces startup stash spaceapps recorder sysmon appearance bar updates display input look presets idlelock animation fontpicker"}
 fail=0
 for id in $ids; do
     qs -c pill ipc call pill open "" "$id" >/dev/null 2>&1 || { printf 'FAIL open %s\n' "$id"; fail=$((fail+1)); continue; }

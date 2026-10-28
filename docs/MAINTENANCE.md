@@ -34,6 +34,8 @@ broke.
 - `configs/hypr/scripts/reddot-update.py`: `DEFAULT_REMOTE` and `DEFAULT_BRANCH`
   point at `SrRenks/reddot` and `e14g7`. An existing pristine clone with the old
   Ricelin remote is retargeted in place on the next fetch.
+- `configs/hypr/scripts/package-updates.sh`: read-only native update probe;
+  pacman, dnf/RPM, zypper/RPM and apt are detected from the available backend.
 
 ## Update
 

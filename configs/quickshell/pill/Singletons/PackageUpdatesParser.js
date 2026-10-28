@@ -24,10 +24,15 @@ function parse(text, previous) {
     var off = [], aur = [], flat = [];
     var section = "";
     var states = { official: "pending", aur: "pending", flatpak: "pending" };
+    var backend = "unknown";
     var errors = [];
     var lines = String(text || "").split("\n");
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
+        if (line.indexOf("@@BACKEND:") === 0) {
+            backend = line.slice(10, line.length - 2);
+            continue;
+        }
         if (line === "@@OFFICIAL@@") { section = "official"; continue; }
         if (line === "@@AUR@@") { section = "aur"; continue; }
         if (line === "@@FLATPAK@@") { section = "flatpak"; continue; }
@@ -80,6 +85,7 @@ function parse(text, previous) {
         states: states,
         errors: errors,
         important: important,
+        backend: backend,
         total: off.length + aur.length + flat.length
     };
 }

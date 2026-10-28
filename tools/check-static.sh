@@ -56,7 +56,7 @@ for module in deploy distro pkg fallbacks tui; do
 done
 
 echo "== shell and lua =="
-for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh; do
+for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"
     [ -f "$file" ] || file="$repo/configs/hypr/scripts/$test"
     [ -f "$file" ] || continue

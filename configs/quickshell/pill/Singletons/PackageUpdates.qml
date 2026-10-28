@@ -26,6 +26,7 @@ Singleton {
     property string lastCheck: ""
     property real lastCheckEpoch: 0
     property string errorText: ""
+    property string backend: "unknown"
     property string officialState: "pending"
     property string aurState: "pending"
     property string flatpakState: "pending"
@@ -39,9 +40,16 @@ Singleton {
             && (Date.now() - lastCheckEpoch) > Math.max(5, minutes) * 120000;
     }
     readonly property bool officialAvailable: officialState !== "missing"
+    readonly property string backendLabel: {
+        if (backend === "fedora") return "RPM/dnf";
+        if (backend === "suse") return "RPM/zypper";
+        if (backend === "debian") return "APT";
+        if (backend === "arch") return "pacman";
+        return "system";
+    }
     readonly property string availabilityText: {
         var parts = [];
-        parts.push("official" + (officialState === "missing" ? " unavailable" : ""));
+        parts.push(backendLabel + (officialState === "missing" ? " unavailable" : ""));
         parts.push("AUR" + (aurState === "missing" ? " unavailable" : ""));
         parts.push("Flatpak" + (flatpakState === "missing" ? " unavailable" : ""));
         return parts.join(" · ");
@@ -69,6 +77,7 @@ Singleton {
         root.official = result.official;
         root.aur = result.aur;
         root.flatpak = result.flatpak;
+        root.backend = result.backend || "unknown";
         root.officialState = result.states.official;
         root.aurState = result.states.aur;
         root.flatpakState = result.states.flatpak;
@@ -93,10 +102,7 @@ Singleton {
 
     Process {
         id: checkProc
-        command: ["sh", "-c",
-            "printf '@@OFFICIAL@@\\n'; out=$(pacman -Qu 2>/dev/null); rc=$?; [ -n \"$out\" ] && printf '%s\\n' \"$out\"; [ $rc -le 1 ] && printf '@@OK:official@@\\n' || printf '@@ERR:official@@\\n'; "
-            + "printf '@@AUR@@\\n'; if command -v yay >/dev/null 2>&1; then out=$(yay -Qua 2>/dev/null); rc=$?; [ -n \"$out\" ] && printf '%s\\n' \"$out\"; [ $rc -le 1 ] && printf '@@OK:aur@@\\n' || printf '@@ERR:aur@@\\n'; else printf '@@MISSING:aur@@\\n'; fi; "
-            + "printf '@@FLATPAK@@\\n'; if command -v flatpak >/dev/null 2>&1; then out=$(flatpak remote-ls --updates --columns=application 2>/dev/null); rc=$?; [ -n \"$out\" ] && printf '%s\\n' \"$out\"; [ $rc -eq 0 ] && printf '@@OK:flatpak@@\\n' || printf '@@ERR:flatpak@@\\n'; else printf '@@MISSING:flatpak@@\\n'; fi"]
+        command: [Quickshell.env("HOME") + "/.config/hypr/scripts/package-updates.sh"]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.parse(this.text);

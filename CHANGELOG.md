@@ -41,6 +41,8 @@ semantic versioning when it cuts a release.
 - Updater clones from the old Ricelin origin are retargeted to
   `SrRenks/reddot` on branch `e14g7`.
 - Search surface with pure alias/tag/typo ranking over the navigation manifest.
+- Package meter now detects pacman, dnf/RPM, zypper/RPM and apt backends and
+  labels the native source accordingly.
 - CI portability fixes: bash-only scripts use bash for syntax, and the package
   selftest no longer assumes pacman is installed on the Ubuntu runner.
 

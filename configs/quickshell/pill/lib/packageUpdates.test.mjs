@@ -33,6 +33,18 @@ eq(p.states, { official: "ok", aur: "ok", flatpak: "ok" }, "all sources ok");
 eq(p.total, 3, "total combines sources");
 eq(p.important, ["linux", "mesa"], "critical names");
 eq(p.errors, [], "no errors");
+eq(p.backend, "unknown", "backend defaults to unknown");
+
+const fedora = parse(`@@BACKEND:fedora@@
+@@OFFICIAL@@
+foo.x86_64 1.2 updates
+bar.noarch 2.0 updates
+@@OK:official@@
+@@MISSING:aur@@
+@@MISSING:flatpak@@`);
+eq(fedora.backend, "fedora", "RPM backend is reported");
+eq(fedora.official, ["foo.x86_64", "bar.noarch"], "RPM listing is parsed");
+eq(fedora.aur, [], "AUR is absent on RPM hosts");
 
 const noUpdates = `@@OFFICIAL@@
 @@OK:official@@

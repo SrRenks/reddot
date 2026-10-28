@@ -1,12 +1,9 @@
 #!/bin/sh
-# Update engine entry point. The Rust binary is the migrated implementation;
-# the Python engine remains as the staged fallback for machines where the extras
-# have not built the binary yet.
+# Rust update engine entry point. Python is no longer a runtime fallback.
 set -u
-rust_engine="$HOME/.local/bin/reddot-update"
-python_engine="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/reddot-update.py"
-
-if [ -x "$rust_engine" ]; then
-    exec "$rust_engine" "$@"
-fi
-exec python3 "$python_engine" "$@"
+rust_engine="${XDG_BIN_HOME:-$HOME/.local/bin}/reddot-update"
+[ -x "$rust_engine" ] || {
+    echo "reddot-update: $rust_engine is missing; run tools/install-extras.sh" >&2
+    exit 127
+}
+exec "$rust_engine" "$@"

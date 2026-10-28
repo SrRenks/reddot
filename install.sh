@@ -155,10 +155,7 @@ main() {
 			rust_ok=1
 		fi
 	fi
-	if [ "$rust_ok" -eq 0 ]; then
-		have python3 || die "Rust installer unavailable and python3 is not installed"
-		python3 "$DIR/installer/reddot_install.py" --source "$DIR/configs" "$@" || exit $?
-	fi
+	[ "$rust_ok" -eq 1 ] || die "Rust installer could not be built; refusing to fall back to Python"
 
 	# The Python installer owns ~/.config. The TLP and ThinkPad helpers, the
 	# polkit rule, the AC/BAT policy and the user-level tools live outside it;

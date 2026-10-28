@@ -150,7 +150,10 @@ main() {
 			has_flag --dry-run "$@" && rust_args="$rust_args --dry-run" || rust_args="$rust_args --apply"
 			has_flag --full "$@" && rust_args="$rust_args --full"
 			has_flag --no-deps "$@" && rust_args="$rust_args --no-deps"
-			if has_flag --brave "$@"; then rust_args="$rust_args --brave"; fi
+			has_flag --sddm "$@" && rust_args="$rust_args --sddm"
+			has_flag --grub "$@" && rust_args="$rust_args --grub"
+			has_flag --brave "$@" && rust_args="$rust_args --brave"
+			has_flag --no-fish "$@" && rust_args="$rust_args --no-fish"
 			"$HOME/.local/bin/reddot-install" $rust_args || exit $?
 			rust_ok=1
 		fi

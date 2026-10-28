@@ -129,15 +129,22 @@ fn main() {
     let mut source = PathBuf::from("configs");
     let mut root = "sudo".to_string();
     let mut dry = false;
+    let mut live = false;
     let mut i = 1;
     while i < args.len() {
         match args[i].as_str() {
             "--source" => { i += 1; source = PathBuf::from(args.get(i).cloned().unwrap_or_default()); }
             "--root" => { i += 1; root = args.get(i).cloned().unwrap_or_else(|| "sudo".into()); }
             "--dry" => dry = true,
+            "--apply" => live = true,
             _ => {}
         }
         i += 1;
+    }
+    if live {
+        let actions = apply(&source, &root, false);
+        println!("{}", actions_json(&actions, true));
+        return;
     }
     let actions = apply(&source, &root, true);
     if mode == "plan" || dry || mode == "apply" {

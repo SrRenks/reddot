@@ -65,6 +65,7 @@ fn main() {
     let mut dry = false;
     let mut quick = false;
     let mut uninstall = false;
+    let mut sddm = false; let mut grub = false; let mut brave = false; let mut fish = true;
     let mut no_deps = false;
     let mut apply = false;
     let mut full = false;
@@ -81,6 +82,7 @@ fn main() {
             "--apply" => apply=true,
             "--reinstall" => apply=true,
             "--uninstall" => uninstall=true,
+            "--sddm" => sddm=true, "--grub" => grub=true, "--brave" => brave=true, "--no-fish" => fish=false,
             "--full" => full=true,
             "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },
             _ => {}
@@ -122,6 +124,12 @@ fn main() {
             let helper = ask("AUR helper: yay, paru or none", &aur);
             if helper == "yay" || helper == "paru" || helper == "none" { aur = helper; }
         }
+        sddm = ask("Install the torii SDDM theme? (y/N)", "n").to_lowercase().starts_with('y');
+        if field(&detect, "bootloader") == "grub" {
+            grub = ask("Install the GRUB theme? (y/N)", "n").to_lowercase().starts_with('y');
+        }
+        brave = ask("Install Brave and follow wallpaper colors? (y/N)", "n").to_lowercase().starts_with('y');
+        fish = !ask("Set fish as login shell? (Y/n)", "y").to_lowercase().starts_with('n');
     }
     println!("reddot-install: family={family} init={init} dry-run={dry} profile={}", if full { "full" } else { "quick" });
     let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
@@ -171,6 +179,21 @@ fn main() {
     let root_arg = config_root.to_string_lossy().into_owned();
     if apply {
         let _ = run(&bin("reddot-deploy"), &["deploy", "--src", &src_arg, "--config-root", &root_arg, "--apply"]);
+        if sddm {
+            let installer = source.join("sddm/themes/torii/install.sh");
+            if installer.exists() {
+                let _ = Command::new("sh").arg(&installer).env("SUDO", "sudo").status();
+            }
+        }
+        if grub {
+            let _ = run(&bin("reddot-grub"), &["apply", "--source", &src_arg, "--root", "sudo", "--apply"]);
+        }
+        if fish {
+            if let Some(sh) = ["/usr/bin/fish", "/usr/local/bin/fish"].iter().find(|p| Path::new(p).is_file()) {
+                let user = env::var("USER").unwrap_or_default();
+                let _ = Command::new("sudo").args(["chsh", "-s", sh, &user]).output();
+            }
+        }
         let _ = run(&bin("reddot-neutralize"), &["--src", &src_arg, "--config-root", &root_arg, "--apply"]);
     } else {
         for (b, args) in [
@@ -180,7 +203,7 @@ fn main() {
             match run(&bin(b), &args) { Ok(out) => print!("{out}"), Err(e) => eprintln!("{e}") }
         }
     }
-    for mode in ["wallpapers", "app-theme", "bridge", "link-cli", "brave"] {
+    for mode in ["wallpapers", "app-theme", "bridge", "link-cli"] {
         let starters = source.parent().unwrap_or(Path::new(".")).join("installer/starter-wallpapers");
         let starters_arg = starters.to_string_lossy().into_owned();
         let mut pargs = vec![mode, "--starters", &starters_arg, "--config-root", &root_arg];
@@ -189,6 +212,13 @@ fn main() {
             Ok(out) => print!("{out}"),
             Err(e) => eprintln!("{e}"),
         }
+    }
+    if brave {
+        let starters = source.parent().unwrap_or(Path::new(".")).join("installer/starter-wallpapers");
+        let starters_arg = starters.to_string_lossy().into_owned();
+        let mut pargs = vec!["brave", "--starters", &starters_arg, "--config-root", &root_arg];
+        if !apply { pargs.push("--dry-run"); }
+        let _ = run(&bin("reddot-post"), &pargs);
     }
     if apply {
         let updater = config_root.join("hypr/scripts/reddot-update");

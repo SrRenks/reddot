@@ -136,6 +136,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust package argv =="
+if command -v rustc >/dev/null 2>&1; then
+    pkg_bin="${TMPDIR:-/tmp}/reddot-pkg-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-pkg.rs" -o "$pkg_bin" 2>/tmp/reddot-pkg-build.log; then
+        ok "rust pkg build"
+        pkg_unit="${TMPDIR:-/tmp}/reddot-pkg-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-pkg.rs" -o "$pkg_unit" 2>/tmp/reddot-pkg-test-build.log && "$pkg_unit" >/tmp/reddot-pkg-unit.log 2>&1; then
+            ok "rust pkg unit tests"
+        else
+            bad "rust pkg unit tests"
+            tail -n 12 /tmp/reddot-pkg-test-build.log /tmp/reddot-pkg-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$pkg_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-pkg-rust.sh" 2>&1); then ok "rust pkg parity"; else bad "rust pkg parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust pkg build"
+        sed 's/^/        /' /tmp/reddot-pkg-build.log | tail -n 12
+    fi
+    rm -f "$pkg_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

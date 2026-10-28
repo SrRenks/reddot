@@ -70,6 +70,13 @@ Item {
     readonly property bool tlpOpen: surface === "tlp"
     readonly property bool thinkpadOpen: surface === "thinkpad"
     readonly property bool settingsOpen: surface === "settings"
+    readonly property bool shellOpen: surface === "shell"
+    readonly property bool windowsOpen: surface === "windows"
+    readonly property bool powerhubOpen: surface === "powerhub"
+    readonly property bool shortcutsOpen: surface === "shortcuts"
+    readonly property bool maintenanceOpen: surface === "maintenance"
+    readonly property bool clockOpen: surface === "clock"
+    readonly property bool pillsettingsOpen: surface === "pillsettings"
     readonly property bool keybindsOpen: surface === "keybinds"
     readonly property bool workspacesOpen: surface === "workspaces"
     readonly property bool startupOpen: surface === "startup"
@@ -205,6 +212,13 @@ Item {
     readonly property real displayW: 392 * s
     readonly property real inputW: 392 * s
     readonly property real lookW: 392 * s
+    readonly property real shellW: 392 * s
+    readonly property real windowsW: 392 * s
+    readonly property real powerhubW: 392 * s
+    readonly property real shortcutsW: 392 * s
+    readonly property real maintenanceW: 392 * s
+    readonly property real clockW: 392 * s
+    readonly property real pillsettingsW: 392 * s
     readonly property real presetsW: 392 * s
     readonly property real idlelockW: 392 * s
     readonly property real animationW: 392 * s
@@ -273,6 +287,13 @@ Item {
         tlp:       { size: () => Qt.size(tlpW, surfaceItem(ldTlp).implicitHeight + 26 * s), ame: () => surfaceItem(ldTlp) },
         thinkpad:  { size: () => Qt.size(thinkpadW, surfaceItem(ldThinkpad).implicitHeight + 26 * s), ame: () => surfaceItem(ldThinkpad) },
         settings:  { size: () => Qt.size(settingsW, surfaceItem(ldSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldSettings) },
+        shell:     { size: () => Qt.size(shellW, surfaceItem(ldShell).implicitHeight + 29 * s), ame: () => surfaceItem(ldShell) },
+        clock:     { size: () => Qt.size(clockW, surfaceItem(ldClock).implicitHeight + 29 * s), ame: () => surfaceItem(ldClock) },
+        pillsettings: { size: () => Qt.size(pillsettingsW, surfaceItem(ldPillSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldPillSettings) },
+        windows:   { size: () => Qt.size(windowsW, surfaceItem(ldWindows).implicitHeight + 29 * s), ame: () => surfaceItem(ldWindows) },
+        powerhub:  { size: () => Qt.size(powerhubW, surfaceItem(ldPowerhub).implicitHeight + 29 * s), ame: () => surfaceItem(ldPowerhub) },
+        shortcuts: { size: () => Qt.size(shortcutsW, surfaceItem(ldShortcuts).implicitHeight + 29 * s), ame: () => surfaceItem(ldShortcuts) },
+        maintenance: { size: () => Qt.size(maintenanceW, surfaceItem(ldMaintenance).implicitHeight + 29 * s), ame: () => surfaceItem(ldMaintenance) },
         keybinds:  { size: () => Qt.size(keybindsW, surfaceItem(ldKeybinds).implicitHeight + 29 * s), ame: () => surfaceItem(ldKeybinds) },
         workspaces: { size: () => Qt.size(workspacesW, surfaceItem(ldWorkspaces).implicitHeight + 29 * s), ame: () => surfaceItem(ldWorkspaces) },
         startup:  { size: () => Qt.size(startupW, surfaceItem(ldStartup).implicitHeight + 29 * s), ame: () => surfaceItem(ldStartup) },
@@ -578,7 +599,10 @@ Item {
         workspaces: ldWorkspaces, stash: ldStash, spaceapps: ldSpaceapps, recorder: ldRecorder,
         sysmon: ldSysmon, appearance: ldAppearance, bar: ldBar, updates: ldUpdates, display: ldDisplay,
         input: ldInput, look: ldLook, presets: ldPresets, startup: ldStartup,
-        idlelock: ldIdlelock, animation: ldAnimation, fontpicker: ldFontpicker
+        idlelock: ldIdlelock, animation: ldAnimation, fontpicker: ldFontpicker,
+        shell: ldShell, windows: ldWindows, powerhub: ldPowerhub,
+        shortcuts: ldShortcuts, maintenance: ldMaintenance,
+        clock: ldClock, pillsettings: ldPillSettings
     })
 
     Timer {
@@ -2494,6 +2518,130 @@ Item {
     }
 
     Loader {
+        id: ldShell
+        active: false
+        anchors.fill: parent
+        sourceComponent: HubSurface {
+            s: pill.s
+            open: pill.shellOpen
+            morphCloseness: pill.morphCloseness
+            hubTitle: "SHELL"
+            hubIcon: "layers"
+            entries: [
+                { name: "Bar layout", sub: "Alignment, order and visible items", icon: "layers", surface: "bar" },
+                { name: "Clock", sub: "Format, seconds and date", icon: "clock", surface: "clock" },
+                { name: "Pill", sub: "Geometry, opacity, panel blur and key notices", icon: "app-window", surface: "pillsettings" }
+            ]
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldClock
+        active: false
+        anchors.fill: parent
+        sourceComponent: ClockSurface {
+            s: pill.s
+            open: pill.clockOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldPillSettings
+        active: false
+        anchors.fill: parent
+        sourceComponent: PillSettings {
+            s: pill.s
+            open: pill.pillsettingsOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldWindows
+        active: false
+        anchors.fill: parent
+        sourceComponent: HubSurface {
+            s: pill.s
+            open: pill.windowsOpen
+            morphCloseness: pill.morphCloseness
+            hubTitle: "WINDOWS"
+            hubIcon: "app-window"
+            entries: [
+                { name: "Window & effects", sub: "Layout, gaps, borders, shadow, opacity, blur", icon: "app-window", surface: "look" },
+                { name: "Motion", sub: "Animation speed, curve and reduced motion", icon: "waves", surface: "animation" }
+            ]
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldPowerhub
+        active: false
+        anchors.fill: parent
+        sourceComponent: HubSurface {
+            s: pill.s
+            open: pill.powerhubOpen
+            morphCloseness: pill.morphCloseness
+            hubTitle: "POWER"
+            hubIcon: "bolt"
+            entries: [
+                { name: "Profile & battery care", sub: "Performance mode and charge window", icon: "bolt", surface: "tlp" },
+                { name: "Power presets", sub: "Saved profile and charge combinations", icon: "layers", surface: "presets" },
+                { name: "Idle & lock", sub: "Auto-lock, screen off and suspend", icon: "lock", surface: "idlelock" },
+                { name: "Session", sub: "Lock, logout, sleep, restart, shut down", icon: "logout", surface: "power" }
+            ]
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldShortcuts
+        active: false
+        anchors.fill: parent
+        sourceComponent: HubSurface {
+            s: pill.s
+            open: pill.shortcutsOpen
+            morphCloseness: pill.morphCloseness
+            hubTitle: "SHORTCUTS"
+            hubIcon: "return"
+            entries: [
+                { name: "Keybinds", sub: "Edit keys, actions and commands", icon: "keyboard", surface: "keybinds" },
+                { name: "Workspaces", sub: "Special workspaces and their shortcuts", icon: "layers", surface: "workspaces" }
+            ]
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldMaintenance
+        active: false
+        anchors.fill: parent
+        sourceComponent: HubSurface {
+            s: pill.s
+            open: pill.maintenanceOpen
+            morphCloseness: pill.morphCloseness
+            hubTitle: "MAINTENANCE"
+            hubIcon: "download"
+            entries: [
+                { name: "Startup", sub: "Commands run when the session starts", icon: "play", surface: "startup" },
+                { name: "Updates", sub: "System packages and shell updates", icon: "download", surface: "updates" }
+            ]
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
         id: ldFontpicker
         active: false
         anchors.fill: parent
@@ -2770,6 +2918,22 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: ScreenRec.cancel()
+        }
+    }
+
+    /** Host wheel target so controls cannot swallow scrolling. */
+    MouseArea {
+        anchors.fill: parent
+        z: 25
+        enabled: pill.surfaceOpen
+        acceptedButtons: Qt.NoButton
+        onWheel: (event) => {
+            if (SurfaceChrome.scrollMax <= 0 || SurfaceChrome.scrollTarget === null)
+                return;
+            var step = Math.max(20 * pill.s,
+                Math.min(140 * pill.s, SurfaceChrome.scrollViewH * 0.16));
+            SurfaceChrome.scrollBy(event.angleDelta.y > 0 ? -step : step);
+            event.accepted = true;
         }
     }
 

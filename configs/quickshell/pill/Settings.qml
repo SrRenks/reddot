@@ -4,9 +4,9 @@ import QtQuick
 import "Singletons"
 
 /**
- * 設 SETTINGS index: a short list of categories. Each row carries its kanji,
- * name and caption, and morphs the pill into that category's sub-surface.
- * Arrow keys move the focused row with the glowing seam and Return opens it.
+ * Settings index, grouped by ownership: visual identity, shell, window manager,
+ * and system controls. Each row carries a short description and opens one hub or
+ * a focused subpage.
  */
 SettingsSurface {
     id: root
@@ -15,18 +15,23 @@ SettingsSurface {
 
     rows: [
         { item: appearanceRow, kind: "nav", surface: "appearance" },
-        { item: barRow, kind: "nav", surface: "bar" },
-        { item: lookRow, kind: "nav", surface: "look" },
+        { item: shellRow, kind: "nav", surface: "shell" },
+        { item: windowsRow, kind: "nav", surface: "windows" },
         { item: displayRow, kind: "nav", surface: "display" },
         { item: inputRow, kind: "nav", surface: "input" },
-        { item: animationRow, kind: "nav", surface: "animation" },
-        { item: keybindsRow, kind: "nav", surface: "keybinds" },
-        { item: workspacesRow, kind: "nav", surface: "workspaces" },
-        { item: startupRow, kind: "nav", surface: "startup" },
-        { item: presetsRow, kind: "nav", surface: "presets" },
-        { item: idleRow, kind: "nav", surface: "idlelock" },
-        { item: updatesRow, kind: "nav", surface: "updates" }
+        { item: shortcutsRow, kind: "nav", surface: "shortcuts" },
+        { item: powerRow, kind: "nav", surface: "powerhub" },
+        { item: systemRow, kind: "nav", surface: "sysmon" },
+        { item: maintenanceRow, kind: "nav", surface: "maintenance" }
     ]
+
+    component Arrow: GlyphIcon {
+        width: 16 * root.s
+        height: 16 * root.s
+        name: "chevron-right"
+        color: Theme.iconDim
+        stroke: 2.2
+    }
 
     Column {
         id: content
@@ -49,49 +54,28 @@ SettingsSurface {
             captionOnFocus: true
             icon: "sparkles"
             name: "Appearance"
-            sub: "Clock, glyphs, accent palette"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === appearanceRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            sub: "Theme, palette, typography, comfort"
+            Arrow {}
         }
 
         SettingsRow {
-            id: barRow
+            id: shellRow
             surface: root
             captionOnFocus: true
             icon: "layers"
-            name: "Bar"
-            sub: "Alignment, order, visible items"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === barRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            name: "Shell"
+            sub: "Bar, clock, pill, notices"
+            Arrow {}
         }
 
         SettingsRow {
-            id: lookRow
+            id: windowsRow
             surface: root
             captionOnFocus: true
             icon: "app-window"
-            name: "Look"
-            sub: "Gaps, blur, pill, notices"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === lookRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            name: "Windows"
+            sub: "Layout, gaps, effects, motion"
+            Arrow {}
         }
 
         SettingsRow {
@@ -101,14 +85,7 @@ SettingsSurface {
             icon: "monitor"
             name: "Display"
             sub: "Resolution, refresh, scale"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === displayRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            Arrow {}
         }
 
         SettingsLabel { s: root.s; text: "Controls" }
@@ -117,139 +94,52 @@ SettingsSurface {
             id: inputRow
             surface: root
             captionOnFocus: true
-            icon: "mouse"
-            name: "Input"
-            sub: "Pointer, keyboard, cursor"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === inputRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
-        }
-
-        SettingsRow {
-            id: animationRow
-            surface: root
-            captionOnFocus: true
-            icon: "waves"
-            name: "Animation"
-            sub: "Speed, motion curve, enable"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === animationRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
-        }
-
-        SettingsRow {
-            id: keybindsRow
-            surface: root
-            captionOnFocus: true
             icon: "keyboard"
-            name: "Keybinds"
-            sub: "Rebind, add, set commands"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === keybindsRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            name: "Input"
+            sub: "Pointer, keyboard, touchpad, cursor"
+            Arrow {}
         }
 
         SettingsRow {
-            id: workspacesRow
+            id: shortcutsRow
             surface: root
             captionOnFocus: true
-            icon: "layers"
-            name: "Workspaces"
-            sub: "Special spaces and their keys"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === workspacesRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            icon: "return"
+            name: "Shortcuts"
+            sub: "Keybinds and special workspaces"
+            Arrow {}
         }
 
-        SettingsLabel { s: root.s; text: "Power & system" }
+        SettingsLabel { s: root.s; text: "System" }
 
         SettingsRow {
-            id: startupRow
-            surface: root
-            captionOnFocus: true
-            icon: "play"
-            name: "Startup"
-            sub: "KDE Connect and session commands"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === startupRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
-        }
-
-        SettingsRow {
-            id: presetsRow
+            id: powerRow
             surface: root
             captionOnFocus: true
             icon: "bolt"
-            name: "Presets"
-            sub: "Desktop, laptop, one switch"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === presetsRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            name: "Power"
+            sub: "Profile, battery care, idle, session"
+            Arrow {}
         }
 
         SettingsRow {
-            id: idleRow
+            id: systemRow
             surface: root
             captionOnFocus: true
-            icon: "lock"
-            name: "Idle / Lock"
-            sub: "Auto-lock, screen off, suspend"
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === idleRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            icon: "waves"
+            name: "System"
+            sub: "Sensors, cooling, compute"
+            Arrow {}
         }
 
         SettingsRow {
-            id: updatesRow
+            id: maintenanceRow
             surface: root
             captionOnFocus: true
             icon: "download"
-            name: "Updates"
-            sub: "Version and check for updates"
-            last: true
-
-            GlyphIcon {
-                width: 16 * root.s
-                height: 16 * root.s
-                name: "chevron-right"
-                color: root.focusRowItem === updatesRow ? Theme.cream : Theme.iconDim
-                stroke: 2.2
-            }
+            name: "Maintenance"
+            sub: "Startup commands and updates"
+            Arrow {}
         }
     }
 }

@@ -645,6 +645,14 @@ ShellRoot {
                  * click-outside stutter. Every outside close now uses the same
                  * dismissPill timeline as Escape.
                  */
+                onWheel: (event) => {
+                    if (SurfaceChrome.scrollMax <= 0 || SurfaceChrome.scrollTarget === null)
+                        return;
+                    var step = Math.max(20 * pill.s,
+                        Math.min(140 * pill.s, SurfaceChrome.scrollViewH * 0.16));
+                    SurfaceChrome.scrollBy(event.angleDelta.y > 0 ? -step : step);
+                    event.accepted = true;
+                }
                 onClicked: (mouse) => {
                     if (pill.quickChoosing) {
                         ScreenRec.quickChoosing = false;

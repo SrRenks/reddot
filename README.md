@@ -18,7 +18,7 @@ kept close to the original.
 ## What this fork adds
 
 - **Auto-hide pill** — retracts to a 10 px top-centre strip and returns on hover;
-  `Pill mode` and `Reserve space` are in **Look → Pill**. Fullscreen still hides it.
+  `Pill mode` and `Reserve space` are in **Shell → Pill**. Fullscreen still hides it.
 - **Power surface** — charge window, profile and Pause/Resume, with multi-battery
   and power-profiles-daemon sysfs fallbacks (`Super+Shift+B`).
 - **Battery history** — 24 h discharge bars and 1 h/24 h averages from UPower's
@@ -26,7 +26,7 @@ kept close to the original.
 - **AC/BAT policy** — `/etc/tlp.d/99-reddot-acbat.conf`: performance on AC,
   balanced on battery, low-power for the manual saver profile.
 - **Power presets** — named TLP profile + charge snapshots in **Settings →
-  Presets**; Desktop and Laptop ship as defaults.
+  Power → Power presets**; Desktop and Laptop ship as defaults.
 - **Performance** — jemalloc decay in the watchdog, 30 s surface unload,
   edge-driven peripheral polling.
 - **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
@@ -38,10 +38,10 @@ kept close to the original.
   the last visited surface. Escape backs out one level, closes at the root,
   and the keybind parks the pointer on the pill so keyboard focus lands without
   a mouse move.
-- **Startup hub** — Settings → Power & system → Startup lists the Hyprland
+- **Startup hub** — Settings → Maintenance → Startup lists the Hyprland
   autostart stack: KDE Connect is editable, system services are locked, and
   ↑/↓ reorder user commands. Changes apply on the next Hyprland start.
-- **Key notices** — Look → Key notices turns on brief pill feedback for expected
+- **Key notices** — Shell → Pill turns on brief pill feedback for expected
   keybind changes. Keyboard-language switches are watched from Hyprland, so
   `Super+Space` needs no wrapper; hold time defaults to 500 ms and is adjustable.
   Any other bind can publish one with
@@ -50,8 +50,8 @@ kept close to the original.
   (Auto/ANSI/ISO/JIS, e.g. `pc104` for an ANSI laptop) from an ordered
   language+variant list (`kb_layout`/`kb_variant`). Add or remove pairs, select
   one directly, or keep cycling with `Super+Space`.
-- **UI blur** — Look → Blur has an independent **Pill / panel blur** switch for
-  every layer surface, plus a separate **Window blur + transparency** switch.
+- **UI blur** — Shell → Pill has the independent **Pill / panel blur** switch;
+  Windows → Window & effects has the separate **Window blur + transparency** switch.
   Panel blur works with window blur off: the generated layer module enables the
   global blur prerequisite and adds a `no_blur` rule to ordinary windows, then
   removes that rule when window blur returns. `Super+Shift+F` changes only

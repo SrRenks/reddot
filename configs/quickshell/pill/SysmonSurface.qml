@@ -763,7 +763,7 @@ PillSurface {
                     Text {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "Power policy → TLP"
+                        text: "Power settings →"
                         color: tlpArea.containsMouse ? Theme.cream : Theme.vermLit
                         font.family: Theme.font
                         font.pixelSize: 9 * root.s
@@ -775,7 +775,7 @@ PillSurface {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.requestSurface("tlp")
+                        onClicked: root.requestSurface("powerhub")
                     }
                 }
 

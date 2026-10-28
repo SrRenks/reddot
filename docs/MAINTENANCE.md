@@ -81,7 +81,7 @@ history of this fork see `git log`; each feature was committed separately.
 - **Resident lock**: `qs -c lock` idles at ~40–70 MB for instant locking. On-demand
   start (Ukishima) saves that at the cost of 200–400 ms and a riskier lock path.
 - **Auto-hide**: `pillMode=auto`, `pillReserve=false`. If the strip does not
-  reveal, any surface keybind makes the pill modal; then **Look → Pill mode →
+  reveal, any surface keybind makes the pill modal; then **Shell → Pill → Mode →
   Always**, or edit `~/.local/state/reddot/flags.json`.
 - **TLP helper**: root-owned `/usr/local/bin/reddot-tlp`, called through
   `pkexec`. TLP has no unprivileged threshold API; TLPUI escalates the same way.

@@ -25,7 +25,6 @@ PillSurface {
     readonly property var machineRows: [
         { label: "Model", value: ThinkPad.model },
         { label: "BIOS", value: ThinkPad.bios },
-        { label: "Platform profile", value: ThinkPad.platform },
         { label: "Lap mode", value: ThinkPad.lapMode < 0 ? "" : (ThinkPad.lapMode === 1 ? "lap" : "desk") },
         { label: "USB-C security", value: ThinkPad.usbCSecurity }
     ]
@@ -303,7 +302,7 @@ PillSurface {
                     Text {
                         anchors.left: parent.left
                         anchors.top: parent.top
-                        text: "Keyboard language"
+                        text: "Keyboard LED language"
                         color: Theme.cream
                         font.family: Theme.font
                         font.pixelSize: 11.5 * root.s
@@ -346,7 +345,7 @@ PillSurface {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Battery and power"
+                    text: "Power settings"
                     color: Theme.subtle
                     font.family: Theme.font
                     font.pixelSize: 10.5 * root.s
@@ -366,7 +365,7 @@ PillSurface {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.requestSurface("tlp")
+                    onClicked: root.requestSurface("powerhub")
                 }
             }
 

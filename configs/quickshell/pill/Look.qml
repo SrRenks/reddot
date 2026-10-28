@@ -7,7 +7,7 @@ import "lib/setDeco.js" as SetDeco
 import "Singletons"
 
 /**
- * 飾 LOOK sub-surface: edits the window-decoration knobs that live in
+ * WINDOWS sub-surface: edits the window-decoration knobs that live in
  * decoration.lua and writes each change straight back to its source so the choice
  * survives a restart. Window gaps, rounding and border size, the two opacity
  * fields and the blur block all rewrite the Lua and reload Hyprland so the change
@@ -37,15 +37,6 @@ SettingsSurface {
             r.push({ item: resizeRow, kind: "toggle", get: function () { return root.resizeOnBorder; }, set: function (v) { root.resizeOnBorder = v; root.writeDeco("resize_on_border", v ? "true" : "false"); } });
             r.push({ item: layoutRow, kind: "seg", vals: ["dwindle", "master"], get: function () { return root.layout; }, set: function (v) { root.layout = v; root.writeDeco("layout", "\"" + v + "\""); } });
         }
-        if (nightGrp.open) {
-            r.push({ item: nlModeRow, kind: "seg", vals: ["off", "on", "scheduled"], get: function () { return Flags.nightLightMode; }, set: function (v) { NightLight.setMode(v); } });
-            if (Flags.nightLightMode !== "off")
-                r.push({ item: nlTempRow, kind: "scrub", bump: function (d) { nlTempScrub.bump(d); } });
-            if (Flags.nightLightMode === "scheduled") {
-                r.push({ item: nlOnRow, kind: "scrub", bump: function (d) { nlOnScrub.bump(d); } });
-                r.push({ item: nlOffRow, kind: "scrub", bump: function (d) { nlOffScrub.bump(d); } });
-            }
-        }
         if (shadowGrp.open) {
             r.push({ item: shEnRow, kind: "toggle", get: function () { return root.shadowOn; }, set: function (v) { root.shadowOn = v; root.writeShadow("enabled", v ? "true" : "false"); } });
             if (root.shadowOn) {
@@ -54,7 +45,6 @@ SettingsSurface {
             }
         }
         if (blurGrp.open) {
-            r.push({ item: uiBlurRow, kind: "toggle", get: function () { return UiBlur.enabled; }, set: function (v) { UiBlur.setEnabled(v); } });
             r.push({ item: blEnRow, kind: "toggle", get: function () { return WindowBlur.enabled; }, set: function (v) { WindowBlur.setEnabled(v); } });
             if (root.blurOn) {
                 r.push({ item: blSizeRow, kind: "scrub", bump: function (d) { blSizeScrub.bump(d); } });
@@ -66,18 +56,6 @@ SettingsSurface {
         if (opGrp.open) {
             r.push({ item: opActRow, kind: "scrub", bump: function (d) { opActScrub.bump(d); } });
             r.push({ item: opInactRow, kind: "scrub", bump: function (d) { opInactScrub.bump(d); } });
-        }
-        if (noticeGrp.open) {
-            r.push({ item: noticeEnRow, kind: "toggle", get: function () { return Flags.keyNoticeEnabled; }, set: function (v) { Flags.keyNoticeEnabled = v; } });
-            if (Flags.keyNoticeEnabled)
-                r.push({ item: noticeMsRow, kind: "scrub", bump: function (d) { noticeMsScrub.bump(d); } });
-        }
-        if (pillGrp.open) {
-            r.push({ item: pillModeRow, kind: "seg", vals: ["always", "auto"], get: function () { return Flags.pillMode; }, set: function (v) { Flags.pillMode = v; } });
-            r.push({ item: pillReserveRow, kind: "toggle", get: function () { return Flags.pillReserve; }, set: function (v) { Flags.pillReserve = v; } });
-            r.push({ item: pillGapRow, kind: "scrub", bump: function (d) { pillGapScrub.bump(d); } });
-            r.push({ item: appGapRow, kind: "scrub", bump: function (d) { appGapScrub.bump(d); } });
-            r.push({ item: pillOpRow, kind: "scrub", bump: function (d) { pillOpScrub.bump(d); } });
         }
         return r;
     }
@@ -372,8 +350,9 @@ SettingsSurface {
 
         SettingsHeader {
             s: root.s
-            glyph: "飾"
-            title: "LOOK"
+            icon: "app-window"
+            glyphColor: Theme.vermLit
+            title: "WINDOWS"
             showBack: true
         }
 
@@ -502,7 +481,7 @@ SettingsSurface {
 
             }
 
-            Group { id: nightGrp; title: "Night light"
+            Group { id: nightGrp; visible: false; title: "Night light"
 
             FieldRow {
                 id: nlModeRow
@@ -623,6 +602,7 @@ SettingsSurface {
 
             FieldRow {
                 id: uiBlurRow
+                visible: false
                 label: "Pill / panel blur"
                 caption: "Layer blur for the pill and every panel. Independent of window blur; while window blur is off, windows get a no-blur rule."
                 LinkToggle {
@@ -755,7 +735,7 @@ SettingsSurface {
 
             }
 
-            Group { id: pillGrp; title: "Pill"
+            Group { id: pillGrp; visible: false; title: "Pill"
 
             FieldRow {
                 id: pillModeRow
@@ -824,7 +804,7 @@ SettingsSurface {
 
             }
 
-            Group { id: noticeGrp; title: "Key notices"; initialOpen: true
+            Group { id: noticeGrp; visible: false; title: "Key notices"; initialOpen: true
 
             FieldRow {
                 id: noticeEnRow

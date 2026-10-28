@@ -35,7 +35,10 @@ SettingsSurface {
      * bump axis.
      */
     rows: {
-        var r = [{ item: enabledRow, kind: "toggle", get: function () { return root.animOn; }, set: function (v) { root.animOn = v; root.writeEnabled(v); } }];
+        var r = [
+            { item: enabledRow, kind: "toggle", get: function () { return root.animOn; }, set: function (v) { root.animOn = v; root.writeEnabled(v); } },
+            { item: reduceRow, kind: "toggle", get: function () { return Flags.reduceMotion; }, set: function (v) { Flags.reduceMotion = v; } }
+        ];
         if (root.animOn)
             r.push({ item: speedRow, kind: "scrub", bump: function (d) { speedScrub.bump(d); } });
         return r;
@@ -145,12 +148,13 @@ SettingsSurface {
 
         SettingsHeader {
             s: root.s
-            glyph: "動"
-            title: "ANIMATION"
+            icon: "waves"
+            glyphColor: Theme.vermLit
+            title: "MOTION"
             showBack: true
         }
 
-        GroupLabel { text: "Motion" }
+        GroupLabel { text: "Timing" }
 
         SettingsRow {
             id: enabledRow
@@ -178,7 +182,7 @@ SettingsSurface {
             captionOnFocus: true
             icon: "bolt"
             visible: root.animOn
-            last: true
+            last: false
             ScrubValue {
                 id: speedScrub
                 s: root.s
@@ -189,6 +193,20 @@ SettingsSurface {
                     root.speed = v;
                     root.writeSpeed(v);
                 }
+            }
+        }
+
+        SettingsRow {
+            id: reduceRow
+            surface: root
+            name: "Reduce motion"
+            sub: "Short fades for the shell and pill"
+            icon: "sparkles"
+            last: !root.animOn
+            LinkToggle {
+                s: root.s
+                on: Flags.reduceMotion
+                onToggled: Flags.reduceMotion = !Flags.reduceMotion
             }
         }
 

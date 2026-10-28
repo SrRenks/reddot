@@ -83,11 +83,14 @@ Item {
         spacing: 5 * srow.s
 
         Text {
+            width: parent.width
             text: srow.name
             color: Theme.cream
             font.family: Theme.font
             font.pixelSize: 12.5 * srow.s
             font.weight: Font.DemiBold
+            elide: Text.ElideRight
+            maximumLineCount: 1
         }
         Text {
             width: parent.width

@@ -1,6 +1,6 @@
 # Startup hub
 
-**Settings → Power & system → Startup** lists the `hl.exec_cmd(...)` calls
+**Settings → Maintenance → Startup** lists the `hl.exec_cmd(...)` calls
 inside `hl.on("hyprland.start", ...)` in `~/.config/hypr/modules/autostart.lua`.
 
 - Core services are read-only: clipboard watcher, wallpaper init, cursor,

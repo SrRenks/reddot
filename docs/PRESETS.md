@@ -11,7 +11,7 @@ The defaults are deliberately the two modes this machine uses:
 | Laptop | Balanced | 95–100% |
 
 Names are user-editable. Create, rename or delete presets from
-**Settings → Presets**.
+**Settings → Power → Power presets**.
 
 ## Using it
 

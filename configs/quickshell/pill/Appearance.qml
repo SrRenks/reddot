@@ -6,11 +6,10 @@ import Quickshell.Io
 import "Singletons"
 
 /**
- * 相 APPEARANCE sub-surface: the clock format and seconds, the Japanese-glyph
- * toggle that gates every surface header, the palette mode (static flame, dynamic
- * per-wallpaper, or a manually chosen hue), whether GTK apps follow that palette,
- * the UI scale and a reduce-motion switch. Reached from the settings index and
- * morphs back to it on an empty click or the back chevron.
+ * 相 APPEARANCE sub-surface: palette mode, typography, UI scale, glyphs,
+ * wallpaper behavior and night light. Clock and motion moved to Shell and
+ * Windows respectively. Reached from the settings index and morphs back to it
+ * on an empty click or the back chevron.
  *
  * Manual palette mode reveals a rainbow hue strip and a dark/light choice; moving
  * either rebuilds the rice colour set from that hue through wallcolors.py --hue
@@ -120,18 +119,37 @@ SettingsSurface {
         }
     }
 
-    rows: [
-        { item: timeRow, kind: "seg", vals: [false, true], get: function () { return Flags.time12h; }, set: function (v) { Flags.time12h = v; } },
-        { item: secRow, kind: "toggle", get: function () { return Flags.clockSeconds; }, set: function (v) { Flags.clockSeconds = v; } },
-        { item: glyphRow, kind: "toggle", get: function () { return Flags.showGlyphs; }, set: function (v) { Flags.showGlyphs = v; } },
-        { item: vizRow, kind: "toggle", get: function () { return Flags.musicViz; }, set: function (v) { Flags.musicViz = v; } },
-        { item: paletteRow, kind: "seg", vals: ["static", "dynamic", "manual"], get: function () { return Flags.paletteMode; }, set: function (v) { root.applyMode(v); } },
-        { item: appRow, kind: "toggle", get: function () { return Flags.appTheme; }, set: function (v) { root.setAppTheme(v); } },
-        { item: randomRow, kind: "seg", vals: ["all", "cursor"], get: function () { return Flags.randomScope; }, set: function (v) { Flags.randomScope = v; } },
-        { item: scaleRow, kind: "seg", vals: [0.9, 1.0, 1.1, 1.25], get: function () { return Flags.uiScale; }, set: function (v) { Flags.uiScale = v; } },
-        { item: motionRow, kind: "toggle", get: function () { return Flags.reduceMotion; }, set: function (v) { Flags.reduceMotion = v; } },
-        { item: fontRow, kind: "nav", surface: "fontpicker" }
+    readonly property var nightModeOptions: [
+        { label: "Off", value: "off" },
+        { label: "On", value: "on" },
+        { label: "Scheduled", value: "scheduled" }
     ]
+
+    function fmtClock(v) {
+        var h = Math.floor(v / 60);
+        var m = v % 60;
+        return h + ":" + (m < 10 ? "0" + m : m);
+    }
+
+    rows: {
+        var r = [
+            { item: glyphRow, kind: "toggle", get: function () { return Flags.showGlyphs; }, set: function (v) { Flags.showGlyphs = v; } },
+            { item: vizRow, kind: "toggle", get: function () { return Flags.musicViz; }, set: function (v) { Flags.musicViz = v; } },
+            { item: paletteRow, kind: "seg", vals: ["static", "dynamic", "manual"], get: function () { return Flags.paletteMode; }, set: function (v) { root.applyMode(v); } },
+            { item: appRow, kind: "toggle", get: function () { return Flags.appTheme; }, set: function (v) { root.setAppTheme(v); } },
+            { item: randomRow, kind: "seg", vals: ["all", "cursor"], get: function () { return Flags.randomScope; }, set: function (v) { Flags.randomScope = v; } },
+            { item: scaleRow, kind: "seg", vals: [0.9, 1.0, 1.1, 1.25], get: function () { return Flags.uiScale; }, set: function (v) { Flags.uiScale = v; } },
+            { item: nlModeRow, kind: "seg", vals: ["off", "on", "scheduled"], get: function () { return Flags.nightLightMode; }, set: function (v) { NightLight.setMode(v); } }
+        ];
+        if (Flags.nightLightMode !== "off")
+            r.push({ item: nlTempRow, kind: "scrub", bump: function (d) { nlTempScrub.bump(d); } });
+        if (Flags.nightLightMode === "scheduled") {
+            r.push({ item: nlOnRow, kind: "scrub", bump: function (d) { nlOnScrub.bump(d); } });
+            r.push({ item: nlOffRow, kind: "scrub", bump: function (d) { nlOffScrub.bump(d); } });
+        }
+        r.push({ item: fontRow, kind: "nav", surface: "fontpicker" });
+        return r;
+    }
 
     Column {
         id: content
@@ -148,33 +166,6 @@ SettingsSurface {
         }
 
         Item { width: 1; height: 12 * root.s }
-
-        SettingsRow {
-            id: timeRow
-            surface: root
-            name: "Time format"
-            icon: "clock"
-
-            SettingsSeg {
-                s: root.s
-                options: [{ label: "24H", value: false }, { label: "12H", value: true }]
-                value: Flags.time12h
-                onPicked: (v) => Flags.time12h = v
-            }
-        }
-
-        SettingsRow {
-            id: secRow
-            surface: root
-            name: "Clock seconds"
-            icon: "stopwatch"
-
-            LinkToggle {
-                s: root.s
-                on: Flags.clockSeconds
-                onToggled: Flags.clockSeconds = !Flags.clockSeconds
-            }
-        }
 
         SettingsRow {
             id: glyphRow
@@ -452,18 +443,73 @@ SettingsSurface {
             }
         }
 
-        SettingsRow {
-            id: motionRow
-            surface: root
-            name: "Reduce motion"
-            icon: "waves"
+        SettingsLabel { s: root.s; text: "Night light" }
 
-            LinkToggle {
+        SettingsRow {
+            id: nlModeRow
+            surface: root
+            name: "Mode"
+            icon: "moon"
+            SettingsSeg {
                 s: root.s
-                on: Flags.reduceMotion
-                onToggled: Flags.reduceMotion = !Flags.reduceMotion
+                options: root.nightModeOptions
+                value: Flags.nightLightMode
+                onPicked: v => NightLight.setMode(v)
             }
         }
+
+        SettingsRow {
+            id: nlTempRow
+            surface: root
+            name: "Temperature"
+            captionOnFocus: true
+            icon: "sun"
+            visible: Flags.nightLightMode !== "off"
+            ScrubValue {
+                id: nlTempScrub
+                s: root.s
+                value: Flags.nightLightTemp
+                openValue: 4000
+                from: 2200; to: 6000; step: 100; unit: "K"
+                onEdited: v => NightLight.setTemp(v)
+            }
+        }
+
+        SettingsRow {
+            id: nlOnRow
+            surface: root
+            name: "On at"
+            icon: "clock"
+            visible: Flags.nightLightMode === "scheduled"
+            ScrubValue {
+                id: nlOnScrub
+                s: root.s
+                value: Flags.nightLightOnMin
+                openValue: 1260
+                from: 0; to: 1425; step: 15
+                fmt: root.fmtClock
+                onEdited: v => NightLight.setOnMin(v)
+            }
+        }
+
+        SettingsRow {
+            id: nlOffRow
+            surface: root
+            name: "Off at"
+            icon: "clock"
+            visible: Flags.nightLightMode === "scheduled"
+            ScrubValue {
+                id: nlOffScrub
+                s: root.s
+                value: Flags.nightLightOffMin
+                openValue: 450
+                from: 0; to: 1425; step: 15
+                fmt: root.fmtClock
+                onEdited: v => NightLight.setOffMin(v)
+            }
+        }
+
+        SettingsLabel { s: root.s; text: "Typography" }
 
         SettingsRow {
             id: fontRow

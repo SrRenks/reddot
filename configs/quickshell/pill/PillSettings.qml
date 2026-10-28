@@ -1,0 +1,152 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import "Singletons"
+
+/** Pill geometry, material and key notices. */
+SettingsSurface {
+    id: root
+
+    implicitHeight: content.implicitHeight
+
+    rows: [
+        { item: modeRow, kind: "seg", vals: ["always", "auto"], get: function () { return Flags.pillMode; }, set: function (v) { Flags.pillMode = v; } },
+        { item: reserveRow, kind: "toggle", get: function () { return Flags.pillReserve; }, set: function (v) { Flags.pillReserve = v; } },
+        { item: pillGapRow, kind: "scrub", bump: function (d) { pillGap.bump(d); } },
+        { item: appGapRow, kind: "scrub", bump: function (d) { appGap.bump(d); } },
+        { item: opacityRow, kind: "scrub", bump: function (d) { opacityScrub.bump(d); } },
+        { item: blurRow, kind: "toggle", get: function () { return UiBlur.enabled; }, set: function (v) { UiBlur.setEnabled(v); } },
+        { item: noticeRow, kind: "toggle", get: function () { return Flags.keyNoticeEnabled; }, set: function (v) { Flags.keyNoticeEnabled = v; } },
+        { item: holdRow, kind: "scrub", bump: function (d) { holdMs.bump(d); } }
+    ]
+
+    Column {
+        id: content
+        width: parent.width
+        spacing: 0
+
+        SettingsHeader {
+            s: root.s
+            icon: "layers"
+            glyphColor: Theme.vermLit
+            title: "PILL"
+            showBack: true
+        }
+
+        SettingsLabel { s: root.s; text: "Geometry" }
+
+        SettingsRow {
+            id: modeRow
+            surface: root
+            name: "Mode"
+            icon: "layers"
+            SettingsSeg {
+                s: root.s
+                options: [{ label: "Always", value: "always" }, { label: "Auto", value: "auto" }]
+                value: Flags.pillMode
+                onPicked: v => Flags.pillMode = v
+            }
+        }
+
+        SettingsRow {
+            id: reserveRow
+            surface: root
+            name: "Reserve space"
+            icon: "app-window"
+            LinkToggle {
+                s: root.s
+                on: Flags.pillReserve
+                onToggled: Flags.pillReserve = !Flags.pillReserve
+            }
+        }
+
+        SettingsRow {
+            id: pillGapRow
+            surface: root
+            name: "Pill gap"
+            icon: "arrow-up"
+            ScrubValue {
+                id: pillGap
+                s: root.s
+                value: Flags.topGap
+                openValue: 1.0
+                from: 0; to: 2; step: 0.1; decimals: 1
+                onEdited: v => Flags.topGap = v
+            }
+        }
+
+        SettingsRow {
+            id: appGapRow
+            surface: root
+            name: "App gap"
+            icon: "arrow-up"
+            ScrubValue {
+                id: appGap
+                s: root.s
+                value: Flags.appGap
+                openValue: 1.0
+                from: 0; to: 2; step: 0.1; decimals: 1
+                onEdited: v => Flags.appGap = v
+            }
+        }
+
+        SettingsRow {
+            id: opacityRow
+            surface: root
+            name: "Opacity"
+            icon: "sparkles"
+            ScrubValue {
+                id: opacityScrub
+                s: root.s
+                value: Flags.pillOpacity
+                openValue: 1.0
+                from: 0.55; to: 1.0; step: 0.05; decimals: 2
+                onEdited: v => Flags.pillOpacity = v
+            }
+        }
+
+        SettingsRow {
+            id: blurRow
+            surface: root
+            name: "Panel blur"
+            sub: "Independent of window blur"
+            icon: "sparkles"
+            LinkToggle {
+                s: root.s
+                on: UiBlur.enabled
+                onToggled: UiBlur.setEnabled(!UiBlur.enabled)
+            }
+        }
+
+        SettingsLabel { s: root.s; text: "Key notices" }
+
+        SettingsRow {
+            id: noticeRow
+            surface: root
+            name: "Show notices"
+            icon: "keyboard"
+            LinkToggle {
+                s: root.s
+                on: Flags.keyNoticeEnabled
+                onToggled: Flags.keyNoticeEnabled = !Flags.keyNoticeEnabled
+            }
+        }
+
+        SettingsRow {
+            id: holdRow
+            surface: root
+            name: "Hold time"
+            icon: "stopwatch"
+            ScrubValue {
+                id: holdMs
+                s: root.s
+                value: Flags.keyNoticeMs
+                openValue: 500
+                from: 200; to: 2000; step: 50; unit: "ms"
+                onEdited: v => Flags.keyNoticeMs = v
+            }
+        }
+
+        Item { width: 1; height: 12 * root.s }
+    }
+}

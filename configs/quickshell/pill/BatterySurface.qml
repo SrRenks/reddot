@@ -277,7 +277,7 @@ PillSurface {
                 anchors.right: parent.right
                 anchors.rightMargin: 6 * root.s
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Power  ›"
+                text: "Power settings  ›"
                 color: Theme.faint
                 font.family: Theme.font
                 font.pixelSize: 9.5 * root.s
@@ -290,7 +290,7 @@ PillSurface {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.requestSurface("tlp")
+                onClicked: root.requestSurface("powerhub")
             }
         }
     }

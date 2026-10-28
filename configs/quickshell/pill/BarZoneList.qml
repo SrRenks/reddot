@@ -9,20 +9,15 @@ Column {
 
     property real s: 1
     readonly property var zones: [
-        { id: "workspaces", label: "Workspaces" },
-        { id: "clock", label: "Clock" },
-        { id: "date", label: "Date under clock" }
+        { id: "workspaces", label: "Workspaces" }
     ]
 
     function shown(id) {
-        if (id === "workspaces") return Flags.barWorkspaces;
-        if (id === "clock") return Flags.barClock;
-        return Flags.barDate;
+        return id === "workspaces" ? Flags.barWorkspaces : false;
     }
     function toggle(id) {
-        if (id === "workspaces") Flags.barWorkspaces = !Flags.barWorkspaces;
-        else if (id === "clock") Flags.barClock = !Flags.barClock;
-        else Flags.barDate = !Flags.barDate;
+        if (id === "workspaces")
+            Flags.barWorkspaces = !Flags.barWorkspaces;
     }
 
     width: parent ? parent.width : 0

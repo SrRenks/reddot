@@ -368,65 +368,11 @@ Item {
      * when none of them is open.
      */
     function rowNavSurface() {
-        if (pill.settingsOpen)
-            return ldSettings.item;
-        if (pill.appearanceOpen)
-            return ldAppearance.item;
-        if (pill.barOpen)
-            return ldBar.item;
-        if (pill.lookOpen)
-            return ldLook.item;
-        if (pill.presetsOpen)
-            return ldPresets.item;
-        if (pill.startupOpen)
-            return ldStartup.item;
-        if (pill.inputOpen)
-            return ldInput.item;
-        if (pill.displayOpen)
-            return ldDisplay.item;
-        if (pill.animationOpen)
-            return ldAnimation.item;
-        if (pill.idlelockOpen)
-            return ldIdlelock.item;
-        if (pill.fontpickerOpen)
-            return ldFontpicker.item;
-        return null;
-    }
-
-    /**
-     * Move the focused settings row by `dir` (+1 down, -1 up), carrying the soul
-     * seam. Returns true when a settings-family surface is open and consumed it.
-     */
-    function settingsMove(dir) {
-        var nav = pill.rowNavSurface();
-        if (!nav)
-            return false;
-        nav.kbMove(dir);
-        return true;
-    }
-
-    /**
-     * Step the focused settings row's control: a segmented choice cycles by
-     * `dir`, a toggle is set on (dir > 0) or off. Returns true when consumed.
-     */
-    function settingsAdjust(dir) {
-        var nav = pill.rowNavSurface();
-        if (!nav)
-            return false;
-        nav.kbAdjust(dir);
-        return true;
-    }
-
-    /**
-     * Activate the focused settings row: a toggle flips, a nav row opens its
-     * sub-surface. Returns true when a settings-family surface is open.
-     */
-    function settingsActivate() {
-        var nav = pill.rowNavSurface();
-        if (!nav)
-            return false;
-        nav.kbActivate();
-        return true;
+        var entry = pill.surfaces[pill.surface];
+        if (!entry || !entry.ame)
+            return null;
+        var item = entry.ame();
+        return item && item.kbMove ? item : null;
     }
 
     /**

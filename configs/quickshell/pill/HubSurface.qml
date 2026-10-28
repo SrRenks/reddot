@@ -12,6 +12,42 @@ SettingsSurface {
     property var entries: []
 
     implicitHeight: content.implicitHeight
+    focus: false
+    activeFocusOnTab: true
+
+    onOpenChanged: {
+        if (open) {
+            kbIndex = 0;
+            forceActiveFocus();
+        }
+    }
+
+    Keys.onUpPressed: (event) => {
+        root.kbMove(-1);
+        event.accepted = true;
+    }
+    Keys.onDownPressed: (event) => {
+        root.kbMove(1);
+        event.accepted = true;
+    }
+    Keys.onPressed: (event) => {
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
+                || event.key === Qt.Key_Space) {
+            if (!event.isAutoRepeat)
+                root.kbActivate();
+            event.accepted = true;
+        }
+    }
+
+    function syncRows() {
+        var next = [];
+        for (var i = 0; i < entriesRepeater.count; i++) {
+            var item = entriesRepeater.itemAt(i);
+            if (item)
+                next.push({ item: item, kind: "nav", surface: root.entries[i].surface });
+        }
+        root.rows = next;
+    }
 
     Column {
         id: content
@@ -28,15 +64,21 @@ SettingsSurface {
         Item { width: 1; height: 9 * root.s }
 
         Repeater {
+            id: entriesRepeater
             model: root.entries
+
+            onCountChanged: root.syncRows()
+            Component.onCompleted: root.syncRows()
 
             Item {
                 id: entryRow
                 required property var modelData
+                required property int index
                 width: content.width
                 height: 42 * root.s
 
                 readonly property bool hovered: hover.hovered
+                readonly property bool focused: root.kbIndex === entryRow.index
 
                 Rectangle {
                     anchors.fill: parent
@@ -45,7 +87,10 @@ SettingsSurface {
                     anchors.topMargin: 2 * root.s
                     anchors.bottomMargin: 2 * root.s
                     radius: 9 * root.s
-                    color: entryRow.hovered ? Theme.frameBg : "transparent"
+                    color: entryRow.focused ? Qt.alpha(Theme.vermLit, 0.09)
+                        : (entryRow.hovered ? Theme.frameBg : "transparent")
+                    border.width: entryRow.focused ? 1 : 0
+                    border.color: Qt.alpha(Theme.vermLit, 0.34)
                 }
 
                 GlyphIcon {
@@ -55,7 +100,7 @@ SettingsSurface {
                     width: 17 * root.s
                     height: 17 * root.s
                     name: entryRow.modelData.icon
-                    color: entryRow.hovered ? Theme.cream : Theme.subtle
+                    color: entryRow.hovered || entryRow.focused ? Theme.cream : Theme.subtle
                     stroke: 1.8
                 }
 
@@ -97,16 +142,19 @@ SettingsSurface {
                     width: 14 * root.s
                     height: 14 * root.s
                     name: "chevron-right"
-                    color: entryRow.hovered ? Theme.cream : Theme.iconDim
+                    color: entryRow.hovered || entryRow.focused ? Theme.cream : Theme.iconDim
                     stroke: 2
                 }
 
-                HoverHandler { id: hover }
+                HoverHandler {
+                    id: hover
+                    onHoveredChanged: if (hovered) root.reportRowHover(entryRow, true)
+                }
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.requestSurface(entryRow.modelData.surface)
+                    onClicked: root.activateRow(entryRow)
                 }
             }
         }

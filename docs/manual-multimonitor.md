@@ -1,7 +1,8 @@
 # Manual multi-monitor test
 
-The current development machine has one output, so this scenario is not covered
-by the automated smoke.
+The development machine has one physical output; a headless output was used for
+the supervised surface and lock runs. Physical EDID, cable and hotplug remain
+manual.
 
 ## Setup
 
@@ -51,6 +52,23 @@ The machine has one physical output. A headless output was created with
 
 The lock-over-two-outputs check was not run. Physical EDID, cable, DPI and
 hotplug remain manual.
+
+## Lock over two outputs, 2026-10-28
+
+A second headless output (`HEADLESS-3`) was configured at `1280x720@60`,
+position `10880x0`, scale `1.25`; the real lock was triggered with both outputs
+active.
+
+- `qs -c lock ipc call lock secure` returned `false` before the lock;
+- the same call returned `true` after the lock, meaning the compositor confirmed
+  every screen covered;
+- the auth panel stayed on `eDP-1`;
+- the secondary output showed the lock background and no interactive panel;
+- the headless output was removed after unlock and `eDP-1` remained active.
+
+`tools/test-lock-multimonitor.sh` reproduces the setup, trigger and `secure`
+check. It deliberately leaves cleanup to the operator because removing an output
+while locked is not safe.
 
 ## Failure record
 

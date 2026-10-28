@@ -10,7 +10,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 |---|---|---|
 | QML das 40 superfícies | estática + módulos puros + runtime | lint em 126 arquivos, baseline de 180 ocorrências, testes Node, harness Quickshell e smoke de abertura |
 | Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML e Security com fingerprint/idle agrupados |
-| Barra e status | boa | contrato de status, smoke, reorder manual |
+| Barra e status | boa | contrato de status, smoke, reorder físico e cancelamento com Escape |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
 | Helpers TLP/ThinkPad | boa + adversarial | testes próprios, casos de metacaracteres/argumentos extras e selftest do installer |
@@ -18,7 +18,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
-| Lock shell | PAM real validado e configurável | QML lint, `check-lock-static.sh`, senha e fingerprint supervisionados; lock sobre duas saídas ainda pendente |
+| Lock shell | PAM real + two outputs | QML lint, `check-lock-static.sh`, senha/fingerprint supervisionados e `WlSessionLock.secure=true` em eDP-1 + headless |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |
 | Performance/RAM | medida e orçamento nesta máquina | PSS/RSS de pill, lock e estados de Settings; `test-perf-budget.sh` host-only |
 | Segurança dos helpers | boa | allowlist, polkit, sudoers, guards e casos adversariais de argumentos |

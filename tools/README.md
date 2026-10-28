@@ -10,6 +10,7 @@
 | `99-reddot-leds.rules` | mute triggers at boot, plus the LED event file for the open panel |
 | `smoke-surfaces.sh` | optional runtime smoke: opens every pill surface and checks the layer |
 | `check-lock-static.sh` | static lock state/flow review, no runtime lock |
+| `test-lock-multimonitor.sh` | supervised two-output lock smoke; leaves cleanup to the operator |
 | `check-privileged.sh` | polkit allowlist, sudoers absence and helper guards |
 | `perf-snapshot.sh` | host-only PSS/RSS and layer geometry snapshot |
 | `test_deploy_sandbox.py` | isolated deploy, re-deploy and uninstall |

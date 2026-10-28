@@ -23,5 +23,14 @@ index calculations.
 
 ## Result
 
-The windowless QML harness passes. The physical drag and Escape checks still
-need a human at the graphical session.
+The windowless QML harness passes. On 2026-10-28 the physical Bar surface was
+exercised with `dotool` against the real `eDP-1`, whose global x offset is 8960.
+
+- `PageDown` moved through the status list and stopped at the last row.
+- Dragging **Weather** by the grip changed the order; the saved
+  `barStatusOrder` was restored afterwards.
+- Starting another drag and pressing Escape left the order unchanged.
+- The first pointer-wheel attempt targeted the wrong global layout and is not
+  used as evidence; `PageDown` and physical drag are the validated paths.
+- `barStatusOrder` and `uiScale` were left at their original values
+  (`uiScale: 1`).

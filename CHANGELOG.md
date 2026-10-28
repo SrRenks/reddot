@@ -28,6 +28,8 @@ semantic versioning when it cuts a release.
   controls.
 - Advisory helper validation cases for shell metacharacters, extra arguments and
   path-like names.
+- `WlSessionLock.secure` diagnostic and a supervised two-output lock smoke.
+- Physical Bar drag and Escape-cancel validation against the real eDP-1 layout.
 
 ### Changed
 

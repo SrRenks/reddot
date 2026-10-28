@@ -104,5 +104,10 @@ ShellRoot {
         function lock(): void {
             root.doLock();
         }
+
+        /** Diagnostic for supervised multi-output tests: true only after every screen is covered. */
+        function secure(): bool {
+            return sessionLock.secure;
+        }
     }
 }

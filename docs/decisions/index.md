@@ -5,3 +5,4 @@
 - [ADR 0004: Rust palette engine](0004-rust-palette-engine.md)
 - [ADR 0005: Rust distro core](0005-rust-distro-core.md)
 - [ADR 0006: Rust package argv core](0006-rust-package-argv-core.md)
+- [ADR 0007: Rust fallback steps](0007-rust-fallback-steps.md)

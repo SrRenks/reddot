@@ -163,6 +163,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust fallbacks =="
+if command -v rustc >/dev/null 2>&1; then
+    fb_bin="${TMPDIR:-/tmp}/reddot-fallbacks-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-fallbacks.rs" -o "$fb_bin" 2>/tmp/reddot-fb-build.log; then
+        ok "rust fallbacks build"
+        fb_unit="${TMPDIR:-/tmp}/reddot-fallbacks-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-fallbacks.rs" -o "$fb_unit" 2>/tmp/reddot-fb-test-build.log && "$fb_unit" >/tmp/reddot-fb-unit.log 2>&1; then
+            ok "rust fallbacks unit tests"
+        else
+            bad "rust fallbacks unit tests"
+            tail -n 12 /tmp/reddot-fb-test-build.log /tmp/reddot-fb-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$fb_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-fallbacks-rust.sh" 2>&1); then ok "rust fallbacks parity"; else bad "rust fallbacks parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust fallbacks build"
+        sed 's/^/        /' /tmp/reddot-fb-build.log | tail -n 12
+    fi
+    rm -f "$fb_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

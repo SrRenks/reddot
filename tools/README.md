@@ -39,6 +39,8 @@
 | `reddot-wallcolors.rs` | Rust palette engine: wallpaper analysis, fastfetch, Hyprland, Ghostty and GTK app theme |
 | `reddot-distro.rs` | Rust installer distro/package planner, parity-tested against installer/distro.py |
 | `reddot-pkg.rs` | Rust package argv builder, parity-tested against installer/pkg.py |
+| `reddot-fallbacks.rs` | Rust source-build/download/Flatpak fallback steps |
+| `test-reddot-fallbacks-rust.sh` | all-family fallback parity
 | `test-reddot-pkg-rust.sh` | native, repo, Portage and AUR argv parity |
 | `test-reddot-distro-rust.sh` | family, AUR and plan parity for the Rust distro core |
 | `test-reddot-wallcolors-rust.sh` | integration parity for the Rust palette engine |

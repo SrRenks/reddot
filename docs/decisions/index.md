@@ -11,3 +11,4 @@
 - [ADR 0010: Rust neutralize core](0010-rust-neutralize.md)
 - [ADR 0011: Rust TUI renderer](0011-rust-tui-renderer.md)
 - [ADR 0012: Rust TUI input](0012-rust-tui-input.md)
+- [ADR 0013: Rust installer detection](0013-rust-detect-core.md)

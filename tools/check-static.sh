@@ -21,6 +21,9 @@ for test in "$repo"/configs/quickshell/pill/lib/*.test.mjs; do
     [ -f "$test" ] && run_node "$test"
 done
 
+echo "== deploy sandbox =="
+if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad "deploy sandbox"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+
 echo "== python =="
 if out=$(PYTHONPYCACHEPREFIX=/tmp/reddot-ci-pycache python3 -m compileall -q "$repo/installer" "$repo/configs/hypr/scripts" "$repo/tools" 2>&1); then
     ok "python compile"

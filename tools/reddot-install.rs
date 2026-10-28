@@ -69,6 +69,7 @@ fn main() {
     let mut no_deps = false;
     let mut apply = false;
     let mut full = false;
+    let mut custom = false;
     let mut aur = "yay".to_string();
     let mut optional = String::new();
     let mut i = 0;
@@ -85,6 +86,7 @@ fn main() {
             "--uninstall" => uninstall=true,
             "--sddm" => sddm=true, "--grub" => grub=true, "--brave" => brave=true, "--no-fish" => fish=false,
             "--full" => full=true,
+            "--custom" => custom=true,
             "--optional" => { i+=1; optional=args.get(i).cloned().unwrap_or_default(); },
             "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },
             _ => {}
@@ -119,19 +121,20 @@ fn main() {
     let init = field(&detect, "init");
     if !quick {
         if !full {
-            let choice = ask("Install profile: 1 Quick, 2 Full", "1");
+            let choice = ask("Install profile: 1 Quick, 2 Full, 3 Custom", "1");
             if choice.trim() == "2" { full = true; }
+            if choice.trim() == "3" { custom = true; }
         }
         if family == "arch" {
             let helper = ask("AUR helper: yay, paru or none", &aur);
             if helper == "yay" || helper == "paru" || helper == "none" { aur = helper; }
         }
-        if full {
+        if full || custom {
             if let Ok(ids) = run(&bin("reddot-plan"), &["--manifest", &source.parent().unwrap_or(Path::new(".")).join("installer/packages.json").to_string_lossy(), "--list-full"]) {
                 let list: Vec<String> = quoted(&ids);
                 if !list.is_empty() {
                     println!("Full apps: {}", list.iter().enumerate().map(|(i, s)| format!("{}={s}", i + 1)).collect::<Vec<_>>().join(", "));
-                    let pick = ask("Optional apps (numbers, comma; empty = all)", "");
+                    let pick = ask(if custom { "Optional apps (numbers, comma; empty = none)" } else { "Optional apps (numbers, comma; empty = all)" }, "");
                     if !pick.trim().is_empty() {
                         let mut chosen = Vec::new();
                         for n in pick.split(',') {
@@ -159,7 +162,7 @@ fn main() {
     let plan = env::temp_dir().join(format!("reddot-plan-{}.json", std::process::id()));
     let manifest = source.parent().unwrap_or(Path::new(".")).join("installer/packages.json");
     let manifest_arg = manifest.to_string_lossy().into_owned();
-    let profile = if full { "full" } else { "quick" };
+    let profile = if custom { "custom" } else if full { "full" } else { "quick" };
     let mut pargs = vec!["--manifest", &manifest_arg, "--family", &family, "--profile", profile, "--aur", &aur];
     if !optional.is_empty() { pargs.extend(["--optional", &optional]); }
     let plan_out = match run(&bin("reddot-plan"), &pargs) {

@@ -149,6 +149,7 @@ main() {
 			fi
 			has_flag --dry-run "$@" && rust_args="$rust_args --dry-run" || rust_args="$rust_args --apply"
 			has_flag --full "$@" && rust_args="$rust_args --full"
+			has_flag --custom "$@" && rust_args="$rust_args --custom"
 			has_flag --no-deps "$@" && rust_args="$rust_args --no-deps"
 			has_flag --sddm "$@" && rust_args="$rust_args --sddm"
 			has_flag --grub "$@" && rust_args="$rust_args --grub"

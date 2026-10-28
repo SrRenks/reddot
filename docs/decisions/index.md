@@ -30,3 +30,4 @@
 - [ADR 0029: Rust wizard confirmations](0029-rust-wizard-confirmations.md)
 - [ADR 0030: Optional app picker](0030-rust-optional-apps.md)
 - [ADR 0031: Rust Custom profile](0031-rust-custom-profile.md)
+- [ADR 0032: Rust final report](0032-rust-final-report.md)

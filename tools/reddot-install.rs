@@ -250,6 +250,9 @@ fn main() {
         let updater_arg = updater.to_string_lossy().into_owned();
         let _ = run(&bin("reddot-post"), &["baseline", "--source", &src_arg, "--config-root", &root_arg, "--updater", &updater_arg]);
     }
+    let mut fargs = vec!["--plan", &plan_arg, "--family", &family, "--final", "--init", &init];
+    if !apply { fargs.push("--dry-run"); }
+    let _ = run(&bin("reddot-report"), &fargs);
     let _ = fs::remove_file(&plan);
     let _ = fs::remove_file(&fallback_path);
     println!("reddot-install: quickstart {} complete", if apply { "apply" } else { "dry-run" });

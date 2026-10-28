@@ -38,11 +38,14 @@ fn main() {
     let mut family = "unknown".to_string();
     let mut do_pkgs = true;
     let mut sddm = false; let mut grub = false; let mut brave = false; let mut fish = true; let mut managed = false;
+    let mut final_report = false;
+    let mut dry = false;
+    let mut init = "systemd".to_string();
     let mut i = 0;
     while i < args.len() { match args[i].as_str() {
         "--plan" => { i+=1; plan_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); },
         "--family" => { i+=1; family=args.get(i).cloned().unwrap_or_default(); },
-        "--no-deps" => do_pkgs=false, "--sddm" => sddm=true, "--grub" => grub=true, "--brave" => brave=true, "--no-fish" => fish=false, "--managed" => managed=true, _ => {} } i+=1; }
+        "--no-deps" => do_pkgs=false, "--sddm" => sddm=true, "--grub" => grub=true, "--brave" => brave=true, "--no-fish" => fish=false, "--managed" => managed=true, "--final" => final_report=true, "--dry-run" => dry=true, "--init" => { i+=1; init=args.get(i).cloned().unwrap_or_else(||"systemd".into()); }, _ => {} } i+=1; }
     let plan = fs::read_to_string(plan_path).ok().and_then(|t| P::parse(&t).ok()).unwrap_or(J::Obj(Default::default()));
     let mut lines: Vec<String> = Vec::new();
     if !do_pkgs { lines.push("Skipping packages, deploying configs only.".into()); }
@@ -71,6 +74,12 @@ fn main() {
     if managed { lines.push("Update the reddot config; your Settings are kept.".into()); }
     else { lines.push("Back up and deploy the reddot config.".into()); }
     println!("{}", lines.join("\n"));
+    if final_report {
+        println!("{}", if dry { "Dry run complete" } else { "reddot is in" });
+        println!("Next: log back in, start Hyprland, open the launcher, pick a wallpaper.");
+        if init != "systemd" { println!("Next: enable NetworkManager and bluetooth through your init."); }
+        if !dry { println!("Log: follow the installer output above; re-run with --dry-run to inspect."); }
+    }
 }
 
 #[cfg(test)]

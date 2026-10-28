@@ -61,12 +61,18 @@ for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh; do
     [ -f "$file" ] || file="$repo/configs/hypr/scripts/$test"
     [ -f "$file" ] || continue
     interpreter=sh
-    [ "$test" = test-reddot-tlp.sh ] && interpreter=sh
+    case "$(head -n 1 "$file")" in
+        *bash*) interpreter=bash ;;
+    esac
     if out=$("$interpreter" "$file" 2>&1); then ok "$test"; else bad "$test"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
 done
 for f in "$repo"/configs/hypr/scripts/*.sh "$repo"/tools/*.sh "$repo/install.sh"; do
     [ -f "$f" ] || continue
-    sh -n "$f" 2>/dev/null || bad "sh -n $(basename "$f")"
+    case "$(head -n 1 "$f")" in
+        *bash*) syntax=bash ;;
+        *) syntax=sh ;;
+    esac
+    "$syntax" -n "$f" 2>/dev/null || bad "$syntax -n $(basename "$f")"
 done
 ok "shell syntax"
 luac_bin=

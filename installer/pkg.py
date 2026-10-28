@@ -402,11 +402,18 @@ def _selftest():
     assert privileged(["pacman", "-S", "x"], "arch") == ["sudo", "pacman", "-S", "x"]
     checks += 1
 
-    # Real read-only queries against this Arch box prove the is_installed path works.
-    assert is_installed("pacman", "arch") is True
-    assert is_installed("bash", "arch") is True
+    # Exercise the read-only path without assuming the CI runner is Arch. On an
+    # Arch host both positives resolve; elsewhere the missing tool is a clean
+    # False, and the negative case still proves the no-package path.
+    if shutil.which("pacman"):
+        assert is_installed("pacman", "arch") is True
+        assert is_installed("bash", "arch") is True
+        checks += 2
+    else:
+        assert is_installed("pacman", "arch") is False
+        checks += 1
     assert is_installed("definitely-not-a-real-pkg-xyz", "arch") is False
-    checks += 3
+    checks += 1
 
     print(f"pkg.py selftest: {checks} checks passed")
 

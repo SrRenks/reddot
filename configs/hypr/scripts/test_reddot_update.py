@@ -45,7 +45,7 @@ def main():
     assert ru.data_dir() == data
 
     origin.mkdir(parents=True)
-    git(origin, "init", "-q", "-b", "main")
+    git(origin, "init", "-q", "-b", ru.DEFAULT_BRANCH)
 
     binds = "configs/hypr/modules/binds.lua"
     monitors = "configs/hypr/modules/monitors.lua"
@@ -107,7 +107,7 @@ def main():
     Diverge the user locally without overlapping the upstream config-bump lines.
     binds: user edits line one (upstream touched line two) -> clean auto-merge.
     monitors: user edits line two (upstream appended a line) -> clean auto-merge.
-    Then move origin/main forward by re-pointing the manifest base to the commit
+    Then move origin/e14g7 forward by re-pointing the manifest base to the commit
     before the config bump so the engine sees an upstream change to merge.
     """
     base_before_bump = ru.git(data, "rev-parse", "HEAD~1").strip()
@@ -200,6 +200,17 @@ def main():
     assert obj["status"] == "error" and obj["error"], obj
     assert out.count("\n") == 0, "exactly one JSON line"
     print("H2 bad trailing flag -> valid JSON, exit 0: ok")
+
+    """
+    C2: an existing pristine clone with an old Ricelin-origin URL is retargeted
+    to the reddot remote instead of continuing to fetch the old project.
+    """
+    clone = ru.data_dir()
+    ru.git(clone, "remote", "set-url", "origin", "file:///tmp/old-ricelin.git")
+    ru.ensure_clone(str(origin), True)
+    current = ru.git(clone, "remote", "get-url", "origin").strip()
+    assert current == str(origin), current
+    print("C2 old clone remote is retargeted: ok")
 
     """
     M1: a present but unparseable manifest is corrupt, surfaced as an error status,

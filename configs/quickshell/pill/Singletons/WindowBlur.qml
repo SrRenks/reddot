@@ -19,6 +19,7 @@ Singleton {
     property real activeOpacity: 0.80
     property real inactiveOpacity: 0.50
     property bool loaded: false
+    property var pendingToggle: null
 
     function refresh() {
         reader.reload();
@@ -43,13 +44,23 @@ Singleton {
     }
 
     function setEnabled(on) {
-        var text = reader.text();
+        if (!root.loaded || reader.text().length === 0) {
+            root.pendingToggle = on;
+            reader.reload();
+            return;
+        }
+
+        var text = String(reader.text());
         var targetActive = on ? Flags.fxSavedActive : 1.0;
         var targetInactive = on ? Flags.fxSavedInactive : 1.0;
 
         if (!on) {
-            Flags.fxSavedActive = parseNumber(text, "active_opacity", root.activeOpacity);
-            Flags.fxSavedInactive = parseNumber(text, "inactive_opacity", root.inactiveOpacity);
+            let currentActive = parseNumber(text, "active_opacity", root.activeOpacity);
+            let currentInactive = parseNumber(text, "inactive_opacity", root.inactiveOpacity);
+            // A previous off/on cycle may have stored 1.00 as the "on" opacity.
+            // Keep usable transparency defaults instead of restoring an opaque state.
+            Flags.fxSavedActive = currentActive > 0.99 ? 0.80 : currentActive;
+            Flags.fxSavedInactive = currentInactive > 0.99 ? 0.50 : currentInactive;
         }
 
         Flags.windowBlur = on;
@@ -67,6 +78,7 @@ Singleton {
         activeOpacity = targetActive;
         inactiveOpacity = targetInactive;
         writer.setText(result.text);
+        reload.running = true;
         // Regenerate the panel module so windows gain/lose their no-blur rule.
         UiBlur.sync(on);
         applyOpacity();
@@ -82,8 +94,13 @@ Singleton {
             root.activeOpacity = root.parseNumber(content, "active_opacity", 0.80);
             root.inactiveOpacity = root.parseNumber(content, "inactive_opacity", 0.50);
             root.loaded = true;
-            if (!Flags.windowBlur)
+            if (root.pendingToggle !== null) {
+                const pending = root.pendingToggle;
+                root.pendingToggle = null;
+                root.setEnabled(pending);
+            } else if (!Flags.windowBlur) {
                 root.applyOpacityTo(1.0, 1.0);
+            }
         }
     }
 

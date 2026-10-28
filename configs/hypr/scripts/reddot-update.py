@@ -31,6 +31,8 @@ import tempfile
 from pathlib import Path
 
 DEFAULT_REMOTE = "https://github.com/SrRenks/reddot.git"
+# The reddot repository's default branch is e14g7; main is a stale mirror.
+DEFAULT_BRANCH = "e14g7"
 
 PROTECTED = [
     "hypr/modules/decoration.lua",
@@ -173,7 +175,16 @@ def ensure_clone(remote, do_fetch):
     clone = data_dir()
     if (clone / ".git").exists():
         if do_fetch:
-            git(clone, "fetch", "origin", "main")
+            # Installations created before the reddot split still have the old
+            # Ricelin URL in the pristine clone. Retarget that clone in place so
+            # an update can never keep following the upstream by accident.
+            try:
+                current = git(clone, "remote", "get-url", "origin").strip()
+            except subprocess.CalledProcessError:
+                current = ""
+            if current and current != remote:
+                git(clone, "remote", "set-url", "origin", remote)
+            git(clone, "fetch", "origin", DEFAULT_BRANCH)
         return clone
     clone.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
@@ -184,7 +195,7 @@ def ensure_clone(remote, do_fetch):
 
 
 def origin_head(clone):
-    return git(clone, "rev-parse", "origin/main").strip()
+    return git(clone, "rev-parse", "origin/" + DEFAULT_BRANCH).strip()
 
 
 def commit_date(clone, sha):

@@ -36,6 +36,12 @@ semantic versioning when it cuts a release.
 - `lastSurface` reopen validated with the real Super+Shift+Space binding.
 - Navigation manifest with aliases/tags, status hover tooltips and a contract
   tying catalog, status order, Settings index and hubs together.
+- `SUPER+SHIFT+F` now restores usable active/inactive opacity instead of
+  preserving an opaque saved state.
+- Updater clones from the old Ricelin origin are retargeted to
+  `SrRenks/reddot` on branch `e14g7`.
+- CI portability fixes: bash-only scripts use bash for syntax, and the package
+  selftest no longer assumes pacman is installed on the Ubuntu runner.
 
 ### Changed
 

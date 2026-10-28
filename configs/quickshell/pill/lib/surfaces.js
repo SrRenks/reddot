@@ -26,6 +26,7 @@ var definitions = {
     tlp:        { parent: "powerhub",  settingsLike: false, cold: true  , loader: "ldTlp" },
     thinkpad:   { parent: "",          settingsLike: false, cold: true  , loader: "ldThinkpad" },
     settings:   { parent: "",          settingsLike: true,  inlineBack: false, cold: true  , loader: "ldSettings" },
+    search:     { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldSearch" },
     shell:      { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldShell" },
     clock:      { parent: "shell",     settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldClock" },
     pillsettings: { parent: "shell",   settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldPillSettings" },

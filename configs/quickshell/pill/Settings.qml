@@ -14,6 +14,7 @@ SettingsSurface {
     implicitHeight: content.implicitHeight
 
     rows: [
+        { item: searchRow, kind: "nav", surface: "search" },
         { item: appearanceRow, kind: "nav", surface: "appearance" },
         { item: shellRow, kind: "nav", surface: "shell" },
         { item: windowsRow, kind: "nav", surface: "windows" },
@@ -45,6 +46,16 @@ SettingsSurface {
             s: root.s
             glyph: "設"
             title: "SETTINGS"
+        }
+
+        SettingsRow {
+            id: searchRow
+            surface: root
+            captionOnFocus: true
+            icon: "search"
+            name: "Search"
+            sub: "Find any section, alias or setting"
+            Arrow {}
         }
 
         SettingsLabel { s: root.s; text: "Desktop" }

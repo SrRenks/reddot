@@ -71,6 +71,7 @@ Item {
     readonly property bool tlpOpen: surface === "tlp"
     readonly property bool thinkpadOpen: surface === "thinkpad"
     readonly property bool settingsOpen: surface === "settings"
+    readonly property bool searchOpen: surface === "search"
     readonly property bool shellOpen: surface === "shell"
     readonly property bool windowsOpen: surface === "windows"
     readonly property bool powerhubOpen: surface === "powerhub"
@@ -201,6 +202,7 @@ Item {
     readonly property real soundW: 400 * s
     readonly property real btW: 286 * s
     readonly property real settingsW: 392 * s
+    readonly property real searchW: 420 * s
     readonly property real keybindsW: 460 * s
     readonly property real workspacesW: 392 * s
     readonly property real startupW: 392 * s
@@ -290,6 +292,7 @@ Item {
         tlp:       { size: () => Qt.size(tlpW, surfaceItem(ldTlp).implicitHeight + 26 * s), ame: () => surfaceItem(ldTlp) },
         thinkpad:  { size: () => Qt.size(thinkpadW, surfaceItem(ldThinkpad).implicitHeight + 26 * s), ame: () => surfaceItem(ldThinkpad) },
         settings:  { size: () => Qt.size(settingsW, surfaceItem(ldSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldSettings) },
+        search:    { size: () => Qt.size(searchW, surfaceItem(ldSearch).implicitHeight + 29 * s), ame: () => surfaceItem(ldSearch) },
         shell:     { size: () => Qt.size(shellW, surfaceItem(ldShell).implicitHeight + 29 * s), ame: () => surfaceItem(ldShell) },
         clock:     { size: () => Qt.size(clockW, surfaceItem(ldClock).implicitHeight + 29 * s), ame: () => surfaceItem(ldClock) },
         pillsettings: { size: () => Qt.size(pillsettingsW, surfaceItem(ldPillSettings).implicitHeight + 29 * s), ame: () => surfaceItem(ldPillSettings) },
@@ -337,6 +340,11 @@ Item {
     signal requestSurface(string name)
     signal requestClose()
     signal requestBack()
+
+    /** Let the shell route Enter through Search when the text field lost layer focus. */
+    function searchPick() {
+        return ldSearch.item ? ldSearch.item.pick() : false;
+    }
 
     /**
      * Forward an arrow-key nudge to the open mixer's targeted fader. Returns true
@@ -545,7 +553,7 @@ Item {
     readonly property var coldLoaders: ({
         sound: ldSound, calendar: ldCalendar, launcher: ldLauncher, clipboard: ldClip,
         wallpaper: ldWall, power: ldPower, wifi: ldWifi, bt: ldBt, battery: ldBattery,
-        tlp: ldTlp, thinkpad: ldThinkpad, settings: ldSettings, keybinds: ldKeybinds,
+        tlp: ldTlp, thinkpad: ldThinkpad, settings: ldSettings, search: ldSearch, keybinds: ldKeybinds,
         workspaces: ldWorkspaces, stash: ldStash, spaceapps: ldSpaceapps, recorder: ldRecorder,
         sysmon: ldSysmon, appearance: ldAppearance, bar: ldBar, updates: ldUpdates, display: ldDisplay,
         input: ldInput, look: ldLook, presets: ldPresets, startup: ldStartup,
@@ -2403,6 +2411,20 @@ Item {
         sourceComponent: ThinkPadSurface {
             s: pill.s
             open: pill.thinkpadOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+            onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldSearch
+        active: false
+        z: 30
+        anchors.fill: parent
+        sourceComponent: Search {
+            s: pill.s
+            open: pill.searchOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)

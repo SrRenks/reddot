@@ -21,6 +21,7 @@ var pages = {
     tlp:        { title: "Profile & battery care", sub: "Performance mode and charge window", aliases: ["tlp", "profile", "charge", "battery"], tags: ["power", "system"] },
     thinkpad:   { title: "ThinkPad",          sub: "Fan, LEDs, TrackPoint and function keys", aliases: ["fan", "trackpoint", "leds", "keyboard"], tags: ["hardware"], available: "thinkpad" },
     settings:   { title: "Settings",          sub: "Preferences and controls",                aliases: ["config", "preferences", "options"], tags: ["system"] },
+    search:     { title: "Search",             sub: "Find any section",                       aliases: ["find", "lookup", "filter"], tags: ["navigation"], hidden: true },
     shell:      { title: "Shell",             sub: "Bar, clock, pill and notices",            aliases: ["gui", "interface", "bar", "pill"], tags: ["appearance"] },
     clock:      { title: "Clock",             sub: "Format, seconds and date",                aliases: ["time", "date", "clock format"], tags: ["bar"] },
     pillsettings: { title: "Pill",           sub: "Geometry, opacity, blur and key notices",  aliases: ["size", "opacity", "blur", "notices"], tags: ["appearance"] },

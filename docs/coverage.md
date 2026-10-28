@@ -8,9 +8,10 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 
 | Área | Cobertura | Evidência |
 |---|---|---|
-| QML das 40 superfícies | estática + módulos puros + runtime | lint em 127 arquivos, baseline de 180 ocorrências, testes Node, harness Quickshell e smoke de abertura |
+| QML das 41 superfícies | estática + módulos puros + runtime | lint em 128 arquivos, baseline de 180 ocorrências, testes Node, harness Quickshell e smoke de abertura |
 | Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML e Security com fingerprint/idle agrupados |
-| Navegação e nomes | fase 1 | manifesto `lib/navigation.js`, tooltips de status, testes Node e contrato com catálogo/hubs |
+| Navegação e nomes | fase 1 + Search | manifesto `lib/navigation.js`, tooltips de status, ranking puro, contrato com catálogo/hubs |
+| Search | página funcional | `Search.qml`, `lib/search.js`, testes Node, aliases/tags/disponibilidade |
 | Barra e status | boa | contrato, smoke, wheel no painel, reorder físico, Escape-cancel, back por catálogo, lastSurface e uiScale 1.25 |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |

@@ -15,7 +15,7 @@ const pages = N.allPageIds();
 const statuses = N.allStatusIds();
 const lower = (s) => String(s || "").toLowerCase();
 
-ok(pages.length === 40, "manifest covers 40 pages");
+ok(pages.length === 41, "manifest covers 41 pages");
 ok(statuses.length === 14, "manifest covers 14 status items");
 ok(pages.every((id) => N.pageInfo(id).title && N.pageInfo(id).sub), "every page has title and subtitle");
 ok(statuses.every((id) => N.statusInfo(id).title && N.statusInfo(id).sub), "every status has title and subtitle");

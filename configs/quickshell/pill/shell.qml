@@ -691,6 +691,14 @@ ShellRoot {
                 HoverHandler {
                     onHoveredChanged: pill.hovered = hovered
                 }
+                Keys.onReturnPressed: (event) => {
+                    if (pill.searchOpen && pill.searchPick())
+                        event.accepted = true;
+                }
+                Keys.onEnterPressed: (event) => {
+                    if (pill.searchOpen && pill.searchPick())
+                        event.accepted = true;
+                }
                 Keys.onEscapePressed: {
                     if (pill.quickChoosing) {
                         ScreenRec.quickChoosing = false;

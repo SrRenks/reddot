@@ -40,6 +40,7 @@ semantic versioning when it cuts a release.
   preserving an opaque saved state.
 - Updater clones from the old Ricelin origin are retargeted to
   `SrRenks/reddot` on branch `e14g7`.
+- Search surface with pure alias/tag/typo ranking over the navigation manifest.
 - CI portability fixes: bash-only scripts use bash for syntax, and the package
   selftest no longer assumes pacman is installed on the Ubuntu runner.
 

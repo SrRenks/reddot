@@ -9,9 +9,9 @@ focus/back changes. This is a map of the current seams, not a rewrite proposal.
 |---|---|
 | Pill QML | `Pill.qml` is ~3,000 lines |
 | Shell/overlay | `shell.qml` is ~1,000 lines |
-| Surface count | 40 catalog entries; 41 Loaders and 40 `surface === "..."` booleans |
+| Surface count | 41 catalog entries; 42 Loaders and 41 `surface === "..."` booleans |
 | Size rule | every surface is capped at the monitor's vertical midpoint; `PillSurface` is a Flickable that scrolls the overflow and reports its content height to the host scrollbar |
-| Surface sizes/morph | 40 entries in the `surfaces` map |
+| Surface sizes/morph | 41 entries in the `surfaces` map |
 | Surface metadata | `lib/surfaces.js` catalog |
 | Back routing | catalog parent + shared top-strip control + `Pill.surfaceBack()` special cases |
 | Persistent UI state | `Flags.lastSurface` |
@@ -99,6 +99,8 @@ validation and the cold-unload set now all read `lib/surfaces.js`.
   while keeping aliases for the old verbs.
 - Generate Settings rows and hub entries from navigation metadata.
 - Add Search over the same nodes, with page-first and row-focus results.
+- The Search surface and its pure ranking engine are in place; row-level focus is
+  the remaining extension.
 
 This removes the eight-touch-point problem without introducing a framework.
 

@@ -34,7 +34,11 @@ cat > "$tmp/bin/gdbus" <<'SH'
 #!/bin/sh
 exit 0
 SH
-chmod +x "$tmp/bin/gsettings" "$tmp/bin/flatpak" "$tmp/bin/gdbus"
+cat > "$tmp/bin/magick" <<'SH'
+#!/bin/sh
+printf '  1000: (230,0,18) #E60012 srgb(230,0,18)\n'
+SH
+chmod +x "$tmp/bin/gsettings" "$tmp/bin/flatpak" "$tmp/bin/gdbus" "$tmp/bin/magick"
 export PATH="$tmp/bin:$PATH"
 export FLATPAK_LOG="$tmp/flatpak.log"
 mkdir -p "$GSETTINGS_STATE"
@@ -49,7 +53,7 @@ grep -q '230;0;18' "$home/.config/fastfetch/config.jsonc"
 echo 'ok - static palette and consumers'
 
 # A tiny red image exercises the histogram path.
-magick -size 32x32 xc:'#e60012' "$tmp/red.png"
+: > "$tmp/red.png"
 # Fake matugen only for the generated path.
 {
   printf '{ "base16": {'

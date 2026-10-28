@@ -7,7 +7,7 @@ import "Singletons"
 
 /**
  * 更 UPDATES sub-surface: a terminal-free face for the reddot update engine. It
- * never touches git itself; it shells out to the python engine at
+ * never touches git itself; it shells out to the update engine at
  * ~/.config/hypr/scripts/reddot-update, which prints one JSON object, and
  * renders that. `check` is a safe dry-run that reports how far behind the install
  * is, the changelog, and any protected file whose local edits clash with upstream;

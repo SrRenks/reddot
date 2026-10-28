@@ -53,6 +53,7 @@ fn main() {
     let mut bin_dir = env::var_os("HOME").map(PathBuf::from).unwrap_or_default().join(".local/bin");
     let mut dry = false;
     let mut quick = false;
+    let mut uninstall = false;
     let mut no_deps = false;
     let mut apply = false;
     let mut full = false;
@@ -67,15 +68,36 @@ fn main() {
             "--quickstart" => quick=true,
             "--no-deps" => no_deps=true,
             "--apply" => apply=true,
+            "--uninstall" => uninstall=true,
             "--full" => full=true,
             "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },
             _ => {}
         }
         i += 1;
     }
+    let bin = |name: &str| bin_dir.join(name);
+    if uninstall {
+        if !dry && !apply { eprintln!("reddot-install: pass --apply explicitly or use --dry-run"); std::process::exit(2); }
+        let root_arg = config_root.to_string_lossy().into_owned();
+        let mut args = vec!["uninstall", "--config-root", &root_arg];
+        if apply { args.push("--apply"); }
+        match run(&bin("reddot-deploy"), &args) {
+            Ok(out) => print!("{out}"),
+            Err(e) => { eprintln!("{e}"); std::process::exit(1); }
+        }
+        if apply {
+            let wall = config_root.join("hypr/scripts/wallcolors");
+            if wall.exists() {
+                let _ = run(&wall, &["--apps", "off"]);
+            }
+            let link = env::var_os("HOME").map(PathBuf::from).unwrap_or_default().join(".local/bin/reddot");
+            if link.is_symlink() { let _ = fs::remove_file(&link); }
+        }
+        println!("reddot-install: uninstall {} complete", if apply { "apply" } else { "dry-run" });
+        return;
+    }
     if !quick { eprintln!("reddot-install: interactive wizard not wired yet; use --quickstart"); std::process::exit(2); }
     if !dry && !apply { eprintln!("reddot-install: pass --apply explicitly or use --dry-run"); std::process::exit(2); }
-    let bin = |name: &str| bin_dir.join(name);
     let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
     let family = field(&detect, "family");
     let init = field(&detect, "init");

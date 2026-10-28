@@ -70,6 +70,7 @@ fn main() {
     let mut apply = false;
     let mut full = false;
     let mut aur = "yay".to_string();
+    let mut optional = String::new();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -84,6 +85,7 @@ fn main() {
             "--uninstall" => uninstall=true,
             "--sddm" => sddm=true, "--grub" => grub=true, "--brave" => brave=true, "--no-fish" => fish=false,
             "--full" => full=true,
+            "--optional" => { i+=1; optional=args.get(i).cloned().unwrap_or_default(); },
             "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },
             _ => {}
         }
@@ -124,6 +126,24 @@ fn main() {
             let helper = ask("AUR helper: yay, paru or none", &aur);
             if helper == "yay" || helper == "paru" || helper == "none" { aur = helper; }
         }
+        if full {
+            if let Ok(ids) = run(&bin("reddot-plan"), &["--manifest", &source.parent().unwrap_or(Path::new(".")).join("installer/packages.json").to_string_lossy(), "--list-full"]) {
+                let list: Vec<String> = quoted(&ids);
+                if !list.is_empty() {
+                    println!("Full apps: {}", list.iter().enumerate().map(|(i, s)| format!("{}={s}", i + 1)).collect::<Vec<_>>().join(", "));
+                    let pick = ask("Optional apps (numbers, comma; empty = all)", "");
+                    if !pick.trim().is_empty() {
+                        let mut chosen = Vec::new();
+                        for n in pick.split(',') {
+                            if let Ok(i) = n.trim().parse::<usize>() {
+                                if i >= 1 && i <= list.len() { chosen.push(list[i - 1].clone()); }
+                            }
+                        }
+                        optional = chosen.join(",");
+                    }
+                }
+            }
+        }
         sddm = ask("Install the torii SDDM theme? (y/N)", "n").to_lowercase().starts_with('y');
         if field(&detect, "bootloader") == "grub" {
             grub = ask("Install the GRUB theme? (y/N)", "n").to_lowercase().starts_with('y');
@@ -140,7 +160,9 @@ fn main() {
     let manifest = source.parent().unwrap_or(Path::new(".")).join("installer/packages.json");
     let manifest_arg = manifest.to_string_lossy().into_owned();
     let profile = if full { "full" } else { "quick" };
-    let plan_out = match run(&bin("reddot-plan"), &["--manifest", &manifest_arg, "--family", &family, "--profile", profile, "--aur", &aur]) {
+    let mut pargs = vec!["--manifest", &manifest_arg, "--family", &family, "--profile", profile, "--aur", &aur];
+    if !optional.is_empty() { pargs.extend(["--optional", &optional]); }
+    let plan_out = match run(&bin("reddot-plan"), &pargs) {
         Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); }
     };
     fs::write(&plan, &plan_out).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });

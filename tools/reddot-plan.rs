@@ -140,6 +140,7 @@ fn main() {
     let mut optional: BTreeSet<String> = BTreeSet::new();
     let mut aur_choice = "yay".to_string();
     let mut overlays = true;
+    let mut list_full = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -149,6 +150,7 @@ fn main() {
             "--optional" => { i += 1; for id in args.get(i).map(|s| s.split(',').collect::<Vec<_>>()).unwrap_or_default() { if !id.is_empty() { optional.insert(id.into()); } } }
             "--aur" => { i += 1; aur_choice = args.get(i).cloned().unwrap_or_else(|| "yay".into()); }
             "--no-overlays" => overlays = false,
+            "--list-full" => list_full = true,
             _ => {}
         }
         i += 1;
@@ -157,6 +159,11 @@ fn main() {
     let text = fs::read_to_string(&manifest_path).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let manifest = P::parse(&text).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let packages = manifest.get("packages").and_then(Json::as_array).unwrap_or(&[]);
+    if list_full {
+        let ids: Vec<String> = packages.iter().filter(|p| p.get("group").and_then(Json::as_str) == Some("full")).filter_map(|p| p.get("id").and_then(Json::as_str).map(str::to_string)).collect();
+        println!("{}", arr(&ids));
+        return;
+    }
     let by_id: BTreeMap<&str, &Json> = packages.iter().filter_map(|p| p.get("id").and_then(Json::as_str).map(|id| (id, p))).collect();
     let groups: &[&str] = if profile == "quick" { &["core"] } else { &["core", "full"] };
     let mut repos: Vec<String> = Vec::new();

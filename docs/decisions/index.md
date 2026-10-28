@@ -28,3 +28,4 @@
 - [ADR 0027: rustc bootstrap](0027-rust-bootstrap.md)
 - [ADR 0028: Python removed from runtime paths](0028-python-runtime-removed.md)
 - [ADR 0029: Rust wizard confirmations](0029-rust-wizard-confirmations.md)
+- [ADR 0030: Optional app picker](0030-rust-optional-apps.md)

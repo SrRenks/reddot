@@ -15,3 +15,4 @@
 - [ADR 0014: Rust installer plan](0014-rust-plan-core.md)
 - [ADR 0015: Rust post-install helpers](0015-rust-post-install.md)
 - [ADR 0016: Rust package runner](0016-rust-package-runner.md)
+- [ADR 0017: Rust service step](0017-rust-service-step.md)

@@ -72,8 +72,9 @@ fn repo_steps(repo: &str, family: &str) -> Vec<Vec<String>> {
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut plan_path = PathBuf::new(); let mut family = String::new(); let mut root = "sudo".to_string(); let mut aur = String::new(); let mut dry = false;
+    let mut init = "systemd".to_string(); let mut services = false;
     let mut i = 0;
-    while i < args.len() { match args[i].as_str() { "--plan" => { i+=1; plan_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); }, "--family" => { i+=1; family=args.get(i).cloned().unwrap_or_default(); }, "--root" => { i+=1; root=args.get(i).cloned().unwrap_or_else(||"sudo".into()); }, "--aur-helper" => { i+=1; aur=args.get(i).cloned().unwrap_or_default(); }, "--dry-run" => dry=true, _ => {} } i+=1; }
+    while i < args.len() { match args[i].as_str() { "--plan" => { i+=1; plan_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); }, "--family" => { i+=1; family=args.get(i).cloned().unwrap_or_default(); }, "--root" => { i+=1; root=args.get(i).cloned().unwrap_or_else(||"sudo".into()); }, "--aur-helper" => { i+=1; aur=args.get(i).cloned().unwrap_or_default(); }, "--dry-run" => dry=true, "--init" => { i+=1; init=args.get(i).cloned().unwrap_or_else(||"systemd".into()); }, "--services" => services=true, _ => {} } i+=1; }
     let text = fs::read_to_string(&plan_path).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let plan = P::parse(&text).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let mut commands: Vec<Vec<String>> = Vec::new();
@@ -87,6 +88,19 @@ fn main() {
     if !aur_names.is_empty() {
         let helper = if aur.is_empty() { ["yay","paru"].iter().find(|h| env::var_os("PATH").map(|p| env::split_paths(&p).any(|d| d.join(*h).is_file())).unwrap_or(false)).map(|s| s.to_string()).unwrap_or_else(|| "yay".into()) } else { aur };
         let mut s = vec![helper, "-S".into(), "--needed".into(), "--noconfirm".into()]; s.extend(aur_names); commands.push(s);
+    }
+    if services {
+        if init == "systemd" {
+            commands.push(vec![root.clone(), "systemctl".into(), "enable".into(), "--now".into(), "NetworkManager.service".into()]);
+            commands.push(vec![root.clone(), "systemctl".into(), "enable".into(), "--now".into(), "bluetooth.service".into()]);
+            if ["/usr/bin/hyprsunset", "/usr/local/bin/hyprsunset"].iter().any(|p| PathBuf::from(p).is_file()) {
+                commands.push(vec!["systemctl".into(), "--user".into(), "enable".into(), "--now".into(), "hyprsunset.service".into()]);
+            }
+        } else if init == "openrc" {
+            for name in ["NetworkManager", "bluetooth"] {
+                commands.push(vec!["sh".into(), "-c".into(), format!("s={name}; [ -e /etc/init.d/$s ] || s={name}d; {root} rc-update add $s default && {root} rc-service $s start")]);
+            }
+        }
     }
     let mut failures = 0;
     for cmd in &commands { if let Err(e) = execute(cmd, dry) { failures += 1; eprintln!("FAILED: {e}"); } }

@@ -16,3 +16,9 @@ EXP
 diff -u "$tmp/expected" "$tmp/out"
 echo 'ok - package runner order'
 echo 'all Rust runner tests passed'
+
+printf '%s\n' '{"repos":[],"native":[],"aur":[]}' > "$tmp/service-plan.json"
+"$bin" --plan "$tmp/service-plan.json" --family arch --root doas --dry-run --services --init systemd > "$tmp/service.out"
+grep -q 'doas systemctl enable --now NetworkManager.service' "$tmp/service.out"
+grep -q 'doas systemctl enable --now bluetooth.service' "$tmp/service.out"
+echo 'ok - systemd service commands'

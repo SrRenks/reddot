@@ -23,3 +23,4 @@
 - [ADR 0022: Quickstart fallbacks and apply](0022-rust-quickstart-apply.md)
 - [ADR 0023: install.sh Rust handoff](0023-install-sh-rust-handoff.md)
 - [ADR 0024: Rust uninstall path](0024-rust-uninstall.md)
+- [ADR 0025: Basic Rust installer wizard](0025-rust-basic-wizard.md)

@@ -4,7 +4,18 @@
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::io::{BufRead, BufReader, Write};
 use std::process::Command;
+
+fn ask(prompt: &str, default: &str) -> String {
+    let Ok(mut tty) = fs::OpenOptions::new().read(true).write(true).open("/dev/tty") else { return default.into() };
+    let _ = write!(tty, "{prompt} [{default}] ");
+    let _ = tty.flush();
+    let mut line = String::new();
+    if BufReader::new(tty).read_line(&mut line).is_err() { return default.into(); }
+    let answer = line.trim().to_string();
+    if answer.is_empty() { default.into() } else { answer }
+}
 
 fn quoted(chunk: &str) -> Vec<String> {
     let mut out = Vec::new();
@@ -96,8 +107,22 @@ fn main() {
         println!("reddot-install: uninstall {} complete", if apply { "apply" } else { "dry-run" });
         return;
     }
-    if !quick { eprintln!("reddot-install: interactive wizard not wired yet; use --quickstart"); std::process::exit(2); }
     if !dry && !apply { eprintln!("reddot-install: pass --apply explicitly or use --dry-run"); std::process::exit(2); }
+    let bin = |name: &str| bin_dir.join(name);
+    let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
+    let family = field(&detect, "family");
+    let init = field(&detect, "init");
+    if !quick {
+        if !full {
+            let choice = ask("Install profile: 1 Quick, 2 Full", "1");
+            if choice.trim() == "2" { full = true; }
+        }
+        if family == "arch" {
+            let helper = ask("AUR helper: yay, paru or none", &aur);
+            if helper == "yay" || helper == "paru" || helper == "none" { aur = helper; }
+        }
+    }
+    println!("reddot-install: family={family} init={init} dry-run={dry} profile={}", if full { "full" } else { "quick" });
     let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
     let family = field(&detect, "family");
     let init = field(&detect, "init");

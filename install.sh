@@ -142,7 +142,8 @@ main() {
 			if has_flag --uninstall "$@"; then
 				rust_args="--uninstall --source $DIR/configs --config-root ${XDG_CONFIG_HOME:-$HOME/.config} --bin-dir $HOME/.local/bin"
 			else
-				rust_args="--quickstart --source $DIR/configs --config-root ${XDG_CONFIG_HOME:-$HOME/.config} --bin-dir $HOME/.local/bin"
+				rust_args="--source $DIR/configs --config-root ${XDG_CONFIG_HOME:-$HOME/.config} --bin-dir $HOME/.local/bin"
+				has_flag --quickstart "$@" && rust_args="--quickstart $rust_args"
 			fi
 			has_flag --dry-run "$@" && rust_args="$rust_args --dry-run" || rust_args="$rust_args --apply"
 			has_flag --full "$@" && rust_args="$rust_args --full"

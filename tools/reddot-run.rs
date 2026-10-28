@@ -73,8 +73,10 @@ fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
     let mut plan_path = PathBuf::new(); let mut family = String::new(); let mut root = "sudo".to_string(); let mut aur = String::new(); let mut dry = false;
     let mut init = "systemd".to_string(); let mut services = false;
+    let mut fallbacks_path = PathBuf::new();
     let mut i = 0;
-    while i < args.len() { match args[i].as_str() { "--plan" => { i+=1; plan_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); }, "--family" => { i+=1; family=args.get(i).cloned().unwrap_or_default(); }, "--root" => { i+=1; root=args.get(i).cloned().unwrap_or_else(||"sudo".into()); }, "--aur-helper" => { i+=1; aur=args.get(i).cloned().unwrap_or_default(); }, "--dry-run" => dry=true, "--init" => { i+=1; init=args.get(i).cloned().unwrap_or_else(||"systemd".into()); }, "--services" => services=true, _ => {} } i+=1; }
+    while i < args.len() { match args[i].as_str() { "--plan" => { i+=1; plan_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); }, "--family" => { i+=1; family=args.get(i).cloned().unwrap_or_default(); }, "--root" => { i+=1; root=args.get(i).cloned().unwrap_or_else(||"sudo".into()); }, "--aur-helper" => { i+=1; aur=args.get(i).cloned().unwrap_or_default(); }, "--dry-run" => dry=true, "--init" => { i+=1; init=args.get(i).cloned().unwrap_or_else(||"systemd".into()); }, "--services" => services=true, "--fallbacks-json" => { i+=1; fallbacks_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); }, _ => {} } i+=1; }
+    let mut failures = 0;
     let text = fs::read_to_string(&plan_path).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let plan = P::parse(&text).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let mut commands: Vec<Vec<String>> = Vec::new();
@@ -89,6 +91,28 @@ fn main() {
         let helper = if aur.is_empty() { ["yay","paru"].iter().find(|h| env::var_os("PATH").map(|p| env::split_paths(&p).any(|d| d.join(*h).is_file())).unwrap_or(false)).map(|s| s.to_string()).unwrap_or_else(|| "yay".into()) } else { aur };
         let mut s = vec![helper, "-S".into(), "--needed".into(), "--noconfirm".into()]; s.extend(aur_names); commands.push(s);
     }
+    if !fallbacks_path.as_os_str().is_empty() {
+        let text = fs::read_to_string(&fallbacks_path).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
+        match P::parse(&text) {
+            Ok(Json::Arr(steps)) => {
+                for step in steps {
+                    if let Json::Obj(map) = step {
+                        let desc = match map.get("desc") { Some(Json::Str(s)) => s.clone(), _ => String::new() };
+                        if let Some(Json::Arr(argv)) = map.get("run") {
+                            let cmd: Vec<String> = argv.iter().filter_map(|v| if let Json::Str(s) = v { Some(s.clone()) } else { None }).collect();
+                            if !dry { println!("  run: {desc}"); }
+                            if let Err(e) = execute(&cmd, dry) { eprintln!("FAILED fallback {desc}: {e}"); failures += 1; }
+                        } else if let Some(Json::Str(shell)) = map.get("shell") {
+                            let cmd = vec!["sh".to_string(), "-c".to_string(), shell.clone()];
+                            if !dry { println!("  shell: {desc}"); }
+                            if let Err(e) = execute(&cmd, dry) { eprintln!("FAILED fallback {desc}: {e}"); failures += 1; }
+                        }
+                    }
+                }
+            }
+            _ => { eprintln!("fallbacks JSON must be an array"); std::process::exit(1); }
+        }
+    }
     if services {
         if init == "systemd" {
             commands.push(vec![root.clone(), "systemctl".into(), "enable".into(), "--now".into(), "NetworkManager.service".into()]);
@@ -102,7 +126,6 @@ fn main() {
             }
         }
     }
-    let mut failures = 0;
     for cmd in &commands { if let Err(e) = execute(cmd, dry) { failures += 1; eprintln!("FAILED: {e}"); } }
     if failures > 0 { std::process::exit(1); }
 }

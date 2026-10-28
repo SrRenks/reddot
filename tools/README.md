@@ -47,7 +47,7 @@
 | `reddot-detect.rs` | Rust installer detection record |
 | `reddot-plan.rs` | Rust installer plan: native, AUR, fallback and skip batches |
 | `reddot-post.rs` | Rust wallpapers, app-theme, bridge, CLI link, Brave and baseline |
-| `reddot-run.rs` | Rust fail-soft package runner and systemd/OpenRC service step |
+| `reddot-run.rs` | Rust fail-soft package runner, fallbacks and systemd/OpenRC services |
 | `test-reddot-run-rust.sh` | dry-run package ordering
 | `test-reddot-post-rust.sh` | post-install effects parity
 | `test-reddot-plan-rust.sh` | profile, AUR and overlay plan parity

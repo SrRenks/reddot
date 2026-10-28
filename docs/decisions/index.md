@@ -16,3 +16,4 @@
 - [ADR 0015: Rust post-install helpers](0015-rust-post-install.md)
 - [ADR 0016: Rust package runner](0016-rust-package-runner.md)
 - [ADR 0017: Rust service step](0017-rust-service-step.md)
+- [ADR 0018: Fallback execution in the runner](0018-rust-fallback-runner.md)

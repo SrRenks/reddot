@@ -22,3 +22,9 @@ printf '%s\n' '{"repos":[],"native":[],"aur":[]}' > "$tmp/service-plan.json"
 grep -q 'doas systemctl enable --now NetworkManager.service' "$tmp/service.out"
 grep -q 'doas systemctl enable --now bluetooth.service' "$tmp/service.out"
 echo 'ok - systemd service commands'
+
+printf '[{"desc":"build thing","run":["echo","hi"]},{"desc":"pipe thing","shell":"echo shell"}]\n' > "$tmp/fb.json"
+"$bin" --plan "$tmp/plan.json" --family arch --dry-run --fallbacks-json "$tmp/fb.json" > "$tmp/fallback.out"
+grep -q 'would run: echo hi' "$tmp/fallback.out"
+grep -q "would run: sh -c 'echo shell'" "$tmp/fallback.out"
+echo 'ok - fallback step ordering'

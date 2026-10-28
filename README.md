@@ -185,6 +185,7 @@ background is third-party; see [CREDITS](configs/sddm/themes/torii/CREDITS.md).
 - [Power and energy tooling](docs/POWER.md)
 - [Measured memory and reductions](docs/LIGHTWEIGHT.md)
 - [Maintenance and update procedure](docs/MAINTENANCE.md)
+- [Audit coverage and remaining gaps](docs/COVERAGE.md)
 - [Related shells and ideas](docs/FORKS.md)
 - [ThinkPad controls and layout](docs/THINKPAD.md)
 - [Power presets](docs/PRESETS.md)

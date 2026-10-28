@@ -8,6 +8,9 @@
 | `install-extras.sh` | installs the helper, polkit rule, TLP policy and user tools |
 | `49-reddot.rules` | polkit rule: admin auth kept for the TLP and ThinkPad helpers |
 | `99-reddot-leds.rules` | mute triggers at boot, plus the LED event file for the open panel |
+| `smoke-surfaces.sh` | optional runtime smoke: opens every pill surface and checks the layer |
+| `check-integration.sh` | installer dry-run/selftests plus udev, polkit, systemd and TLP checks |
+| `check-ui-contract.mjs` | surface references, debug leftovers, wheel path and status coverage |
 | `test-reddot-tlp.sh` | 25 assertions with fake sysfs and fake tlp/ppd/systemctl |
 | `test-reddot-thinkpad.sh` | fake ThinkPad sysfs: status and allowlisted writes |
 | `reddot-bench.sh` | PSS/CPU + session cgroup anon/file snapshot |

@@ -30,6 +30,16 @@ else
     bad "installer compile"
 fi
 
+echo "== installer selftests =="
+for module in deploy distro pkg fallbacks tui; do
+    if out=$(cd "$repo/installer" && timeout 60s python3 -c "import $module; $module._selftest()" 2>&1); then
+        ok "$module._selftest"
+    else
+        bad "$module._selftest"
+        printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
+    fi
+done
+
 echo "== system files =="
 if command -v udevadm >/dev/null 2>&1; then
     if udevadm verify "$repo/tools/99-reddot-leds.rules" >/dev/null 2>&1; then

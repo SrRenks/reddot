@@ -48,6 +48,14 @@ const wheelCount = (shell.match(/\bonWheel\s*:/g) || []).length;
 if (wheelCount !== 1)
     failures.push(`shell.qml: expected one backdrop wheel handler, found ${wheelCount}`);
 
+const search = read(pillDir + "Search.qml");
+if (!/id:\s*ids\[i\]/.test(search))
+    failures.push("Search.qml: results must carry the catalog id");
+if (!/root\.requestSurface\(entry\.id\)/.test(search))
+    failures.push("Search.qml: result activation must pass entry.id");
+if (!/function pick\(\)/.test(search))
+    failures.push("Search.qml: missing pick() activation helper");
+
 const order = read(pillDir + "StatusOrderList.qml");
 const knownBlock = order.match(/knownIds:\s*\[([\s\S]*?)\]/);
 const known = knownBlock ? [...knownBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]) : [];

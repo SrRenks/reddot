@@ -25,6 +25,7 @@ top-level README stays short; operational detail lives in the pages below.
 - [Manual lock test](manual-lock-test.md)
 - [Manual gesture test](manual-gestures-test.md)
 - [Manual multi-monitor test](manual-multimonitor.md)
+- [Project checkup, 2026-10-28](checkup-2026-10-28.md)
 
 ## Reference
 

@@ -111,7 +111,7 @@ Supported package families: Arch, Debian, Fedora, openSUSE and Gentoo. The docum
 
 ## Keybinds
 
-The full active map is generated from `configs/hypr/modules/binds.lua` and documented in [docs/KEYBINDS.md](docs/KEYBINDS.md).
+The active map lives in `configs/hypr/modules/binds.lua` and is documented in [docs/KEYBINDS.md](docs/KEYBINDS.md).
 
 | Keys | Action |
 |---|---|

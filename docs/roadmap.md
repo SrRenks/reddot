@@ -21,9 +21,14 @@ Status of the main follow-ups after the Settings, package and scroll work.
 - Two-output lock verified with `WlSessionLock.secure=true` on `eDP-1` plus a
   headless output.
 - Physical pointer click on the panel back chip confirmed working by the user.
+- Navigation manifest, status hover labels and a Search surface with pure
+  alias/tag/typo ranking.
+- `SUPER+SHIFT+F` opacity restoration, updater remote/branch migration and the
+  Ubuntu CI portability fixes.
 
 ## Next / deferred
 
+- Search row-level focus: open a page and focus a specific setting row.
 - Updater adversarial fuzz: helper arguments were covered, the update helper was
   not fuzzed in this cycle.
 - Installer execution in VMs for the five package families.
@@ -35,4 +40,3 @@ Status of the main follow-ups after the Settings, package and scroll work.
 
 - Split the largest QML files only where a tested lifecycle boundary exists.
 - Replace synchronous Loader use with LazyLoader only after a startup and RAM measurement.
-- Add per-section reset and search to Settings.

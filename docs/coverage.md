@@ -32,10 +32,31 @@ bloquear a sessão, então a execução fica fora do gate automático.
 ## O que os testes não provam
 
 - que o layout de cada superfície está bonito ou legível em toda fonte/escala;
-- que drag, wheel e teclado se comportam como esperado em todas as combinações;
+- que cada interação física funciona em todos os temas, escalas e monitores;
 - que o instalador real (não dry-run) é idempotente em todas as distros;
-- que o lock shell autentica e desbloqueia corretamente;
-- que o consumo de RAM fica dentro de um limite.
+- que o updater aplica uma atualização real sem conflito em toda instalação;
+- que o consumo de RAM obedece ao orçamento em máquinas diferentes.
+
+## Leitura quantitativa
+
+Não existe instrumentação de cobertura QML neste repositório; a porcentagem abaixo
+é uma **estimativa ponderada por risco**, não um número de cobertura de código.
+Ela usa os gates e os testes executados nesta sessão.
+
+| Eixo | Peso | Estado | Cobertura |
+|---|---:|---|---:|
+| Catálogo, contratos e lint QML | 25% | 41/41 superfícies; 128 QML; 0 warnings novos | 100% |
+| Lógica pura e busca | 15% | fuzzy, scroll, ordem, pacotes, search e navegação com testes Node | 100% |
+| Runtime das superfícies | 20% | Search, Settings, Bar, lock e smoke das superfícies; não todas manualmente | 85% |
+| Lock e autenticação | 15% | PAM real, fingerprint, duas saídas headless | 95% |
+| Instalador | 10% | matriz de 5 famílias + dry-run + deploy sandbox; sem VMs reais | 75% |
+| CI e documentação | 10% | CI Ubuntu verde; links e docs obrigatórios | 100% |
+| Hardware e performance | 5% | PSS na máquina de referência; sem duas saídas físicas | 80% |
+
+**Estimativa atual: ~93% dos caminhos críticos e ~82% do projeto total.**
+
+Os maiores descontos são os testes que exigem VMs reais, duas saídas físicas,
+foco por linha na Search e uma aplicação real do updater.
 
 ## Comandos
 

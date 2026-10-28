@@ -71,6 +71,14 @@ else
     printf '  skip  node not found\n'
 fi
 
+echo "== integration =="
+if out=$(sh "$here/check-integration.sh" 2>&1); then
+    ok "installer and system files"
+else
+    bad "installer and system files"
+    printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'
+fi
+
 echo "== qml contract =="
 if command -v node >/dev/null 2>&1; then
     if node "$here/check-ui-contract.mjs"; then ok "UI contract"; else bad "UI contract"; fi

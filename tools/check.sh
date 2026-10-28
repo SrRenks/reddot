@@ -28,6 +28,42 @@ for test in test-reddot-tlp.sh test-reddot-thinkpad.sh; do
     fi
 done
 
+echo "== script tests =="
+if [ -f "$cfg/hypr/scripts/test_launch_guard.sh" ]; then
+    if out=$(sh "$cfg/hypr/scripts/test_launch_guard.sh" 2>&1); then
+        ok "test_launch_guard.sh"
+    else
+        bad "test_launch_guard.sh"
+        printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
+    fi
+else
+    bad "test_launch_guard.sh missing"
+fi
+for test in test_reddot_update.py test_wallcolors_apps.py; do
+    if [ -f "$cfg/hypr/scripts/$test" ]; then
+        if out=$(python3 "$cfg/hypr/scripts/$test" 2>&1); then
+            ok "$test"
+        else
+            bad "$test"
+            printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
+        fi
+    fi
+done
+if command -v node >/dev/null 2>&1; then
+    for test in "$pill"/lib/*.test.mjs; do
+        [ -f "$test" ] || continue
+        if out=$(node "$test" 2>&1); then ok "$(basename "$test")"; else bad "$(basename "$test")"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
+    done
+fi
+
+echo "== python syntax =="
+if out=$(PYTHONPYCACHEPREFIX=/tmp/reddot-pycache python3 -m compileall -q installer configs/hypr/scripts tools 2>&1); then
+    ok "python compile"
+else
+    bad "python compile"
+    printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
+fi
+
 echo "== surfaces =="
 if command -v node >/dev/null 2>&1; then
     if node "$here/check-surfaces.mjs"; then ok "surface catalog"; else bad "surface catalog"; fi
@@ -48,7 +84,7 @@ lint=$(command -v qmllint 2>/dev/null || true)
 if [ -x "$lint" ]; then
     before=$fail
     n=0
-    for f in "$pill"/*.qml "$pill"/Singletons/*.qml; do
+    for f in "$pill"/*.qml "$pill"/Singletons/*.qml "$cfg"/quickshell/lock/shell.qml; do
         [ -f "$f" ] || continue
         n=$((n + 1))
         errors=$("$lint" -I /usr/lib/qt6/qml "$f" 2>&1 | grep -c "Error:")

@@ -19,6 +19,7 @@ cat >"$fake/clip"
 EOF
 chmod +x "$fake"/notify-send "$fake"/wl-copy
 export PATH="$fake:$PATH"
+export XDG_RUNTIME_DIR="$fake"
 
 "$here/launch-guard.sh" Broken "" "" sh -c 'echo boom >&2; exit 127'
 grep -q 'Broken failed (exit 127)' "$fake/notify.args"

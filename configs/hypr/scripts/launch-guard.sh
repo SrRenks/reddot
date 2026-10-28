@@ -16,7 +16,11 @@ shift 3
 window=5
 cap=65536
 
-tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/launch-guard.XXXXXX")"
+runtime="${XDG_RUNTIME_DIR:-/tmp}"
+if [ ! -d "$runtime" ] || [ ! -w "$runtime" ]; then
+    runtime=/tmp
+fi
+tmp="$(mktemp "$runtime/launch-guard.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT
 [ -n "$wd" ] && cd "$wd" 2>/dev/null || :
 

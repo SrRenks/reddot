@@ -43,6 +43,10 @@ if (/WheelHandler\s*\{/.test(surfaceBase)
     && !/surface\.scrollBy\(ScrollMath\.stepFor/.test(surfaceBase))
     failures.push("PillSurface.qml: WheelHandler must forward to Surface.scrollBy(ScrollMath.stepFor)");
 
+const sensors = read(pillDir + "Singletons/Sensors.qml");
+if (!/Math\.max\(next\.rpm, Math\.round\(value\)\)/.test(sensors))
+    failures.push("Sensors.qml: fan RPM must keep the highest sensor value");
+
 const shell = read(pillDir + "shell.qml");
 const wheelCount = (shell.match(/\bonWheel\s*:/g) || []).length;
 if (wheelCount !== 1)

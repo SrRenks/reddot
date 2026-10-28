@@ -94,7 +94,11 @@ Singleton {
             else if (label === "RAM1")
                 next.ram1 = Math.round(value);
             else if (item.type === "fan_speed")
-                next.rpm = Math.round(value);
+                // The scanner emits a dedicated FAN RPM entry and also the raw
+                // hwmon fan entries. Some raw entries read 0 while the ThinkPad
+                // fan is spinning, so keep the highest valid RPM instead of
+                // letting the last entry overwrite the real value.
+                next.rpm = Math.max(next.rpm, Math.round(value));
             else if (item.type === "fan_level")
                 next.level = Math.round(value);
             else if (item.type === "amd_ppt")

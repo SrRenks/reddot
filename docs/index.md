@@ -33,4 +33,5 @@ top-level README stays short; operational detail lives in the pages below.
 - [Related shells](FORKS.md)
 - [Credits and licenses](CREDITS.md)
 - [Roadmap](roadmap.md)
+- [Architecture decisions](decisions/index.md)
 - [Changelog](../CHANGELOG.md)

@@ -13,11 +13,11 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Navegação e nomes | fase 1 + Search | manifesto `lib/navigation.js`, tooltips de status, ranking puro, contrato com catálogo/hubs |
 | Search | página funcional | `Search.qml`, `lib/search.js`, testes Node, aliases/tags/disponibilidade |
 | Barra e status | boa | contrato, smoke, wheel no painel, reorder físico, Escape-cancel, back por catálogo, lastSurface e uiScale 1.25 |
-| Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
+| Pacotes | boa | parser puro + testes Node; backends pacman/dnf/zypper/apt, health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
 | Helpers TLP/ThinkPad | boa + adversarial | testes próprios, casos de metacaracteres/argumentos extras e selftest do installer |
 | Instalador Python | lógica, matriz e deploy isolado | dry-run, selftests, matriz de 5 famílias e deploy/re-deploy/uninstall em config root temporário |
-| CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local |
+| CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local; Ubuntu verde após os fixes de portabilidade |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
 | Lock shell | PAM real + two outputs | QML lint, `check-lock-static.sh`, senha/fingerprint supervisionados e `WlSessionLock.secure=true` em eDP-1 + headless |

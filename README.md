@@ -2,203 +2,213 @@
 
 # reddot
 
-**A personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), the hand-written Quickshell pill for Hyprland.**
+A Hyprland desktop shell built around one morphing Quickshell pill.
 
-Fork point: `df7fd5f`. Upstream Ricelin is © 2026 Gakuseei, MIT; everything upstream credits still applies.
+Personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), maintained on a ThinkPad E14 Gen 7.
 
 ![reddot desktop](assets/hero.png)
 
 </div>
 
-reddot is my daily-driver fork: the same one morphing pill, with the changes I
-run on a ThinkPad E14 Gen 7 — auto-hide, a TLP power surface, UPower history in
-the battery card and a few performance fixes. The upstream README is below,
-kept close to the original.
+reddot turns the top of the screen into a single pill that expands into the panel you need. It carries the bar, launcher, mixer, calendar, lock screen, power controls and the system pages, then collapses back to a small status strip.
 
-## What this fork adds
+The project is a working personal setup, not a distribution. The installer handles the supported package families, and the documentation records what has been tested on real hardware.
 
-- **Auto-hide pill** — retracts to a 10 px top-centre strip and returns on hover;
-  `Pill mode` and `Reserve space` are in **Shell → Pill**. Fullscreen still hides it.
-- **Power surface** — charge window, profile and Pause/Resume, with multi-battery
-  and power-profiles-daemon sysfs fallbacks (`Super+Shift+B`).
-- **Battery history** — 24 h discharge bars and 1 h/24 h averages from UPower's
-  own `GetHistory`; `reddot-power-report` prints the same plus recent packages.
-- **AC/BAT policy** — `/etc/tlp.d/99-reddot-acbat.conf`: performance on AC,
-  balanced on battery, low-power for the manual saver profile.
-- **Power presets** — named TLP profile + charge snapshots in **Settings →
-  Power → Power presets**; Desktop and Laptop ship as defaults.
-- **Performance** — jemalloc decay in the watchdog, 30 s surface unload,
-  edge-driven peripheral polling.
-- **Maintenance** — `tools/check.sh`, helper tests, and `docs/` describing the
-  power and memory measurements.
-- **System** — live CPU/IGPU/memory dials, native CPU/IGPU temperature and
-  fan dials, compact Thermal/Power/Fan groups for every other sensor, and the
-  ThinkPad fan curve. No Glances dependency.
-- **Pill navigation** — wheel, scrollbar drag and `PageUp`/`PageDown` scroll long
-  pages; `Home`/`End` jump to the edges. Settings hubs and the status reorder
-  list follow the same arrow-key focus model.
-- **Pill toggle** — `Super+Shift+Space` opens or closes the pill and restores
-  the last visited surface. Escape backs out one level, closes at the root,
-  and the keybind parks the pointer on the pill so keyboard focus lands without
-  a mouse move.
-- **Startup hub** — Settings → Maintenance → Startup lists the Hyprland
-  autostart stack: KDE Connect is editable, system services are locked, and
-  ↑/↓ reorder user commands. Changes apply on the next Hyprland start.
-- **Key notices** — Shell → Pill turns on brief pill feedback for expected
-  keybind changes. Keyboard-language switches are watched from Hyprland, so
-  `Super+Space` needs no wrapper; hold time defaults to 500 ms and is adjustable.
-  Any other bind can publish one with
-  `qs -c pill ipc call pill notice <icon> <label> <value>`.
-- **Package updates** — the bar can show a compact pacman/AUR/Flatpak update
-  count, checked every 60 minutes by default. Kernel, mkinitcpio, bootloader,
-  firmware, systemd, glibc and core graphics/hyprland updates turn the meter red.
-  A failed source keeps the last good count and is marked in the bar; the page
-  shows source health and check age. Configure it in **Maintenance → System packages**.
-- **Keyboard languages** — Input → Keyboard separates the physical model
-  (Auto/ANSI/ISO/JIS, e.g. `pc104` for an ANSI laptop) from an ordered
-  language+variant list (`kb_layout`/`kb_variant`). Add or remove pairs, select
-  one directly, or keep cycling with `Super+Space`.
-- **UI blur** — Shell → Pill has the independent **Pill / panel blur** switch;
-  Windows → Window & effects has the separate **Window blur + transparency** switch.
-  Panel blur works with window blur off: the generated layer module enables the
-  global blur prerequisite and adds a `no_blur` rule to ordinary windows, then
-  removes that rule when window blur returns. `Super+Shift+F` changes only
-  window blur and its opacity pair; panel blur survives it.
-- **Conventional keymap** — see `docs/KEYBINDS.md`; screenshots, mic mute and
-  window movement are unified and the dangerous hibernate chord is gone.
-- ThinkPad extras (optional): on a ThinkPad only, writable LEDs in `THINKPAD`,
-  and TrackPoint/double-tap/Fn-lock in `INPUT → TrackPoint`. Detection is lazy
-  and the helper is installed only on ThinkPad hardware.
+## Highlights
 
-The System sensor snapshot is a small Rust binary built by
-`tools/install-extras.sh` from `tools/reddot-sensors.rs`; it has no runtime
-crate dependency and runs only while System is open. If `rustc` is absent, the
-sensor block is omitted instead of falling back to a Python process.
+### One pill, many surfaces
 
-Install runs the upstream Python installer and then `tools/install-extras.sh`
-for the root helper, polkit rule, TLP policy and user tools. On a ThinkPad it
-also installs the optional `reddot-thinkpad` helper; the shared polkit rule
-covers both helpers on every machine.
+The pill has 41 surfaces: settings, launcher, clipboard, wallpaper picker, media, mixer, calendar, notifications, network, Bluetooth, battery, power, security, system monitor, recorder and the ThinkPad tools.
 
-## Install (this fork)
+Use the wheel, the scrollbar or `PageUp`/`PageDown` on long pages. `Home` and `End` jump to the edges. `Super+Shift+Space` reopens the last surface.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
+![Pill hover](assets/pill-hover.gif)
+
+![Pill tour](assets/pill-tour.gif)
+
+### Search that knows the interface
+
+`Settings → Search` ranks pages by title, alias and tag. It accepts typos and informal names:
+
+```text
+gui          → Bar layout
+organize     → Bar layout
+fingerprint  → Security
+fan           → ThinkPad
+touchpad      → Input
 ```
 
+The Search surface uses the same navigation manifest as the Settings index and the status bar, so labels and destinations have one source of truth.
 
-## The shell
+![Search](assets/search.gif)
 
-Everything you see is hand-written Quickshell. One pill bar that morphs into whatever surface I need.
+### A bar you can rearrange
 
-![The pill surfaces](assets/shell.png)
+The status cluster supports drag reordering, visibility toggles and keyboard movement. The Bar page follows the same rules, and the layout survives a restart.
 
-The pill becomes media and now playing, a calendar, the wallpaper picker, clipboard history, an audio and brightness mixer, a sound page with an EQ, AutoEQ headphone profiles, per-app volume and a mic noise filter, and network and bluetooth controls. There is also an app launcher, a lock screen, and [rishot](https://github.com/Gakuseei/rishot), my own screenshot and annotation tool, which lives in its own repo so you can read all of it there.
+![Bar layout](assets/bar.gif)
 
-## Stack
+### Security and the lock screen
 
-- WM: Hyprland, configured in Lua
-- Shell UI: custom Quickshell
-- Terminal: Ghostty
-- Shell: fish
-- Font: JetBrains Mono Nerd
-- Colors: matugen, palette pulled from the wallpaper
+The lock screen authenticates with PAM. Password and fingerprint are independent contexts: a rejected password does not consume the fingerprint prompt, and a failed fingerprint returns to the password state without an automatic loop.
 
-matugen pulls a palette from each wallpaper and recolors the pill, terminal, window borders, fastfetch and GTK apps. The shell itself runs a black ThinkPad-red theme I tuned by hand.
+Fingerprint is optional and configurable in `Settings → Security`. Availability is detected from `fprintd` and the enrolled-print list.
 
-<div align="center">
+### Power and hardware
 
-![the palette is pulled from the wallpaper](assets/wallust.gif)
+The Power page covers TLP profiles, charge thresholds, pause/resume and the session actions. The battery card uses UPower history for 24-hour discharge bars and averages.
+
+On ThinkPad hardware, the optional helper exposes fan RPM, thermal sensors, the fan curve, TrackPoint settings and keyboard LEDs. The System surface reads native hwmon and power-supply data through a small Rust scanner.
+
+### Package updates for more than Arch
+
+The package meter reads the native update source for the running system:
+
+| System | Source |
+|---|---|
+| Arch | `pacman` and optional AUR via `yay` |
+| Fedora and RHEL family | `dnf` RPM updates |
+| openSUSE | `zypper` RPM updates |
+| Debian and Ubuntu | `apt` |
+| Any system | optional Flatpak updates |
+
+The page shows the active backend and keeps the last good count when a source is temporarily unavailable. Kernel, initramfs, bootloader, firmware and core desktop packages are marked as important.
+
+### Appearance and effects
+
+matugen derives a palette from the current wallpaper and feeds it to the pill, terminal, borders, fastfetch and GTK apps. Window blur, transparency and panel blur are separate controls. `Super+Shift+F` toggles window blur and opacity; panel blur stays independent.
+
+![Wallpaper palette](assets/wallust.gif)
 
 ![Wallpaper retheme](assets/retheme.gif)
 
-</div>
+### Recording and capture
+
+`Super+Shift+R` opens the recorder. `Print` or `Super+F9` starts rishot, and `Shift+Print` captures the current monitor. rishot lives in its own project.
 
 ## Install
 
-> [!WARNING]
-> The installer is young. It hasn't had a clean-machine run beyond mine yet, so expect rough edges. Read `install.sh` first and keep backups. If something breaks, file a bug and say it's the installer.
-
-One line, straight through the pipe:
+The bootstrap detects the package family, installs the required tools, clones reddot and starts the Python installer.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
 ```
 
-`install.sh` is a thin bootstrap: it detects your distro (Arch, Debian, Fedora,
-openSUSE or Gentoo), makes sure git and python3 are there, clones the rice into
-`~/.local/share/reddot`, then hands off to the guided Python installer. That part
-walks you through a short wizard, picks the right package names for your distro,
-pulls the deps and copies the configs into `~/.config`, backing up anything it
-replaces. The monitor layout and GPU env are swapped for portable defaults so it
-boots on any hardware; my own layout is kept next to it as `monitors.lua.example`.
-Then start `Hyprland` from a TTY.
+Read `install.sh` before piping it. The installer makes backups of replaced configuration.
 
-Skip the wizard with flags, passed straight through the pipe:
+Non-interactive options:
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash -s -- --quickstart
+```text
+--quickstart   core defaults, no questions
+--full         include the daily applications
+--sddm         install the torii SDDM theme
+--no-deps      deploy configuration only
+--dry-run      run the flow without changing anything
+--skip-extras  skip TLP, ThinkPad and user-tool installation
 ```
 
-```
---quickstart  core defaults, no questions
---full        also install the daily apps (dolphin, keepassxc, zathura, imv, rnote)
---sddm        also install the torii SDDM login theme
---no-deps     skip the package step, just deploy the configs
---dry-run     walk the whole flow and change nothing
---skip-extras skip the TLP/ThinkPad helpers and user tools step
-```
-
-reddot is a Hyprland shell. On Niri, Sway or anything else only rishot (the
-screenshot tool) makes sense; grab it from [rishot](https://github.com/Gakuseei/rishot)'s own installer.
+Supported package families: Arch, Debian, Fedora, openSUSE and Gentoo. The documented target is Hyprland on Wayland. Other compositors only make sense for the standalone rishot capture tool.
 
 ## Keybinds
 
-| Key | Action |
+The full active map is generated from `configs/hypr/modules/binds.lua` and documented in [docs/KEYBINDS.md](docs/KEYBINDS.md).
+
+| Keys | Action |
 |---|---|
-| `Super` + `Return` | terminal |
-| `Super` + `A` | app launcher |
-| `Super` + `V` | clipboard history |
-| `Super` + `C` | wallpaper picker |
-| `Super` + `B` | shuffle wallpaper and retheme |
-| `Super` + `E` | file manager (yazi) |
-| `Super` + `T` | toggle floating |
-| `Super` + `L` | lock |
-| `Super` + `Shift` + `B` | power surface |
+| `Super+Return` | Terminal |
+| `Super+A` | Launcher |
+| `Super+V` | Clipboard history |
+| `Super+W` | Wallpaper picker |
+| `Super+Shift+W` | Apply a new wallpaper |
+| `Super+E` | File manager |
+| `Super+L` | Lock |
+| `Super+F` | Fullscreen |
+| `Super+Shift+Space` | Open or close the pill, restoring the last surface |
+| `Super+1..0` | Focus workspace |
+| `Super+Shift+1..0` | Move window to workspace |
+| `Super+Shift+B` | Power surface |
+| `Super+Shift+T` | ThinkPad surface |
+| `Super+Shift+F` | Window blur and transparency |
+| `Super+Shift+R` | Recorder |
+| `Super+Shift+C` | Color picker |
+| `Super+Shift+E` | EasyEffects bypass |
+| `Super+G` | Game mode |
+| `Super+S`, `Super+Shift+S` | Stash, send window to stash |
+| `Super+T` | Toggle floating |
+| `Super+M`, `Super+Shift+M` | Minimize, minimized stash |
+| `Super+Space` | Keyboard layout |
 | `Print`, `Super+F9` | rishot |
+| `Shift+Print`, `Super+Shift+Print` | Capture current monitor |
 
-## Notes
+The Keybinds page can edit the active file. Dynamic workspace binds from `spaces.lua` are documented but are not listed in the editor.
 
-These started as personal dotfiles, built around one machine. The installer
-neutralises the hardware-specific monitor/env bits, but the fork still carries
-my keymap, 0-gap/master layout and the TLP helper, so read before you borrow.
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Compositor | Hyprland, configured in Lua |
+| Shell | Quickshell and hand-written QML |
+| Terminal | Ghostty |
+| Shell environment | fish |
+| Font | JetBrains Mono Nerd |
+| Palette | matugen, driven by the wallpaper |
+| Installer and updater | Python 3 |
+| Sensor snapshot | Rust, built only when needed |
+| Configuration and helpers | POSIX shell and systemd user units |
+
+The installer and updater use the Python standard library. The sensor scanner is a small Rust binary compiled by `tools/install-extras.sh`; it has no runtime crate dependency and is omitted when `rustc` is absent.
+
+## Project quality
+
+The repository has a read-only checkout gate and a headless CI gate:
+
+```sh
+tools/check.sh
+tools/check-static.sh
+```
+
+They cover QML lint with a reviewed warning baseline, surface and navigation contracts, pure JavaScript tests, helper tests, installer matrix and deploy sandbox checks, Lua syntax, Hyprland API rules and documentation links. Runtime checks that require a compositor or a real lock session stay supervised and are recorded in [docs/coverage.md](docs/coverage.md).
+
+The live system was tested with real PAM unlock, password and fingerprint, two lock outputs, Bar drag and wheel, Search, host PSS measurements and a real package probe.
+
+## Project layout
+
+| Path | Contents |
+|---|---|
+| `configs/hypr/` | Hyprland Lua modules, scripts and helpers |
+| `configs/quickshell/pill/` | Pill surfaces, navigation, status and settings |
+| `configs/quickshell/lock/` | Lock surfaces and PAM authentication |
+| `configs/fish/`, `configs/ghostty/` | Shell and terminal configuration |
+| `installer/` | Guided installer and package manifest |
+| `tools/` | Validation gates, tests and host utilities |
+| `docs/` | Architecture, operations, coverage and roadmaps |
+| `assets/` | Screenshots and README recordings |
+
+## Documentation
+
+Start at [docs/index.md](docs/index.md). The most useful entry points:
+
+- [Getting started](docs/getting-started.md)
+- [Architecture](docs/architecture.md)
+- [Conventions](docs/conventions.md)
+- [Keybinds](docs/KEYBINDS.md)
+- [ThinkPad controls](docs/THINKPAD.md)
+- [Power and energy](docs/POWER.md)
+- [Performance](docs/performance.md)
+- [Validation checklist](docs/validation-checklist.md)
+- [Coverage and remaining gaps](docs/coverage.md)
+- [Architecture decisions](docs/decisions/index.md)
+
+The project roadmap and open validation work live in [docs/roadmap.md](docs/roadmap.md).
+
+## Acknowledgements
+
+reddot is an independent fork of [Ricelin](https://github.com/Gakuseei/Ricelin), created by [Gakuseei](https://github.com/Gakuseei). The pill concept, the interaction model and the original implementation are his work. Upstream code is MIT licensed, and the upstream credits continue to apply to everything inherited from it.
+
+The sound page began as a proposal by [@Seza007](https://github.com/Seza007) in the upstream Ricelin issue tracker. AutoEQ profiles come from [AutoEq](https://github.com/jaakkopasanen/AutoEq). [rishot](https://github.com/Gakuseei/rishot) provides the screenshot and annotation workflow.
+
+Wallpapers and the SDDM background are third-party assets and are documented in [WALLPAPERS.md](WALLPAPERS.md) and [configs/sddm/themes/torii/CREDITS.md](configs/sddm/themes/torii/CREDITS.md).
 
 ## License
 
-MIT. Upstream code © 2026 [Gakuseei](https://github.com/Gakuseei); my changes
-© 2026 Ricardo Castro (SrRenks). The full text is in [LICENSE](LICENSE).
-Wallpapers are not in the repo; see [WALLPAPERS.md](WALLPAPERS.md). The SDDM
-background is third-party; see [CREDITS](configs/sddm/themes/torii/CREDITS.md).
-
-## Docs
-
-The documentation index is [docs/index.md](docs/index.md). Start with
-[Getting started](docs/getting-started.md), [Architecture](docs/architecture.md),
-[Conventions](docs/conventions.md) and [Validation](docs/validation-checklist.md).
-
-Operational guides:
-
-- [Power and energy tooling](docs/POWER.md)
-- [Measured memory and reductions](docs/LIGHTWEIGHT.md)
-- [Maintenance and update procedure](docs/MAINTENANCE.md)
-- [Audit coverage and remaining gaps](docs/coverage.md)
-- [Related shells and ideas](docs/FORKS.md)
-- [ThinkPad controls and layout](docs/THINKPAD.md)
-- [Power presets](docs/PRESETS.md)
-- [Credits and licenses](docs/CREDITS.md)
-
-## Credits
-
-The lock screen, the SDDM background and the wallpapers are not mine. See [CREDITS](configs/sddm/themes/torii/CREDITS.md).
-
-The sound page started as a proposal by [@Seza007](https://github.com/Seza007) in [#31](https://github.com/Gakuseei/Ricelin/issues/31). AutoEQ profiles come from [AutoEq](https://github.com/jaakkopasanen/AutoEq).
+MIT. Upstream code © 2026 Gakuseei. reddot-specific changes © 2026 Ricardo Castro (SrRenks). See [LICENSE](LICENSE).

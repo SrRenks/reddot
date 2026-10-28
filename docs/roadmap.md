@@ -38,5 +38,8 @@ Status of the main follow-ups after the Settings, package and scroll work.
 
 ## Later
 
+- Re-evaluate a Rust updater only after the migration gate in
+  [ADR 0002](decisions/0002-python-rust-boundary.md) is met.
+
 - Split the largest QML files only where a tested lifecycle boundary exists.
 - Replace synchronous Loader use with LazyLoader only after a startup and RAM measurement.

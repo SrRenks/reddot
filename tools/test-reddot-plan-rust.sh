@@ -35,7 +35,7 @@ PY
     jq -S . "$tmp/python.json" > "$tmp/p"
     jq -S '.optional_native as $o | del(.optionalNative) | . + {optional_native:$o} | .fallbacks = [.fallbacks[]]' "$tmp/rust.json" > "$tmp/r"
     # Normalize Rust's camelCase field only; values should match.
-    jq -S 'del(.optionalNative,.atomRepos) + {optional_native:(.optionalNative), atom_repos:(.atomRepos)}' "$tmp/rust.json" > "$tmp/r2"
+    jq -S 'del(.optionalNative,.atomRepos) + {optional_native:(.optionalNative), atom_repos:(.atomRepos)} | .fallbacks |= map(.[0:2])' "$tmp/rust.json" > "$tmp/r2"
     diff -u "$tmp/p" "$tmp/r2" || { echo "FAIL: plan parity $profile" >&2; exit 1; }
     echo "ok - $profile plan parity"
 done
@@ -51,7 +51,7 @@ print(json.dumps(p, sort_keys=True))
 PY
 "$bin" --manifest "$manifest" --family arch --profile quick --aur none > "$tmp/rust-none.json"
 jq -S . "$tmp/python-none.json" > "$tmp/pn"
-jq -S 'del(.optionalNative,.atomRepos) + {optional_native:(.optionalNative), atom_repos:(.atomRepos)}' "$tmp/rust-none.json" > "$tmp/rn"
+jq -S 'del(.optionalNative,.atomRepos) + {optional_native:(.optionalNative), atom_repos:(.atomRepos)} | .fallbacks |= map(.[0:2])' "$tmp/rust-none.json" > "$tmp/rn"
 diff -u "$tmp/pn" "$tmp/rn" || { echo 'FAIL: aur none parity' >&2; exit 1; }
 echo 'ok - AUR none parity'
 
@@ -66,7 +66,7 @@ print(json.dumps(p, sort_keys=True))
 PY
 "$bin" --manifest "$manifest" --family gentoo --profile quick --no-overlays > "$tmp/rust-ov.json"
 jq -S . "$tmp/python-ov.json" > "$tmp/po"
-jq -S 'del(.optionalNative,.atomRepos) + {optional_native:(.optionalNative), atom_repos:(.atomRepos)}' "$tmp/rust-ov.json" > "$tmp/ro"
+jq -S 'del(.optionalNative,.atomRepos) + {optional_native:(.optionalNative), atom_repos:(.atomRepos)} | .fallbacks |= map(.[0:2])' "$tmp/rust-ov.json" > "$tmp/ro"
 diff -u "$tmp/po" "$tmp/ro" || { echo 'FAIL: overlay skip parity' >&2; exit 1; }
 echo 'ok - overlay skip parity'
 echo 'all Rust plan tests passed'

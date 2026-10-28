@@ -191,7 +191,10 @@ fn main() {
             let handler = target.clone().unwrap_or_default();
             let app = pkg.get("flatpak_id").and_then(Json::as_str).unwrap_or("");
             if present(&handler, id, app) { skipped.push(id.into()); }
-            else { fallbacks.push((id.into(), handler, String::new())); }
+            else {
+                let app = pkg.get("flatpak_id").and_then(Json::as_str).unwrap_or("").to_string();
+                fallbacks.push((id.into(), handler, app));
+            }
             continue;
         }
         let target = target.unwrap_or_default();
@@ -204,7 +207,7 @@ fn main() {
         if !is_aur(pkg, &family) && pkg.get("required").and_then(Json::as_bool) != Some(true) { optional_native.insert(target); }
     }
     let atom_json: Vec<String> = atom_repos.iter().map(|(k, v)| format!("{}:{}", json(k), v.as_deref().map(json).unwrap_or_else(|| "null".into()))).collect();
-    let fb_json: Vec<String> = fallbacks.iter().map(|(id, handler, _)| format!("[{},{}]", json(id), json(handler))).collect();
+    let fb_json: Vec<String> = fallbacks.iter().map(|(id, handler, app)| format!("[{},{},{}]", json(id), json(handler), json(app))).collect();
     println!("{{{}}}", vec![
         format!("\"repos\":{}", arr(&repos)),
         format!("\"native\":{}", arr(&native_names)),

@@ -20,3 +20,4 @@
 - [ADR 0019: Rust install summary](0019-rust-summary-report.md)
 - [ADR 0020: Crate-free build bundle](0020-rust-build-bundle.md)
 - [ADR 0021: Rust quickstart entry point](0021-rust-install-entrypoint.md)
+- [ADR 0022: Quickstart fallbacks and apply](0022-rust-quickstart-apply.md)

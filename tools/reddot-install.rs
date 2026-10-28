@@ -6,6 +6,32 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+fn quoted(chunk: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut rest = chunk;
+    while let Some(a) = rest.find('"') {
+        let after = &rest[a + 1..];
+        let Some(b) = after.find('"') else { break };
+        out.push(after[..b].to_string());
+        rest = &after[b + 1..];
+    }
+    out
+}
+fn fallback_triples(plan: &str) -> Vec<(String, String, String)> {
+    let Some(start) = plan.find("\"fallbacks\":[") else { return Vec::new() };
+    let rest = &plan[start + 13..];
+    let Some(end) = rest.find(']') else { return Vec::new() };
+    let body = &rest[..end];
+    let mut out = Vec::new();
+    for part in body.split("],[") {
+        let vals = quoted(part);
+        if vals.len() >= 2 {
+            out.push((vals[0].clone(), vals[1].clone(), vals.get(2).cloned().unwrap_or_default()));
+        }
+    }
+    out
+}
+
 fn field(text: &str, key: &str) -> String {
     let needle = format!("\"{key}\":\"");
     let Some(start) = text.find(&needle) else { return String::new() };
@@ -28,6 +54,7 @@ fn main() {
     let mut dry = false;
     let mut quick = false;
     let mut no_deps = false;
+    let mut apply = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -37,12 +64,13 @@ fn main() {
             "--dry-run" => dry=true,
             "--quickstart" => quick=true,
             "--no-deps" => no_deps=true,
+            "--apply" => apply=true,
             _ => {}
         }
         i += 1;
     }
     if !quick { eprintln!("reddot-install: interactive wizard not wired yet; use --quickstart"); std::process::exit(2); }
-    if !dry { eprintln!("reddot-install: apply path not wired yet; use --dry-run"); std::process::exit(2); }
+    if !dry && !apply { eprintln!("reddot-install: pass --apply explicitly or use --dry-run"); std::process::exit(2); }
     let bin = |name: &str| bin_dir.join(name);
     let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
     let family = field(&detect, "family");
@@ -55,35 +83,67 @@ fn main() {
     let plan_out = match run(&bin("reddot-plan"), &["--manifest", &manifest_arg, "--family", &family, "--profile", profile]) {
         Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); }
     };
-    fs::write(&plan, plan_out).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
+    fs::write(&plan, &plan_out).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
     let plan_arg = plan.to_string_lossy().into_owned();
     match run(&bin("reddot-report"), &["--plan", &plan_arg, "--family", &family]) {
         Ok(out) => print!("{out}"),
         Err(e) => eprintln!("{e}"),
     }
+    let fallback_pairs = fallback_triples(&plan_out);
+    let fallback_path = env::temp_dir().join(format!("reddot-fallbacks-{}.json", std::process::id()));
+    if !fallback_pairs.is_empty() {
+        let mut steps = Vec::new();
+        for (id, handler, app) in &fallback_pairs {
+            match run(&bin("reddot-fallbacks"), &["steps", "--fallback", handler.as_str(), "--id", id.as_str(), "--app", app.as_str(), "--family", &family]) {
+                Ok(out) => {
+                    let body = out.trim().trim_start_matches('[').trim_end_matches(']').to_string();
+                    if !body.is_empty() { steps.push(body); }
+                }
+                Err(e) => eprintln!("{e}"),
+            }
+        }
+        let _ = fs::write(&fallback_path, format!("[{}]", steps.join(",")));
+    }
     if !no_deps {
         let root = "sudo";
-        match run(&bin("reddot-run"), &["--plan", &plan_arg, "--family", &family, "--root", root, "--dry-run", "--services", "--init", &init]) {
+        let mut args = vec!["--plan", &plan_arg, "--family", &family, "--root", root, "--services", "--init", &init];
+        if !apply { args.push("--dry-run"); }
+        let fb_arg = fallback_path.to_string_lossy().into_owned();
+        if !fallback_pairs.is_empty() { args.extend(["--fallbacks-json", &fb_arg]); }
+        match run(&bin("reddot-run"), &args) {
             Ok(out) => print!("{out}"),
             Err(e) => eprintln!("{e}"),
         }
     }
     let src_arg = source.to_string_lossy().into_owned();
     let root_arg = config_root.to_string_lossy().into_owned();
-    for (b, args) in [
-        ("reddot-deploy", vec!["deploy", "--src", &src_arg, "--config-root", &root_arg]),
-        ("reddot-neutralize", vec!["--src", &src_arg, "--config-root", &root_arg]),
-    ] {
-        match run(&bin(b), &args) { Ok(out) => print!("{out}"), Err(e) => eprintln!("{e}") }
+    if apply {
+        let _ = run(&bin("reddot-deploy"), &["deploy", "--src", &src_arg, "--config-root", &root_arg, "--apply"]);
+        let _ = run(&bin("reddot-neutralize"), &["--src", &src_arg, "--config-root", &root_arg, "--apply"]);
+    } else {
+        for (b, args) in [
+            ("reddot-deploy", vec!["deploy", "--src", &src_arg, "--config-root", &root_arg]),
+            ("reddot-neutralize", vec!["--src", &src_arg, "--config-root", &root_arg]),
+        ] {
+            match run(&bin(b), &args) { Ok(out) => print!("{out}"), Err(e) => eprintln!("{e}") }
+        }
     }
     for mode in ["wallpapers", "app-theme", "bridge", "link-cli", "brave"] {
         let starters = source.parent().unwrap_or(Path::new(".")).join("installer/starter-wallpapers");
         let starters_arg = starters.to_string_lossy().into_owned();
-        match run(&bin("reddot-post"), &[mode, "--starters", &starters_arg, "--config-root", &root_arg, "--dry-run"]) {
+        let mut pargs = vec![mode, "--starters", &starters_arg, "--config-root", &root_arg];
+        if !apply { pargs.push("--dry-run"); }
+        match run(&bin("reddot-post"), &pargs) {
             Ok(out) => print!("{out}"),
             Err(e) => eprintln!("{e}"),
         }
     }
+    if apply {
+        let updater = config_root.join("hypr/scripts/reddot-update");
+        let updater_arg = updater.to_string_lossy().into_owned();
+        let _ = run(&bin("reddot-post"), &["baseline", "--source", &src_arg, "--config-root", &root_arg, "--updater", &updater_arg]);
+    }
     let _ = fs::remove_file(&plan);
-    println!("reddot-install: quickstart dry-run complete");
+    let _ = fs::remove_file(&fallback_path);
+    println!("reddot-install: quickstart {} complete", if apply { "apply" } else { "dry-run" });
 }

@@ -23,7 +23,7 @@ hz=$(getconf CLK_TCK 2>/dev/null || echo 100)
 
 # The shell stack plus the helpers that live beside it. Names are comm names,
 # so pgrep -x matches them exactly (no substring hits on editors).
-names="quickshell Hyprland hypridle hyprpolkitagent xdg-desktop-portal-hyprland cava wl-paste cliphist kdeconnectd kdeconnect-indicator"
+names="qs Hyprland hypridle hyprpolkitagent xdg-desktop-portal-hyprland cava wl-paste cliphist kdeconnectd kdeconnect-indicator"
 
 pss_kb() {
     awk '/^Pss:/{print $2; exit}' "/proc/$1/smaps_rollup" 2>/dev/null || echo 0
@@ -89,7 +89,7 @@ awk -v k="$total_pss" -v c="$count" \
 awk '/MemAvailable/{printf "  %-34s %7s %9.0f\n", "system MemAvailable", "", $2 / 1024}' /proc/meminfo
 
 # Allocator: the 250 MB class only holds when the pill got the decay settings.
-qspid=$(pgrep -x quickshell 2>/dev/null | head -n1 || true)
+qspid=$(pgrep -x qs 2>/dev/null | head -n1 || true)
 if [ -n "$qspid" ] && tr '\0' '\n' < "/proc/$qspid/environ" 2>/dev/null | grep -q MALLOC_CONF; then
     printf '  %-34s %7s %9s\n' "MALLOC_CONF" "" "set"
 else

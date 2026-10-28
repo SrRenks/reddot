@@ -191,6 +191,32 @@ The all-surface row is not a steady state. Cold surfaces unload after 30 seconds
 
 The host-only checker is `tools/test-perf-budget.sh`. It fails when the sandbox hides `/proc` instead of reporting a false pass. The detailed procedure and measurements are in [docs/performance.md](docs/performance.md).
 
+### Default RAM footprint
+
+For a default session without the browser, private anonymous memory from `smaps_rollup` is the useful number. It excludes shared Qt pages, so the processes can be added without charging the same library more than once.
+
+| Setup | Private anonymous | PSS, for reference |
+|---|---:|---:|
+| Hyprland + pill | 281 MiB | 380 MiB |
+| Hyprland + pill + resident lock + polkit agent | 388 MiB | 523 MiB |
+
+Measured on this ThinkPad E14 Gen 7:
+
+```text
+Hyprland         90.0 MiB private
+qs -c pill      198.1 MiB private
+qs -c lock       75.1 MiB private
+hyprpolkitagent  33.8 MiB private
+```
+
+The browser is deliberately excluded. Zen alone is larger than the complete shell, so including the browser would measure the tab workload, not reddot.
+
+On a 16 GiB machine, 281 MiB is about 1.7% and the full 388 MiB about 2.4%. On 8 GiB, those become about 3.4% and 4.7%. This is acceptable for a feature-dense Qt shell and sits at the low end of the 250 to 400 MiB QuickShell band. It is not excellent: Waybar plus separate tray, launcher and locker can do 60 to 120 MiB, but loses the single morphing pill.
+
+The practical limit for this design is close. The largest remaining saving is the resident lock: starting it on demand could save about 74 MiB private memory, but it adds a 200 to 400 ms start on the security path and a failed spawn must never expose the session. I chose the warm lock. Dropping KDE Connect saves roughly 40 MiB if phone integration is not needed. A second monitor would add another Pill scene graph, so a per-monitor policy matters more there than micro-tuning.
+
+Do not expect large wins from timer cleanups or surface unloading: cold surfaces already unload after 30 seconds, and jemalloc decay is already enabled. Below this point the honest options are removing features or changing the shell architecture.
+
 ### Notes on the decisions
 
 I keep the lock process resident. It costs roughly 50 MB PSS, but a lock that is warm starts immediately and does not depend on spawning a Qt process during the critical path. I chose that trade for a personal machine where unlock latency and fail-closed behavior matter more than the last few megabytes.

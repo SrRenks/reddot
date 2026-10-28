@@ -88,6 +88,21 @@ lock    51546 kB
 
 Earlier cold-shell samples were 249853 kB idle and 290775 kB after 64 s.
 
+Private anonymous memory for a default session without the browser, measured on
+2026-10-28 (`smaps_rollup`, not PSS, so shared Qt pages are not double-counted):
+
+| Process | Private anonymous |
+|---|---:|
+| Hyprland | 90032 kB |
+| `qs -c pill` | 198148 kB |
+| `qs -c lock` | 75108 kB |
+| `hyprpolkitagent` | 33780 kB |
+
+Hyprland plus the pill is about **281 MiB** (288 MB decimal); adding the resident
+lock and the polkit agent brings it to about **388 MiB** (397 MB decimal). The PSS
+table above is charged process memory and is larger because it includes shared
+file-backed pages.
+
 The all-surfaces sample is not a steady state. Cold surfaces unload after 30 s
 and the allocator releases memory gradually; the 32 s and 64 s rows show that
 the process does not return immediately to the first closed sample. These are

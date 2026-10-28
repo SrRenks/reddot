@@ -8,7 +8,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 
 | Área | Cobertura | Evidência |
 |---|---|---|
-| QML das 40 superfícies | estática + módulos puros + runtime | lint em 126 arquivos, baseline de 179 ocorrências, testes Node, harness Quickshell e smoke de abertura |
+| QML das 40 superfícies | estática + módulos puros + runtime | lint em 126 arquivos, baseline de 180 ocorrências, testes Node, harness Quickshell e smoke de abertura |
 | Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML real e smoke de abertura |
 | Barra e status | boa | contrato de status, smoke, reorder manual |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
@@ -18,7 +18,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
-| Lock shell | PAM real validado | QML lint, `check-lock-static.sh`, senha e fingerprint supervisionados; lock sobre duas saídas ainda pendente |
+| Lock shell | PAM real validado e configurável | QML lint, `check-lock-static.sh`, senha e fingerprint supervisionados; lock sobre duas saídas ainda pendente |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |
 | Performance/RAM | medida real nesta máquina | PSS/RSS de pill, lock e estados de Settings; sem threshold universal |
 | Segurança dos helpers | parcial | allowlist, polkit, sudoers e guards verificados; sem fuzz adversarial |

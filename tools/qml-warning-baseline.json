@@ -13,6 +13,7 @@
   "configs/quickshell/lock/Singletons/Flags.qml": [
     "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
     "Type Flags not declared as singleton in qmldir but using pragma Singleton [import]#1",
+    "Unqualified access [unqualified] @ readonly property bool lockFingerprint: adapter.lockFingerprint#1",
     "Unqualified access [unqualified] @ readonly property bool time12h: adapter.time12h#1",
     "Unqualified access [unqualified] @ readonly property real topGap: adapter.topGap#1",
     "Unqualified access [unqualified] @ readonly property string paletteMode: adapter.paletteMode#1"

@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pam
+import "Singletons"
 
 /**
  * Lock authentication. Password and fingerprint are separate PAM contexts.
@@ -16,7 +17,7 @@ Item {
     readonly property bool passwordActive: passwordPam.active
     readonly property bool fingerprintActive: fingerPam.active
     readonly property bool authenticating: passwordActive
-    readonly property bool fingerprintAvailable: fingerProbe.available
+    readonly property bool fingerprintAvailable: fingerProbe.available && Flags.lockFingerprint
     readonly property string promptText: passwordPrompt.length > 0
         ? passwordPrompt : (fingerPrompt.length > 0 ? fingerPrompt : "")
 
@@ -97,6 +98,14 @@ Item {
     }
 
     Component.onCompleted: fingerProbe.running = true
+
+    Connections {
+        target: Flags
+        function onLockFingerprintChanged() {
+            if (!Flags.lockFingerprint)
+                auth.cancelFingerprint();
+        }
+    }
 
     PamContext {
         id: passwordPam

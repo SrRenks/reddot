@@ -16,7 +16,7 @@ focus/back changes. This is a map of the current seams, not a rewrite proposal.
 | Back routing | catalog parent + shared top-strip control + `Pill.surfaceBack()` special cases |
 | Persistent UI state | `Flags.lastSurface` |
 | Focus routing | `shell.qml` + `PillSurface` + `HyprlandFocusGrab` |
-| QML lint | 179 warning occurrences in the reviewed baseline, zero errors |
+| QML lint | 180 warning occurrences in the reviewed baseline, zero errors |
 | Tests | `tools/check.sh` validates every QML file, the warning baseline, lua/helpers, the surface catalog, the UI contract and the documentation links; behavior still needs a Qt Quick test harness |
 
 ## Where adding a surface touches code

@@ -24,6 +24,8 @@ semantic versioning when it cuts a release.
 - First real PSS/RSS measurements for pill states and the resident lock.
 - Password and fingerprint authentication split into independent PAM contexts;
   fingerprint is started explicitly with Enter on an empty field.
+- Fingerprint unlock toggle in Input, gated by reader and enrolled-print
+  detection.
 
 ### Changed
 

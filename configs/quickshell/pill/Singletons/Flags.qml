@@ -88,6 +88,7 @@ Singleton {
     property alias barUpdates: adapter.barUpdates
     property alias packageUpdatesEnabled: adapter.packageUpdatesEnabled
     property alias packageCheckMinutes: adapter.packageCheckMinutes
+    property alias lockFingerprint: adapter.lockFingerprint
 
     FileView {
         id: file
@@ -193,6 +194,8 @@ Singleton {
             property bool barUpdates: true
             property bool packageUpdatesEnabled: true
             property int packageCheckMinutes: 60
+            /** Allow the lock screen to offer fingerprint authentication when a reader and an enrolled print exist. */
+            property bool lockFingerprint: true
         }
     }
 }

@@ -21,6 +21,11 @@ little, ring, middle and index. `pam_fprintd` authenticates any enrolled print f
 the user; it has no per-finger selector. Remove extra prints with
 `fprintd-delete` if only the index finger should remain.
 
+Fingerprint availability is controlled in **Input → Fingerprint → Lock unlock**.
+The switch is enabled only when `fprintd-list` finds an enrolled finger. Turning
+it off leaves password authentication intact and cancels an active fingerprint
+attempt.
+
 ## Preconditions
 
 - save all work;

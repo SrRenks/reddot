@@ -12,6 +12,7 @@ Singleton {
     readonly property string paletteMode: adapter.paletteMode
     readonly property bool time12h: adapter.time12h
     readonly property real topGap: adapter.topGap
+    readonly property bool lockFingerprint: adapter.lockFingerprint
 
     FileView {
         path: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/reddot/flags.json"
@@ -26,6 +27,7 @@ Singleton {
             property string paletteMode: "static"
             property bool time12h: false
             property real topGap: 1.0
+            property bool lockFingerprint: true
         }
     }
 }

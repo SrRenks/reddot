@@ -34,9 +34,13 @@ SettingsSurface {
             surface: root
             name: "Official"
             icon: "download"
+            sub: PackageUpdates.officialState === "missing" ? "not installed"
+                : (PackageUpdates.officialState === "error" ? "last good count" : "")
             Text {
                 text: PackageUpdates.officialCount
-                color: Theme.cream
+                    + (PackageUpdates.officialState === "error" ? " !" : "")
+                color: PackageUpdates.officialState === "error" ? Theme.flameCore
+                    : (PackageUpdates.officialState === "missing" ? Theme.faint : Theme.cream)
                 font.family: Theme.font
                 font.pixelSize: 11 * root.s
                 font.weight: Font.DemiBold
@@ -48,9 +52,13 @@ SettingsSurface {
             surface: root
             name: "AUR"
             icon: "download"
+            sub: PackageUpdates.aurState === "missing" ? "yay not installed"
+                : (PackageUpdates.aurState === "error" ? "last good count" : "")
             Text {
                 text: PackageUpdates.aurCount
-                color: Theme.cream
+                    + (PackageUpdates.aurState === "error" ? " !" : "")
+                color: PackageUpdates.aurState === "error" ? Theme.flameCore
+                    : (PackageUpdates.aurState === "missing" ? Theme.faint : Theme.cream)
                 font.family: Theme.font
                 font.pixelSize: 11 * root.s
                 font.weight: Font.DemiBold
@@ -61,9 +69,13 @@ SettingsSurface {
             surface: root
             name: "Flatpak"
             icon: "download"
+            sub: PackageUpdates.flatpakState === "missing" ? "flatpak not installed"
+                : (PackageUpdates.flatpakState === "error" ? "last good count" : "")
             Text {
                 text: PackageUpdates.flatpakCount
-                color: Theme.cream
+                    + (PackageUpdates.flatpakState === "error" ? " !" : "")
+                color: PackageUpdates.flatpakState === "error" ? Theme.flameCore
+                    : (PackageUpdates.flatpakState === "missing" ? Theme.faint : Theme.cream)
                 font.family: Theme.font
                 font.pixelSize: 11 * root.s
                 font.weight: Font.DemiBold
@@ -146,10 +158,12 @@ SettingsSurface {
         Text {
             width: parent.width
             topPadding: 8 * root.s
-            text: PackageUpdates.errorText.length > 0
-                ? PackageUpdates.errorText
+            text: PackageUpdates.checking ? "Checking packages…"
+                : PackageUpdates.errorText.length > 0
+                    ? PackageUpdates.errorText + " · " + PackageUpdates.ageText
                 : (PackageUpdates.lastCheck.length > 0
-                    ? "Last check " + PackageUpdates.lastCheck + " · " + PackageUpdates.total + " update(s) total"
+                    ? "Checked " + PackageUpdates.lastCheck + " · " + PackageUpdates.ageText
+                        + " · " + PackageUpdates.total + " update(s)"
                     : "Waiting for the first check")
             color: PackageUpdates.errorText.length > 0 ? Theme.flameCore : Theme.faint
             font.family: Theme.font

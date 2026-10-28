@@ -37,5 +37,9 @@ exercised with `dotool` against the real `eDP-1`, whose global x offset is 8960.
 - The Bar surface rendered correctly at `uiScale` 1.25; the original `uiScale`
   (1) was restored.
 - `barStatusOrder`, `uiScale` and `lastSurface` were restored after the run.
-- Escape-back from Shell could not be validated with `dotool` because the
-  simulated key went to the focused browser instead of the layer surface.
+- Back routing was validated through the new `qs -c pill ipc call pill back`
+  control: from Shell it returned `settings`, and the `surface` query reported
+  the transition. The physical header chip uses the same parent routing.
+- The physical header click and `lastSurface` reopen were not validated with
+  `dotool`; the simulated focus stayed with the browser, and the `close`/`toggle`
+  sequence reopened home instead of the remembered surface.

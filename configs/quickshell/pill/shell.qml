@@ -346,6 +346,14 @@ ShellRoot {
         function presets(mon: string): void { root.toggleSurface(mon, "presets"); }
         function startup(mon: string): void { root.toggleSurface(mon, "startup"); }
         function toggle(mon: string): void { root.togglePill(mon); }
+        function back(): void {
+            var parent = SurfaceCatalog.parent(root.openSurface);
+            if (parent.length > 0)
+                root.toggleSurface(root.openMon, parent);
+            else
+                root.back();
+        }
+        function surface(): string { return root.openSurface; }
         function blur(): void {
             const on = !WindowBlur.enabled;
             WindowBlur.setEnabled(on);

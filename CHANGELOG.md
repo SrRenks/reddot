@@ -43,6 +43,8 @@ semantic versioning when it cuts a release.
 - Search surface with pure alias/tag/typo ranking over the navigation manifest.
 - Package meter now detects pacman, dnf/RPM, zypper/RPM and apt backends and
   labels the native source accordingly.
+- Package meter accepts `paru` as an AUR fallback, prefers `checkupdates` for a
+  rootless refresh and hides sources that are not installed.
 - Fan RPM keeps the highest valid sensor value instead of being overwritten by a
   zeroed generic hwmon entry.
 - CI portability fixes: bash-only scripts use bash for syntax, and the package

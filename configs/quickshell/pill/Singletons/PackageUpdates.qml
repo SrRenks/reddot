@@ -5,7 +5,7 @@ import Quickshell.Io
 import "PackageUpdatesParser.js" as PackageParser
 
 /**
- * Periodic system package counter: official repos, AUR via yay, and Flatpak.
+ * Periodic system package counter: native repos, AUR via yay or paru, and Flatpak.
  * A small key-package list flags updates that change the kernel, initramfs,
  * bootloader, firmware or core desktop stack so the bar can turn red.
  */
@@ -49,9 +49,11 @@ Singleton {
     }
     readonly property string availabilityText: {
         var parts = [];
-        parts.push(backendLabel + (officialState === "missing" ? " unavailable" : ""));
-        parts.push("AUR" + (aurState === "missing" ? " unavailable" : ""));
-        parts.push("Flatpak" + (flatpakState === "missing" ? " unavailable" : ""));
+        parts.push(backendLabel + (officialAvailable ? "" : " unavailable"));
+        if (aurAvailable)
+            parts.push("AUR");
+        if (flatpakAvailable)
+            parts.push("Flatpak");
         return parts.join(" · ");
     }
     readonly property bool aurAvailable: aurState !== "missing"

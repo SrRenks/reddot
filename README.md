@@ -66,13 +66,15 @@ The package meter reads the native update source for the running system:
 
 | System | Source |
 |---|---|
-| Arch | `pacman` and optional AUR via `yay` |
+| Arch | `pacman` and optional AUR via `yay` or `paru` |
 | Fedora and RHEL family | `dnf` RPM updates |
 | openSUSE | `zypper` RPM updates |
 | Debian and Ubuntu | `apt` |
 | Any system | optional Flatpak updates |
 
-The page shows the active backend and keeps the last good count when a source is temporarily unavailable. Kernel, initramfs, bootloader, firmware and core desktop packages are marked as important.
+The page shows only the sources present on the machine, so Fedora does not reserve a row for AUR and a machine without Flatpak does not show an empty Flatpak chip. Kernel, initramfs, bootloader, firmware and core desktop packages are marked as important.
+
+The check is read-only. On Arch it uses `checkupdates` when available, which refreshes a temporary sync database without root, and falls back to the cached `pacman -Qu`. It never runs `pacman -Syu`; applying updates stays an explicit user action. dnf, zypper and apt read their own cached metadata. A package manager holding its database lock during an upgrade cannot leave the page in `checking` because each probe has a 25 second ceiling.
 
 ### Appearance and effects
 

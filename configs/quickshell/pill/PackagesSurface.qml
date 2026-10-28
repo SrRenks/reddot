@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import "Singletons"
 
-/** System package updates across pacman, yay/AUR and Flatpak. */
+/** System package updates across native, AUR and Flatpak sources. */
 SettingsSurface {
     id: root
 
@@ -42,6 +42,7 @@ SettingsSurface {
                 Text {
                     text: PackageUpdates.backendLabel + " " + PackageUpdates.officialCount
                         + (PackageUpdates.officialState === "error" ? "!" : "")
+                    visible: PackageUpdates.officialAvailable
                     color: PackageUpdates.officialState === "error" ? Theme.flameCore
                         : Theme.cream
                     font.family: Theme.font
@@ -51,6 +52,8 @@ SettingsSurface {
                 }
                 Text {
                     text: "·"
+                    visible: PackageUpdates.officialAvailable
+                        && (PackageUpdates.aurAvailable || PackageUpdates.flatpakAvailable)
                     color: Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 11 * root.s
@@ -58,6 +61,7 @@ SettingsSurface {
                 Text {
                     text: "AUR " + PackageUpdates.aurCount
                         + (PackageUpdates.aurState === "error" ? "!" : "")
+                    visible: PackageUpdates.aurAvailable
                     color: PackageUpdates.aurState === "error" ? Theme.flameCore
                         : Theme.cream
                     font.family: Theme.font
@@ -67,6 +71,7 @@ SettingsSurface {
                 }
                 Text {
                     text: "·"
+                    visible: PackageUpdates.aurAvailable && PackageUpdates.flatpakAvailable
                     color: Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 11 * root.s
@@ -74,6 +79,7 @@ SettingsSurface {
                 Text {
                     text: "Flatpak " + PackageUpdates.flatpakCount
                         + (PackageUpdates.flatpakState === "error" ? "!" : "")
+                    visible: PackageUpdates.flatpakAvailable
                     color: PackageUpdates.flatpakState === "error" ? Theme.flameCore
                         : Theme.cream
                     font.family: Theme.font

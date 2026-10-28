@@ -34,10 +34,21 @@ fake zypper 'printf "S | Repository | Name | Current | Available | Arch\\n--+---
 check_output 'suse lists RPM name' suse '^zypper-pkg$'
 check_output 'suse marks zypper backend' suse '@@BACKEND:suse@@'
 
-# Arch via pacman, with AUR absent.
-fake pacman 'printf "pacman-pkg 1.0 -> 1.1\\n"'
+# Arch via checkupdates, which refreshes a temporary database without root.
+fake checkupdates 'printf "check-pkg 1.0 -> 1.1\n"; exit 0'
+check_output 'arch uses checkupdates' arch '^check-pkg 1.0'
+
+# Arch without checkupdates falls back to the cached pacman database.
+rm "$tmp/bin/checkupdates"
+fake pacman 'printf "pacman-pkg 1.0 -> 1.1\n"'
 check_output 'arch lists pacman name' arch '^pacman-pkg 1.0'
 check_output 'arch marks pacman backend' arch '@@BACKEND:arch@@'
+
+# paru is accepted when yay is not installed.
+fake paru 'printf "paru-pkg 1.0 -> 1.1\n"'
+out=$(PATH="$tmp/bin" PACKAGE_UPDATES_FAMILY=arch /bin/sh "$script" 2>&1)
+if printf '%s\n' "$out" | grep -q '^paru-pkg 1.0'; then ok 'arch lists paru name'; else fail 'arch lists paru name'; fi
+if printf '%s\n' "$out" | grep -q '^@@OK:aur@@$'; then ok 'arch marks paru AUR ok'; else fail 'arch marks paru AUR ok'; fi
 
 # Debian via apt.
 fake apt 'printf "Listing...\\napt-pkg/stable 1.0 amd64 [upgradable]\\n"'

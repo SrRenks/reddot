@@ -36,6 +36,8 @@ broke.
   Ricelin remote is retargeted in place on the next fetch.
 - `configs/hypr/scripts/package-updates.sh`: read-only native update probe;
   pacman, dnf/RPM, zypper/RPM and apt are detected from the available backend.
+  Arch uses `checkupdates` when installed, then cached `pacman -Qu`; the AUR
+  accepts `yay` or `paru`. The UI hides sources that are not present.
 
 ## Update
 

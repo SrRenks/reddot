@@ -1,0 +1,33 @@
+# Changelog
+
+All notable changes are recorded here. The project follows Keep a Changelog and
+semantic versioning when it cuts a release.
+
+## Unreleased
+
+### Added
+
+- QML warning baseline and gate, tracking each warning occurrence per file.
+- Hyprland API and legacy-syntax check.
+- Documentation index, getting-started guide, repository map, roadmap and
+  validation checklist.
+- Relative-link checker for committed documentation.
+- Project conventions for QML surfaces, singletons, loaders, scale and Hyprland
+  modules.
+
+### Changed
+
+- Renamed `docs/ARCHITECTURE.md` to `docs/architecture.md` and
+  `docs/COVERAGE.md` to `docs/coverage.md`.
+- Moved the package parser into `Singletons/PackageUpdatesParser.js` so the QML
+  singleton no longer imports across directories.
+- README now points to the documentation index instead of an incomplete list.
+- Architecture and coverage notes reflect the current warning baseline and
+  verification commands.
+
+### Fixed
+
+- Strict string comparisons in the wallpaper, launcher and app lists.
+- Dynamic host contract in the notification toast, keeping the QML boundary explicit.
+- Nested Tooltip access to the component scale.
+- Package parser test path after the parser move.

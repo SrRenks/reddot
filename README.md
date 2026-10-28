@@ -182,10 +182,16 @@ background is third-party; see [CREDITS](configs/sddm/themes/torii/CREDITS.md).
 
 ## Docs
 
+The documentation index is [docs/index.md](docs/index.md). Start with
+[Getting started](docs/getting-started.md), [Architecture](docs/architecture.md),
+[Conventions](docs/conventions.md) and [Validation](docs/validation-checklist.md).
+
+Operational guides:
+
 - [Power and energy tooling](docs/POWER.md)
 - [Measured memory and reductions](docs/LIGHTWEIGHT.md)
 - [Maintenance and update procedure](docs/MAINTENANCE.md)
-- [Audit coverage and remaining gaps](docs/COVERAGE.md)
+- [Audit coverage and remaining gaps](docs/coverage.md)
 - [Related shells and ideas](docs/FORKS.md)
 - [ThinkPad controls and layout](docs/THINKPAD.md)
 - [Power presets](docs/PRESETS.md)

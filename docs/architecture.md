@@ -7,17 +7,17 @@ focus/back changes. This is a map of the current seams, not a rewrite proposal.
 
 | Area | Current shape |
 |---|---|
-| Pill QML | `Pill.qml` is ~2,650 lines |
-| Shell/overlay | `shell.qml` is ~800 lines |
-| Surface count | 40 catalog entries; 41 Loaders and 41 `surface == "..."` booleans |
+| Pill QML | `Pill.qml` is ~3,000 lines |
+| Shell/overlay | `shell.qml` is ~1,000 lines |
+| Surface count | 40 catalog entries; 41 Loaders and 40 `surface === "..."` booleans |
 | Size rule | every surface is capped at the monitor's vertical midpoint; `PillSurface` is a Flickable that scrolls the overflow and reports its content height to the host scrollbar |
-| Surface sizes/morph | 39 entries in the `surfaces` map |
+| Surface sizes/morph | 40 entries in the `surfaces` map |
 | Surface metadata | `lib/surfaces.js` catalog |
 | Back routing | catalog parent + shared top-strip control + `Pill.surfaceBack()` special cases |
 | Persistent UI state | `Flags.lastSurface` |
 | Focus routing | `shell.qml` + `PillSurface` + `HyprlandFocusGrab` |
-| QML lint | 109 warnings (mostly unqualified access), zero errors |
-| Tests | `tools/check.sh` validates every QML file, lua/helpers, the surface catalog and the UI contract; behavior still needs a Qt Quick test harness |
+| QML lint | 179 warning occurrences in the reviewed baseline, zero errors |
+| Tests | `tools/check.sh` validates every QML file, the warning baseline, lua/helpers, the surface catalog, the UI contract and the documentation links; behavior still needs a Qt Quick test harness |
 
 ## Where adding a surface touches code
 
@@ -28,7 +28,7 @@ still requires:
 2. `Pill.qml`: a width constant.
 3. `Pill.qml`: a `surfaces` size/ame entry.
 4. `Pill.qml`: a `Loader`.
-5. `Pill.qml`: `rowNavSurface()` when it is keyboard-navigable.
+5. `Pill.qml`: the generic `rowNavSurface()` resolves it from `lib/surfaces.js`.
 6. `shell.qml`: a convenience IPC function; `page <name>` already provides
    a generic fallback.
 7. `Settings.qml`: an index row when it belongs in the settings index.
@@ -51,9 +51,10 @@ validation and the cold-unload set now all read `lib/surfaces.js`.
   - the shell-level floating chevron;
   - `Pill.surfaceBack()` if-chain;
   - per-panel form closers.
-- `settingsLike`, `hasInlineBack`, `cold`, `rowNavSurface()` and the loader list
-  are independent lists. They can drift.
-- QML warnings are not enforced in CI, so new unqualified references can pass.
+- `settingsLike`, `hasInlineBack` and `cold` come from the catalog; the loader
+  list is still explicit in `Pill.qml` and checked by `check-surfaces.mjs`.
+- QML warnings are enforced through `tools/qml-warning-baseline.json`; new
+  warnings fail the gate.
 - The rishot current-monitor feature is a **local patch** outside this repo.
   `docs/RISHOT.md` records it, but a rishot reinstall loses it.
 
@@ -117,8 +118,8 @@ This removes the eight-touch-point problem without introducing a framework.
   configuration`.
 - Add parser tests for `lib/autostart.js`, `lib/binds.js`, `lib/setDeco.js`.
 - Add a lightweight QML test for Escape/back state, not full UI automation.
-- Baseline QML warnings and require no new warnings. Clean the unqualified
-  access warnings in batches.
+- Keep the QML warning baseline at zero new occurrences; clean existing
+  warnings in reviewed batches.
 
 ## Priorities for this repository
 

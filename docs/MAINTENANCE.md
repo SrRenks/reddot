@@ -12,7 +12,7 @@ broke.
 | `installer/` | upstream Python wizard: packages, deploy, neutralize, backup |
 | `install.sh` | bootstrap: clone/update, run the wizard, then `tools/install-extras.sh` |
 | `tools/` | TLP helper, TLP AC/BAT policy, bench, power report, tests, `check.sh` |
-| `docs/` | power, keybinds, startup, memory, related shells, credits |
+| `docs/` | index, architecture, conventions, operations, coverage and credits |
 | `assets/` | screenshots and demo images only |
 
 ## What is local to this fork
@@ -67,7 +67,8 @@ python3 ~/.config/hypr/scripts/test_reddot_update.py
 python3 ~/.config/hypr/scripts/test_wallcolors_apps.py
 node ~/.config/quickshell/pill/lib/fuzzy.test.mjs
 node ~/.config/quickshell/pill/lib/monitors.test.mjs
-sh ~/.config/hypr/scripts/test_launch_guard.sh   # needs writable /run/user/$UID
+node ~/.config/quickshell/pill/lib/packageUpdates.test.mjs
+sh ~/.config/hypr/scripts/test_launch_guard.sh   # falls back to /tmp when needed
 ```
 
 ## Backups
@@ -96,7 +97,5 @@ history of this fork see `git log`; each feature was committed separately.
 
 ## Docs
 
-- `docs/POWER.md` — battery/energy tooling and what is trustworthy
-- `docs/LIGHTWEIGHT.md` — measured memory and ranked reductions
-- `docs/FORKS.md` — related shells and features worth borrowing
-- `docs/CREDITS.md` — upstream, ideas and assets
+The complete documentation index is `docs/index.md`. The most-used guides are
+`docs/POWER.md`, `docs/LIGHTWEIGHT.md`, `docs/FORKS.md` and `docs/CREDITS.md`.

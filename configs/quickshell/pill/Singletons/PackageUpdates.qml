@@ -31,6 +31,12 @@ Singleton {
     property int ageTick: 0
 
     readonly property bool important: importantNames.length > 0
+    readonly property bool hasError: errorText.length > 0
+    readonly property bool stale: {
+        ageTick;
+        return lastCheckEpoch > 0
+            && (Date.now() - lastCheckEpoch) > Math.max(5, minutes) * 120000;
+    }
     readonly property bool officialAvailable: officialState !== "missing"
     readonly property bool aurAvailable: aurState !== "missing"
     readonly property bool flatpakAvailable: flatpakState !== "missing"

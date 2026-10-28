@@ -1973,7 +1973,8 @@ Item {
                     id: updatesIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("updates")
-                    visible: Flags.barUpdates && PackageUpdates.enabled && PackageUpdates.total > 0
+                    visible: Flags.barUpdates && PackageUpdates.enabled
+                        && (PackageUpdates.total > 0 || PackageUpdates.hasError)
                     width: visible ? updatesLabel.implicitWidth + 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -1984,7 +1985,8 @@ Item {
                         height: 13 * pill.s
                         name: "download"
                         color: PackageUpdates.important ? Theme.verm
-                            : (updatesArea.containsMouse ? Theme.cream : Theme.iconDim)
+                            : (PackageUpdates.hasError || PackageUpdates.stale ? Theme.flameCore
+                            : (updatesArea.containsMouse ? Theme.cream : Theme.iconDim))
                         stroke: 1.8
                     }
 
@@ -1992,9 +1994,10 @@ Item {
                         id: updatesLabel
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        text: PackageUpdates.total
+                        text: PackageUpdates.total + (PackageUpdates.hasError ? "!" : "")
                         color: PackageUpdates.important ? Theme.verm
-                            : (updatesArea.containsMouse ? Theme.cream : Theme.subtle)
+                            : (PackageUpdates.hasError || PackageUpdates.stale ? Theme.flameCore
+                            : (updatesArea.containsMouse ? Theme.cream : Theme.subtle))
                         font.family: Theme.font
                         font.pixelSize: 9.5 * pill.s
                         font.weight: Font.Bold

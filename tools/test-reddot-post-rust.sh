@@ -37,7 +37,9 @@ HOME="$rs_home" XDG_STATE_HOME="$rs_home/.local/state" PATH="$tmp/bin:/usr/bin:/
 HOME="$rs_home" XDG_STATE_HOME="$rs_home/.local/state" PATH="$tmp/bin:/usr/bin:/bin" "$bin" brave >/dev/null
 [ -f "$py_home/.local/state/reddot/flags.json" ] && [ -f "$rs_home/.local/state/reddot/flags.json" ]
 jq -e '.appTheme == true' "$rs_home/.local/state/reddot/flags.json" >/dev/null
-diff <(cd "$py_home/reddot/wallpapers" && find . -type f | sort) <(cd "$rs_home/reddot/wallpapers" && find . -type f | sort)
+(cd "$py_home/reddot/wallpapers" && find . -type f | sort) > "$tmp/py-wp"
+(cd "$rs_home/reddot/wallpapers" && find . -type f | sort) > "$tmp/rs-wp"
+diff -u "$tmp/py-wp" "$tmp/rs-wp"
 [ -L "$py_home/.local/bin/awww" ] && [ -L "$rs_home/.local/bin/awww" ]
 [ -f "$rs_home/.config/BraveSoftware/Brave-Browser/Default/Preferences" ]
 echo 'ok - wallpapers, app theme, bridge and Brave effects'

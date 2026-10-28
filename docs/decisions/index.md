@@ -18,3 +18,4 @@
 - [ADR 0017: Rust service step](0017-rust-service-step.md)
 - [ADR 0018: Fallback execution in the runner](0018-rust-fallback-runner.md)
 - [ADR 0019: Rust install summary](0019-rust-summary-report.md)
+- [ADR 0020: Crate-free build bundle](0020-rust-build-bundle.md)

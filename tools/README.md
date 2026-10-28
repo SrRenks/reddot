@@ -52,6 +52,7 @@
 | `build-rust.sh` | build all crate-free Rust helpers into one binary directory |
 | `reddot-install.rs` | entry point with profile/AUR prompts, quickstart, apply and uninstall |
 | `test-reddot-install-rust.sh` | bundle + quickstart dry-run integration |
+| `test-reddot-install-matrix.sh` | five-family orchestration dry-run |
 | `test-reddot-report-rust.sh` | summary parity
 | `test-reddot-run-rust.sh` | dry-run package ordering
 | `test-reddot-post-rust.sh` | post-install effects parity

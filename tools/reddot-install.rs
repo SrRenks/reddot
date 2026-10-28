@@ -72,6 +72,7 @@ fn main() {
     let mut custom = false;
     let mut aur = "yay".to_string();
     let mut optional = String::new();
+    let mut family_override = String::new();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -88,6 +89,7 @@ fn main() {
             "--full" => full=true,
             "--custom" => custom=true,
             "--optional" => { i+=1; optional=args.get(i).cloned().unwrap_or_default(); },
+            "--family" => { i+=1; family_override=args.get(i).cloned().unwrap_or_default(); },
             "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },
             _ => {}
         }
@@ -117,7 +119,8 @@ fn main() {
     if !dry && !apply { eprintln!("reddot-install: pass --apply explicitly or use --dry-run"); std::process::exit(2); }
     let bin = |name: &str| bin_dir.join(name);
     let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
-    let family = field(&detect, "family");
+    let detected_family = field(&detect, "family");
+    let family = if family_override.is_empty() { detected_family } else { family_override };
     let init = field(&detect, "init");
     if !quick {
         if !full {
@@ -252,7 +255,7 @@ fn main() {
     }
     let mut fargs = vec!["--plan", &plan_arg, "--family", &family, "--final", "--init", &init];
     if !apply { fargs.push("--dry-run"); }
-    let _ = run(&bin("reddot-report"), &fargs);
+    match run(&bin("reddot-report"), &fargs) { Ok(out) => print!("{out}"), Err(e) => eprintln!("{e}") }
     let _ = fs::remove_file(&plan);
     let _ = fs::remove_file(&fallback_path);
     println!("reddot-install: quickstart {} complete", if apply { "apply" } else { "dry-run" });

@@ -52,6 +52,8 @@ the helper tools. Generated files and Python caches are not tracked.
 | `tools/check-integration.sh` | Installer, udev, polkit, systemd and TLP checks. |
 | `tools/check-ui-contract.mjs` | Surface and status contracts. |
 | `tools/check-qml-warnings.mjs` | QML warning baseline gate. |
+| `tools/test-installer-matrix.py` | Five-family synthetic installer matrix. |
+| `tools/check-systemd-contract.sh` | Static session target contract. |
 | `tools/check-hypr-api.sh` | Rejects legacy Hyprland syntax. |
 | `tools/smoke-surfaces.sh` | Runtime surface smoke. |
 | `tools/reddot-tlp` | Privileged TLP helper. |

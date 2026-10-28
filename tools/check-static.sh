@@ -26,6 +26,10 @@ for check in check-lock-static.sh check-privileged.sh; do
     if out=$(sh "$here/$check" 2>&1); then ok "$check"; else bad "$check"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 done
 
+echo "== installer matrix =="
+if out=$(python3 "$here/test-installer-matrix.py" 2>&1); then ok "$out"; else bad "installer matrix"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
+if out=$(sh "$here/check-systemd-contract.sh" 2>&1); then ok "session target contract"; else bad "session target contract"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
+
 echo "== deploy sandbox =="
 if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad "deploy sandbox"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 

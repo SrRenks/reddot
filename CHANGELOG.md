@@ -18,6 +18,7 @@ semantic versioning when it cuts a release.
 - Node tests for scroll and status-order behavior.
 - Static lock-flow review and isolated deploy/re-deploy/uninstall test.
 - Host-only performance snapshot and privileged-boundary check.
+- Five-family synthetic installer matrix and a static session-target contract.
 
 ### Changed
 

@@ -35,6 +35,8 @@ Run these checks before declaring a change complete. The full gate is
 - [ ] deploy/distro/pkg/fallbacks/tui selftests pass;
 - [ ] udev, polkit, session target and TLP checks pass.
 - [ ] `python3 tools/test_deploy_sandbox.py` passes.
+- [ ] `python3 tools/test-installer-matrix.py` passes.
+- [ ] `sh tools/check-systemd-contract.sh` passes.
 - [ ] `sh tools/check-lock-static.sh` and `sh tools/check-privileged.sh` pass.
 
 ## Documentation

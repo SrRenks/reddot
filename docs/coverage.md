@@ -14,8 +14,8 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
 | Helpers TLP/ThinkPad | boa | testes próprios + selftest do installer |
-| Instalador Python | lógica e deploy isolado | dry-run, selftests e deploy/re-deploy/uninstall em config root temporário |
-| Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, forma do target, política TLP |
+| Instalador Python | lógica, matriz e deploy isolado | dry-run, selftests, matriz de 5 famílias e deploy/re-deploy/uninstall em config root temporário |
+| Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
 | Lock shell | fluxo estático | QML lint, `check-lock-static.sh`; PAM e unlock não executados para não bloquear a sessão |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |

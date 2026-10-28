@@ -14,6 +14,8 @@
 | `perf-snapshot.sh` | host-only PSS/RSS and layer geometry snapshot |
 | `test_deploy_sandbox.py` | isolated deploy, re-deploy and uninstall |
 | `check-qml-runtime.sh` | headless Quickshell runtime harness for PillSurface, SettingsSeg and ScrubValue |
+| `test-installer-matrix.py` | synthetic five-family installer plan/resolve matrix |
+| `check-systemd-contract.sh` | static session target contract |
 | `check-static.sh` | headless CI gate: contracts, JS/Python tests, shell and Lua syntax |
 | `check-integration.sh` | installer dry-run/selftests plus udev, polkit, systemd and TLP checks |
 | `check-qml-warnings.mjs` | QML warning baseline by file and occurrence |

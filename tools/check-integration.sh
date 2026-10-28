@@ -30,6 +30,10 @@ else
     bad "installer compile"
 fi
 
+echo "== installer matrix =="
+if out=$(python3 "$repo/tools/test-installer-matrix.py" 2>&1); then ok "$out"; else bad "installer matrix"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
+if out=$(sh "$repo/tools/check-systemd-contract.sh" 2>&1); then ok "session target contract"; else bad "session target contract"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
+
 echo "== installer selftests =="
 for module in deploy distro pkg fallbacks tui; do
     if out=$(cd "$repo/installer" && timeout 60s python3 -c "import $module; $module._selftest()" 2>&1); then

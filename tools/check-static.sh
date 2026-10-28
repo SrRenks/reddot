@@ -109,6 +109,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust distro =="
+if command -v rustc >/dev/null 2>&1; then
+    distro_bin="${TMPDIR:-/tmp}/reddot-distro-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-distro.rs" -o "$distro_bin" 2>/tmp/reddot-distro-build.log; then
+        ok "rust distro build"
+        distro_unit="${TMPDIR:-/tmp}/reddot-distro-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-distro.rs" -o "$distro_unit" 2>/tmp/reddot-distro-test-build.log && "$distro_unit" >/tmp/reddot-distro-unit.log 2>&1; then
+            ok "rust distro unit tests"
+        else
+            bad "rust distro unit tests"
+            tail -n 12 /tmp/reddot-distro-test-build.log /tmp/reddot-distro-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$distro_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-distro-rust.sh" 2>&1); then ok "rust distro parity"; else bad "rust distro parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust distro build"
+        sed 's/^/        /' /tmp/reddot-distro-build.log | tail -n 12
+    fi
+    rm -f "$distro_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

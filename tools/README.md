@@ -37,5 +37,7 @@
 | `reddot-sensors.rs` | one-shot native hwmon/thermal/power_supply scanner: every readable sensor for the System surface |
 | `reddot-update.rs` | Rust update engine: clone, merge, manifest, dependency scan and JSON contract |
 | `reddot-wallcolors.rs` | Rust palette engine: wallpaper analysis, fastfetch, Hyprland, Ghostty and GTK app theme |
+| `reddot-distro.rs` | Rust installer distro/package planner, parity-tested against installer/distro.py |
+| `test-reddot-distro-rust.sh` | family, AUR and plan parity for the Rust distro core |
 | `test-reddot-wallcolors-rust.sh` | integration parity for the Rust palette engine |
 | `test-reddot-update-rust.sh` | integration parity for the Rust update engine |

@@ -171,7 +171,7 @@ fn main() {
         let group = pkg.get("group").and_then(Json::as_str).unwrap_or("");
         if !groups.contains(&group) { continue; }
         let id = pkg.get("id").and_then(Json::as_str).unwrap_or("");
-        if profile != "quick" && group != "core" && !optional.contains(id) { continue; }
+        if profile == "custom" && group != "core" && !optional.contains(id) { continue; }
         let (action, target) = if family == "arch" && is_aur(pkg, &family) && aur_choice == "none" {
             match pkg.get("fallback").and_then(Json::as_str) { Some(f) => ("fallback".to_string(), Some(f.to_string())), None => ("skip".into(), None) }
         } else if let Some(name) = native(pkg, &family) {

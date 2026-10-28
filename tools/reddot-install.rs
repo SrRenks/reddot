@@ -55,6 +55,8 @@ fn main() {
     let mut quick = false;
     let mut no_deps = false;
     let mut apply = false;
+    let mut full = false;
+    let mut aur = "yay".to_string();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -65,6 +67,8 @@ fn main() {
             "--quickstart" => quick=true,
             "--no-deps" => no_deps=true,
             "--apply" => apply=true,
+            "--full" => full=true,
+            "--aur" => { i+=1; aur=args.get(i).cloned().unwrap_or_else(|| "yay".into()); },
             _ => {}
         }
         i += 1;
@@ -79,8 +83,8 @@ fn main() {
     let plan = env::temp_dir().join(format!("reddot-plan-{}.json", std::process::id()));
     let manifest = source.parent().unwrap_or(Path::new(".")).join("installer/packages.json");
     let manifest_arg = manifest.to_string_lossy().into_owned();
-    let profile = "quick";
-    let plan_out = match run(&bin("reddot-plan"), &["--manifest", &manifest_arg, "--family", &family, "--profile", profile]) {
+    let profile = if full { "full" } else { "quick" };
+    let plan_out = match run(&bin("reddot-plan"), &["--manifest", &manifest_arg, "--family", &family, "--profile", profile, "--aur", &aur]) {
         Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); }
     };
     fs::write(&plan, &plan_out).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });

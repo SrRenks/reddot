@@ -133,7 +133,24 @@ main() {
 	ensure_deps "$fam"
 	fetch
 
-	python3 "$DIR/installer/reddot_install.py" --source "$DIR/configs" "$@" || exit $?
+	# Prefer the Rust entry point when a toolchain is available. It currently
+	# implements the quickstart flow; the Python installer stays as the rollout
+	# fallback for interactive/reinstall/uninstall flows.
+	rust_ok=0
+	if have rustc && ! has_flag --reinstall "$@" && ! has_flag --uninstall "$@"; then
+		if "$DIR/tools/build-rust.sh" "$HOME/.local/bin" >/dev/null 2>&1; then
+			rust_args="--quickstart --source $DIR/configs --config-root ${XDG_CONFIG_HOME:-$HOME/.config} --bin-dir $HOME/.local/bin"
+			has_flag --dry-run "$@" && rust_args="$rust_args --dry-run" || rust_args="$rust_args --apply"
+			has_flag --full "$@" && rust_args="$rust_args --full"
+			has_flag --no-deps "$@" && rust_args="$rust_args --no-deps"
+			if has_flag --brave "$@"; then rust_args="$rust_args --brave"; fi
+			"$HOME/.local/bin/reddot-install" $rust_args || exit $?
+			rust_ok=1
+		fi
+	fi
+	if [ "$rust_ok" -eq 0 ]; then
+		python3 "$DIR/installer/reddot_install.py" --source "$DIR/configs" "$@" || exit $?
+	fi
 
 	# The Python installer owns ~/.config. The TLP and ThinkPad helpers, the
 	# polkit rule, the AC/BAT policy and the user-level tools live outside it;

@@ -4,24 +4,71 @@ import QtQuick
 import "Singletons"
 
 /**
- * Drag-to-reorder list for the right status cluster. A grip is the only visible
- * control; tapping the label toggles visibility without an on/off switch, keeping
- * the bar page minimal. Flags.barStatusOrder is the single source of truth.
+ * Drag-to-reorder status cluster. The grip is the drag handle; the following
+ * row lifts under the pointer while the others slide into their new slots.
+ * Visibility stays a tap on the label, so the row keeps its minimalist shape.
  */
-Column {
+Item {
     id: list
 
     property real s: 1
-    property int dragIndex: -1
     property real rowH: 24 * list.s
-    readonly property var order: {
-        var base = Flags.barStatusOrder.split(",");
-        if (base.indexOf("updates") < 0) {
-            var at = base.indexOf("settings");
-            if (at < 0) base.push("updates");
-            else base.splice(at, 0, "updates");
+    property real slotH: rowH + 2 * list.s
+
+    readonly property var knownIds: [
+        "weather", "minimized", "tray", "dnd", "network", "inbox",
+        "mixer", "sound", "thinkpad", "sysmon", "updates",
+        "recorder", "settings", "power"
+    ]
+
+    property var allIds: []
+    property var displayOrder: []
+    property string dragId: ""
+    property int dragPos: -1
+    property real dragVisualY: 0
+    property real dragGrabY: 0
+    property bool moved: false
+
+    width: parent ? parent.width : 0
+    height: allIds.length * slotH
+    implicitHeight: height
+
+    Component.onCompleted: syncOrder()
+
+    Connections {
+        target: Flags
+        function onBarStatusOrderChanged() {
+            if (list.dragId.length === 0)
+                list.syncOrder();
         }
-        return base;
+    }
+
+    function normalized() {
+        var raw = Flags.barStatusOrder.split(",");
+        var out = [];
+        var seen = ({});
+        for (var i = 0; i < raw.length; i++) {
+            var id = raw[i];
+            if (id.length === 0 || seen[id] !== undefined)
+                continue;
+            seen[id] = true;
+            out.push(id);
+        }
+        // Keep current custom IDs, then add known items that predate this list.
+        for (var k = 0; k < knownIds.length; k++) {
+            if (seen[knownIds[k]] === undefined)
+                out.push(knownIds[k]);
+        }
+        return out;
+    }
+
+    function syncOrder() {
+        var next = normalized();
+        var at = next.indexOf("settings");
+        if (at >= 0 && next.indexOf("updates") < 0)
+            next.splice(at, 0, "updates");
+        allIds = next.slice();
+        displayOrder = next.slice();
     }
 
     function label(id) {
@@ -83,52 +130,97 @@ Column {
         }
     }
 
-    function move(index, to) {
-        if (to < 0 || to >= list.order.length || to === index)
-            return;
-        var next = list.order.slice();
-        var item = next[index];
-        next.splice(index, 1);
-        next.splice(to, 0, item);
-        Flags.barStatusOrder = next.join(",");
+    function beginDrag(id, index, grabY) {
+        dragId = id;
+        dragPos = index;
+        dragGrabY = grabY;
+        dragVisualY = index * slotH;
+        moved = false;
     }
 
-    function dragTo(y) {
-        if (list.dragIndex < 0)
+    function dragTo(pointerY) {
+        if (dragId.length === 0)
             return;
-        var target = Math.max(0, Math.min(list.order.length - 1,
-            Math.floor((y - 2 * list.s) / list.rowH)));
-        if (target === list.dragIndex)
+        var nextY = Math.max(0, Math.min((allIds.length - 1) * slotH,
+            pointerY - dragGrabY));
+        dragVisualY = nextY;
+        var target = Math.max(0, Math.min(allIds.length - 1,
+            Math.round(nextY / slotH)));
+        if (target === dragPos)
             return;
-        var index = list.dragIndex;
-        list.move(index, target);
-        list.dragIndex = target;
+        var next = displayOrder.slice();
+        var from = next.indexOf(dragId);
+        if (from < 0)
+            return;
+        next.splice(from, 1);
+        next.splice(target, 0, dragId);
+        displayOrder = next;
+        dragPos = target;
+        moved = true;
     }
 
-    width: rootWidth()
-    spacing: 2 * list.s
+    function endDrag() {
+        if (dragId.length === 0)
+            return;
+        if (moved)
+            Flags.barStatusOrder = displayOrder.join(",");
+        dragId = "";
+        dragPos = -1;
+        moved = false;
+    }
 
-    function rootWidth() {
-        return parent ? Math.max(300 * list.s, parent.width) : 300 * list.s;
+    function cancelDrag() {
+        if (dragId.length === 0)
+            return;
+        syncOrder();
+        dragId = "";
+        dragPos = -1;
+        moved = false;
+    }
+
+    Rectangle {
+        visible: list.dragId.length > 0
+        x: 8 * list.s
+        y: list.dragPos * list.slotH
+        width: list.width - 16 * list.s
+        height: 2 * list.s
+        radius: 1 * list.s
+        color: Theme.vermLit
+        opacity: 0.9
+        z: 5
+        Behavior on y { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
     }
 
     Repeater {
-        model: list.order
+        model: list.allIds
 
         Rectangle {
             id: row
             required property var modelData
-            required property int index
+            readonly property int pos: list.displayOrder.indexOf(row.modelData)
             readonly property bool shown: list.visibleOf(row.modelData)
-            readonly property bool dragging: list.dragIndex === row.index
+            readonly property bool dragging: list.dragId === row.modelData
 
+            x: 0
+            y: dragging ? list.dragVisualY : row.pos * list.slotH
             width: list.width
             height: list.rowH
             radius: 7 * list.s
-            color: row.dragging ? Qt.alpha(Theme.vermLit, 0.12)
+            z: dragging ? 10 : 0
+            scale: dragging ? 1.018 : 1
+            color: dragging ? Qt.alpha(Theme.vermLit, 0.16)
                 : (rowHover.hovered ? Qt.alpha(Theme.cream, 0.07)
                 : (row.shown ? Qt.alpha(Theme.vermLit, 0.035) : "transparent"))
-            opacity: row.shown ? 1 : 0.42
+            opacity: dragging ? 1 : (row.shown ? 1 : 0.42)
+            border.width: dragging ? 1 : 0
+            border.color: Qt.alpha(Theme.vermLit, 0.55)
+
+            Behavior on y {
+                enabled: !row.dragging
+                NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic }
+            }
+            Behavior on scale { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
+            Behavior on color { ColorAnimation { duration: Motion.fast } }
             Behavior on opacity { NumberAnimation { duration: Motion.fast } }
 
             HoverHandler { id: rowHover }
@@ -156,7 +248,8 @@ Column {
                     width: 14 * list.s
                     height: 14 * list.s
                     name: "grip"
-                    color: row.shown ? Theme.vermLit : Theme.faint
+                    color: row.dragging || rowHover.hovered ? Theme.cream
+                        : (row.shown ? Theme.vermLit : Theme.faint)
                     stroke: 1.8
                 }
 
@@ -165,17 +258,19 @@ Column {
                     anchors.margins: -4 * list.s
                     cursorShape: Qt.SizeVerCursor
                     preventStealing: true
-                    onPressed: {
-                        list.dragIndex = row.index;
+                    onPressed: (mouse) => {
+                        var p = mapToItem(list, mouse.x, mouse.y);
+                        list.beginDrag(row.modelData, row.pos,
+                            Math.max(0, Math.min(list.rowH, p.y - row.y)));
                     }
                     onPositionChanged: (mouse) => {
-                        if (!pressed || list.dragIndex < 0)
+                        if (!pressed || list.dragId.length === 0)
                             return;
                         var p = mapToItem(list, mouse.x, mouse.y);
                         list.dragTo(p.y);
                     }
-                    onReleased: list.dragIndex = -1
-                    onCanceled: list.dragIndex = -1
+                    onReleased: list.endDrag()
+                    onCanceled: list.cancelDrag()
                 }
             }
 

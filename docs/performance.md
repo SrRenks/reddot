@@ -89,11 +89,17 @@ lock    51546 kB
 Earlier cold-shell samples were 249853 kB idle and 290775 kB after 64 s.
 
 A session cgroup sample with the browser in its own scope showed a 337.2 MB
-anonymous footprint, with a 469.2 MB PSS total across Hyprland, both QuickShell
-processes and their helpers. The optional KDE Connect
-pair added about 38 MB PSS (75 MB plus 46 MB RSS), and the resident lock process
-was about 47 MB PSS. Both are outside the pill itself and are the first places to
-look when a boot number is above 1.5 GB.
+anonymous footprint. The corrected `reddot-bench` run reported 570.9 MB PSS
+across 13 session processes, including the xdg-desktop-portal helpers and both
+halves of KDE Connect. KDE Connect itself was about 55 MB PSS and the resident
+lock process about 47 MB PSS. Both are outside the pill's own 216 to 265 MB PSS,
+and are the first places to look when a boot number is above 1.5 GB.
+
+The bench used to search for `quickshell` and the full
+`kdeconnect-indicator`/`xdg-desktop-portal-hyprland` names. Process names are
+truncated to 15 characters, so those helpers were silently absent. It now uses
+`qs` and the comm names, which is why the reported total is higher than the old
+snapshot.
 
 Private anonymous memory for a default session without the browser, measured on
 2026-10-28 (`smaps_rollup`, not PSS, so shared Qt pages are not double-counted):

@@ -33,6 +33,7 @@ semantic versioning when it cuts a release.
 - Wheel input over an open panel now scrolls instead of being swallowed by the
   surface.
 - IPC `back` and `surface` controls for supervised surface-routing tests.
+- `lastSurface` reopen validated with the real Super+Shift+Space binding.
 
 ### Changed
 

@@ -40,6 +40,7 @@ exercised with `dotool` against the real `eDP-1`, whose global x offset is 8960.
 - Back routing was validated through the new `qs -c pill ipc call pill back`
   control: from Shell it returned `settings`, and the `surface` query reported
   the transition. The physical header chip uses the same parent routing.
-- The physical header click and `lastSurface` reopen were not validated with
-  `dotool`; the simulated focus stayed with the browser, and the `close`/`toggle`
-  sequence reopened home instead of the remembered surface.
+- The physical header click itself was not delivered to the layer by `dotool`,
+  but its parent-routing logic was validated through the IPC back control.
+- `lastSurface` was validated: after opening Settings and closing, the real
+  `Super+Shift+Space` binding reopened Settings.

@@ -55,6 +55,39 @@ Values in kB, rounded to the nearest kB.
 | Closed, 64 s later | 290775 | 384784 |
 | Lock process, resident | 51764 | 108884 |
 
+## Budget
+
+The initial budget is deliberately above the current measured medians, so a
+normal cold-start variance does not make the check noisy:
+
+| State | Budget |
+|---|---:|
+| pill idle | 270000 kB PSS |
+| pill after 60 s closed | 310000 kB PSS |
+| lock resident | 60000 kB PSS |
+
+Run the check in the live session:
+
+```sh
+sh tools/test-perf-budget.sh idle   # fresh shell, before opening the 40 surfaces
+sh tools/test-perf-budget.sh post   # after opening and closing all 40, 60 s later
+sh tools/test-perf-budget.sh lock   # while the lock daemon is resident
+```
+
+The script is host-only. It fails when `/proc` is hidden rather than reporting a
+false pass. Do not run `idle` after a surface sweep; use `post` for that steady
+state.
+
+Samples on 2026-10-28:
+
+```text
+idle   245956 kB
+post   279760 kB
+lock    51546 kB
+```
+
+Earlier cold-shell samples were 249853 kB idle and 290775 kB after 64 s.
+
 The all-surfaces sample is not a steady state. Cold surfaces unload after 30 s
 and the allocator releases memory gradually; the 32 s and 64 s rows show that
 the process does not return immediately to the first closed sample. These are

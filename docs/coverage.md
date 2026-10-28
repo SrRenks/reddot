@@ -13,15 +13,15 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Barra e status | boa | contrato de status, smoke, reorder manual |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
-| Helpers TLP/ThinkPad | boa | testes próprios + selftest do installer |
+| Helpers TLP/ThinkPad | boa + adversarial | testes próprios, casos de metacaracteres/argumentos extras e selftest do installer |
 | Instalador Python | lógica, matriz e deploy isolado | dry-run, selftests, matriz de 5 famílias e deploy/re-deploy/uninstall em config root temporário |
 | CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
 | Lock shell | PAM real validado e configurável | QML lint, `check-lock-static.sh`, senha e fingerprint supervisionados; lock sobre duas saídas ainda pendente |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |
-| Performance/RAM | medida real nesta máquina | PSS/RSS de pill, lock e estados de Settings; sem threshold universal |
-| Segurança dos helpers | parcial | allowlist, polkit, sudoers e guards verificados; sem fuzz adversarial |
+| Performance/RAM | medida e orçamento nesta máquina | PSS/RSS de pill, lock e estados de Settings; `test-perf-budget.sh` host-only |
+| Segurança dos helpers | boa | allowlist, polkit, sudoers, guards e casos adversariais de argumentos |
 
 O lock shell foi revisado estaticamente. Ele cria `WlSessionLock` e só chama
 `locked = true` pelo gatilho `doLock()`; mesmo assim, um smoke de runtime poderia

@@ -26,6 +26,8 @@ semantic versioning when it cuts a release.
   fingerprint is started explicitly with Enter on an empty field.
 - Security page grouping fingerprint, auto-lock, screen-off and suspend
   controls.
+- Advisory helper validation cases for shell metacharacters, extra arguments and
+  path-like names.
 
 ### Changed
 

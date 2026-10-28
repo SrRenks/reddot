@@ -131,6 +131,11 @@ run led kbd 2
 contains "$(cat "$tmp/sys/class/leds/tpacpi::kbd_backlight/brightness")" '^2$' "writes the backlight"
 
 exits 2 "rejects an unknown attribute" run trackpoint foo 1
+exits 2 "rejects a path attribute" run trackpoint '../sensitivity' 100
+exits 2 "rejects metacharacters in an attribute" run trackpoint 'sensitivity;id' 100
+exits 2 "rejects extra arguments" run doubletap 1 extra
+exits 2 "rejects metacharacters in an LED" run led 'kbd;id' 1
+exits 2 "rejects an empty LED" run led '' 1
 exits 2 "rejects an out-of-range sensitivity" run trackpoint sensitivity 300
 exits 2 "rejects an out-of-range backlight" run led kbd 3
 exits 2 "rejects an unknown LED" run led power 1

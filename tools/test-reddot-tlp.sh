@@ -139,6 +139,10 @@ assert_exit 2 "rejects a path as a battery" run set ../etc 40 80
 assert_exit 2 "rejects an unknown profile" run profile turbo
 assert_exit 2 "rejects an invalid apply window" run apply balanced 90 80
 assert_exit 2 "rejects an invalid apply profile" run apply turbo 50 80
+assert_exit 2 "rejects shell metacharacters in a battery" run set 'BAT0;id' 40 80
+assert_exit 2 "rejects an extra battery argument" run set BAT0 40 80 extra
+assert_exit 2 "rejects shell metacharacters in a profile" run profile 'balanced;id'
+assert_exit 2 "rejects an empty battery" run set '' 40 80
 
 # --- pause / resume -------------------------------------------------------
 run pause BAT0

@@ -354,6 +354,7 @@ ShellRoot {
                 root.back();
         }
         function surface(): string { return root.openSurface; }
+        function pickSearch(): bool { return pill.searchPick(); }
         function blur(): void {
             const on = !WindowBlur.enabled;
             WindowBlur.setEnabled(on);

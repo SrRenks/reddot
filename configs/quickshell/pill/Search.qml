@@ -14,6 +14,7 @@ PillSurface {
     id: root
 
     property var results: []
+    property var currentEntry: null
     property int selected: -1
 
     implicitHeight: content.implicitHeight
@@ -35,14 +36,22 @@ PillSurface {
                 continue;
             if (entry.available === "thinkpad" && !ThinkPad.present)
                 continue;
-            out.push(entry);
+            out.push({
+                id: ids[i],
+                title: entry.title,
+                sub: entry.sub,
+                aliases: entry.aliases,
+                tags: entry.tags
+            });
         }
         return out;
     }
 
     function refresh() {
-        root.results = SearchEngine.rank(root.pages, query.text, 8);
-        root.selected = root.results.length > 0 ? 0 : -1;
+        var hits = SearchEngine.rank(root.pages, query.text, 8);
+        root.results = hits;
+        root.selected = hits.length > 0 ? 0 : -1;
+        root.currentEntry = hits.length > 0 ? hits[0] : null;
     }
 
     function openResult(entry) {
@@ -53,29 +62,43 @@ PillSurface {
     }
 
     function pick() {
-        return root.openResult(root.results[root.selected]);
+        return root.openResult(root.currentEntry);
     }
 
     function moveSelection(dir) {
         if (root.results.length === 0)
             return;
         root.selected = Math.max(0, Math.min(root.results.length - 1, root.selected + dir));
+        root.currentEntry = root.results[root.selected] || null;
     }
 
     onOpenChanged: {
         if (open) {
             query.text = "";
             root.results = [];
+            root.currentEntry = null;
             root.selected = -1;
             root.forceActiveFocus();
             Qt.callLater(() => query.forceActiveFocus());
         }
     }
 
-    Keys.onReturnPressed: root.openResult(root.results[root.selected])
-    Keys.onEnterPressed: root.openResult(root.results[root.selected])
+    Keys.onReturnPressed: root.pick()
+    Keys.onEnterPressed: root.pick()
     Keys.onDownPressed: root.moveSelection(1)
     Keys.onUpPressed: root.moveSelection(-1)
+
+    Shortcut {
+        sequence: "Return"
+        enabled: root.open
+        onActivated: root.pick()
+    }
+
+    Shortcut {
+        sequence: "Enter"
+        enabled: root.open
+        onActivated: root.pick()
+    }
 
     Column {
         id: content

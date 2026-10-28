@@ -379,6 +379,29 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust run =="
+if command -v rustc >/dev/null 2>&1; then
+    run_bin="${TMPDIR:-/tmp}/reddot-run-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-run.rs" -o "$run_bin" 2>/tmp/reddot-run-build.log; then
+        ok "rust run build"
+        run_unit="${TMPDIR:-/tmp}/reddot-run-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-run.rs" -o "$run_unit" 2>/tmp/reddot-run-test-build.log && "$run_unit" >/tmp/reddot-run-unit.log 2>&1; then
+            ok "rust run unit tests"
+        else
+            bad "rust run unit tests"
+            tail -n 12 /tmp/reddot-run-test-build.log /tmp/reddot-run-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$run_unit"
+        if out=$(sh "$repo/tools/test-reddot-run-rust.sh" 2>&1); then ok "rust run ordering"; else bad "rust run ordering"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+    else
+        bad "rust run build"
+        sed 's/^/        /' /tmp/reddot-run-build.log | tail -n 12
+    fi
+    rm -f "$run_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

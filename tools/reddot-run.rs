@@ -1,0 +1,106 @@
+//! Package-phase runner: reads the plan JSON from reddot-plan and runs refresh,
+//! repositories, Portage overrides, native and AUR batches. Dry-run prints the
+//! exact commands; otherwise failures are collected, never raised.
+
+use std::collections::BTreeMap;
+use std::env;
+use std::fs;
+use std::path::PathBuf;
+use std::process::Command;
+
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+enum Json { Null, Bool(bool), Num(f64), Str(String), Arr(Vec<Json>), Obj(BTreeMap<String, Json>) }
+struct P<'a> { b: &'a [u8], i: usize }
+impl<'a> P<'a> {
+    fn parse(t: &'a str) -> Result<Json, String> { let mut p = Self { b: t.as_bytes(), i: 0 }; let v = p.value()?; p.ws(); if p.i != p.b.len() { return Err("json".into()); } Ok(v) }
+    fn ws(&mut self) { while self.i < self.b.len() && self.b[self.i].is_ascii_whitespace() { self.i += 1; } }
+    fn value(&mut self) -> Result<Json, String> {
+        self.ws();
+        match *self.b.get(self.i).ok_or("end")? {
+            b'n' => { self.lit(b"null")?; Ok(Json::Null) }, b't' => { self.lit(b"true")?; Ok(Json::Bool(true)) }, b'f' => { self.lit(b"false")?; Ok(Json::Bool(false)) },
+            b'"' => Ok(Json::Str(self.string()?)), b'[' => self.array(), b'{' => self.object(), b'-' | b'0'..=b'9' => self.number(), c => Err(format!("json {c}")),
+        }
+    }
+    fn lit(&mut self, w: &[u8]) -> Result<(), String> { if self.b.get(self.i..self.i + w.len()) == Some(w) { self.i += w.len(); Ok(()) } else { Err("lit".into()) } }
+    fn string(&mut self) -> Result<String, String> {
+        if self.b.get(self.i) != Some(&b'"') { return Err("str".into()); } self.i += 1; let mut o = String::new();
+        loop { let c = *self.b.get(self.i).ok_or("str")?; self.i += 1; match c {
+            b'"' => return Ok(o), b'\\' => { let e = *self.b.get(self.i).ok_or("esc")?; self.i += 1; match e { b'"' => o.push('"'), b'\\' => o.push('\\'), b'/' => o.push('/'), b'n' => o.push('\n'), b'r' => o.push('\r'), b't' => o.push('\t'), b'b' => o.push('\u{8}'), b'f' => o.push('\u{c}'), b'u' => { let mut n = 0u32; for _ in 0..4 { let h = *self.b.get(self.i).ok_or("u")?; self.i += 1; n = (n << 4) + match h { b'0'..=b'9' => (h-b'0') as u32, b'a'..=b'f' => (h-b'a'+10) as u32, b'A'..=b'F' => (h-b'A'+10) as u32, _ => return Err("u".into()) }; } o.push(char::from_u32(n).ok_or("u")?); }, _ => return Err("esc".into()) } }, c if c < 0x20 => return Err("ctl".into()), c => o.push(c as char) } }
+    }
+    fn array(&mut self) -> Result<Json, String> { self.i += 1; let mut a = Vec::new(); self.ws(); if self.b.get(self.i) == Some(&b']') { self.i += 1; return Ok(Json::Arr(a)); } loop { a.push(self.value()?); self.ws(); match self.b.get(self.i) { Some(b',') => self.i += 1, Some(b']') => { self.i += 1; return Ok(Json::Arr(a)); }, _ => return Err("arr".into()) } } }
+    fn object(&mut self) -> Result<Json, String> { self.i += 1; let mut m = BTreeMap::new(); self.ws(); if self.b.get(self.i) == Some(&b'}') { self.i += 1; return Ok(Json::Obj(m)); } loop { let k = self.string()?; self.ws(); if self.b.get(self.i) != Some(&b':') { return Err("colon".into()); } self.i += 1; m.insert(k, self.value()?); self.ws(); match self.b.get(self.i) { Some(b',') => { self.i += 1; self.ws(); }, Some(b'}') => { self.i += 1; return Ok(Json::Obj(m)); }, _ => return Err("obj".into()) } } }
+    fn number(&mut self) -> Result<Json, String> { let s = self.i; while self.i < self.b.len() && matches!(self.b[self.i], b'-'|b'+'|b'.'|b'e'|b'E'|b'0'..=b'9') { self.i += 1; } Ok(Json::Num(std::str::from_utf8(&self.b[s..self.i]).map_err(|_| "n")?.parse().map_err(|_| "n")?)) }
+}
+fn strings(v: &Json, key: &str) -> Vec<String> {
+    match v { Json::Obj(m) => match m.get(key) { Some(Json::Arr(a)) => a.iter().filter_map(|x| if let Json::Str(s)=x { Some(s.clone()) } else { None }).collect(), _ => vec![], }, _ => vec![], }
+}
+fn quote(s: &str) -> String { if s.chars().all(|c| c.is_ascii_alphanumeric() || "_@%+=:,./-".contains(c)) { s.into() } else { format!("'{}'", s.replace('\'', "'\\''")) } }
+fn print_cmd(argv: &[String]) { println!("  would run: {}", argv.iter().map(|s| quote(s)).collect::<Vec<_>>().join(" ")); }
+fn execute(argv: &[String], dry: bool) -> Result<(), String> {
+    if dry { print_cmd(argv); return Ok(()); }
+    let status = Command::new(&argv[0]).args(&argv[1..]).status().map_err(|e| format!("{e}: {}", argv.join(" ")))?;
+    if status.success() { Ok(()) } else { Err(format!("exit {}: {}", status.code().unwrap_or(-1), argv.join(" "))) }
+}
+fn batch(family: &str, names: &[String]) -> Vec<String> {
+    if names.is_empty() { return Vec::new(); }
+    let mut a = match family {
+        "arch" => vec!["pacman".into(), "-S".into(), "--needed".into(), "--noconfirm".into()],
+        "debian" => vec!["apt-get".into(), "install".into(), "-y".into()],
+        "fedora" => vec!["dnf".into(), "install".into(), "-y".into()],
+        "gentoo" => vec!["emerge".into(), "--noreplace".into()],
+        _ => vec!["zypper".into(), "--non-interactive".into(), "install".into()],
+    };
+    a.extend(names.iter().cloned());
+    if family == "fedora" { a.push("--skip-broken".into()); }
+    a
+}
+fn repo_steps(repo: &str, family: &str) -> Vec<Vec<String>> {
+    if repo.starts_with("copr:") && family == "fedora" {
+        return vec![vec!["sh".into(), "-c".into(), "dnf install -y dnf-plugins-core 2>/dev/null; dnf install -y dnf5-plugins 2>/dev/null; true".into()], vec!["dnf".into(), "copr".into(), "enable".into(), "-y".into(), repo[5..].into()]];
+    }
+    if repo.starts_with("overlay:") && family == "gentoo" {
+        let name = &repo[8..];
+        return vec![vec!["emerge".into(), "--noreplace".into(), "app-eselect/eselect-repository".into()], vec!["sh".into(), "-c".into(), format!("portageq get_repo_path / {name} >/dev/null 2>&1 || eselect repository enable {name}")], vec!["emerge".into(), "--sync".into(), name.into()]];
+    }
+    if repo.starts_with("obs:") && family == "suse" {
+        let project = &repo[4..];
+        return vec![vec!["zypper".into(), "--non-interactive".into(), "addrepo".into(), format!("https://download.opensuse.org/repositories/{}/openSUSE_Tumbleweed/", project.replace(':', ":/")), project.replace(':', "_")], vec!["zypper".into(), "--non-interactive".into(), "--gpg-auto-import-keys".into(), "refresh".into()]];
+    }
+    Vec::new()
+}
+fn main() {
+    let args: Vec<String> = env::args().skip(1).collect();
+    let mut plan_path = PathBuf::new(); let mut family = String::new(); let mut root = "sudo".to_string(); let mut aur = String::new(); let mut dry = false;
+    let mut i = 0;
+    while i < args.len() { match args[i].as_str() { "--plan" => { i+=1; plan_path=PathBuf::from(args.get(i).cloned().unwrap_or_default()); }, "--family" => { i+=1; family=args.get(i).cloned().unwrap_or_default(); }, "--root" => { i+=1; root=args.get(i).cloned().unwrap_or_else(||"sudo".into()); }, "--aur-helper" => { i+=1; aur=args.get(i).cloned().unwrap_or_default(); }, "--dry-run" => dry=true, _ => {} } i+=1; }
+    let text = fs::read_to_string(&plan_path).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
+    let plan = P::parse(&text).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });
+    let mut commands: Vec<Vec<String>> = Vec::new();
+    let mut refresh = vec![root.clone()];
+    refresh.extend(match family.as_str() { "arch" => vec!["pacman","-Syu","--noconfirm"], "debian" => vec!["apt-get","update"], "fedora" => vec!["dnf","makecache"], "gentoo" => vec!["emerge","--sync"], _ => vec!["zypper","--non-interactive","refresh"] }.into_iter().map(str::to_string));
+    commands.push(refresh);
+    for repo in strings(&plan, "repos") { for step in repo_steps(&repo, &family) { let mut s = vec![root.clone()]; s.extend(step); commands.push(s); } }
+    let native = strings(&plan, "native");
+    if !native.is_empty() { let mut s = vec![root.clone()]; s.extend(batch(&family, &native)); commands.push(s); }
+    let aur_names = strings(&plan, "aur");
+    if !aur_names.is_empty() {
+        let helper = if aur.is_empty() { ["yay","paru"].iter().find(|h| env::var_os("PATH").map(|p| env::split_paths(&p).any(|d| d.join(*h).is_file())).unwrap_or(false)).map(|s| s.to_string()).unwrap_or_else(|| "yay".into()) } else { aur };
+        let mut s = vec![helper, "-S".into(), "--needed".into(), "--noconfirm".into()]; s.extend(aur_names); commands.push(s);
+    }
+    let mut failures = 0;
+    for cmd in &commands { if let Err(e) = execute(cmd, dry) { failures += 1; eprintln!("FAILED: {e}"); } }
+    if failures > 0 { std::process::exit(1); }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn batch_shape() {
+        assert_eq!(batch("arch", &["foo".into()]), vec!["pacman","-S","--needed","--noconfirm","foo"]);
+        assert!(batch("fedora", &["foo".into()]).contains(&"--skip-broken".into()));
+    }
+    #[test]
+    fn quote_spaces() { assert_eq!(quote("a b"), "'a b'"); }
+}

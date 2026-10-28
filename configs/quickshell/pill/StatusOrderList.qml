@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import "Singletons"
+import "lib/statusOrder.js" as StatusOrder
 
 /**
  * Drag-to-reorder status cluster. The grip is the drag handle; the following
@@ -44,7 +45,7 @@ Item {
     function findFlick() {
         var p = list.parent;
         while (p) {
-            if (p.contentY !== undefined && p.contentHeight !== undefined)
+            if (p instanceof Flickable)
                 return p;
             p = p.parent;
         }
@@ -80,10 +81,7 @@ Item {
         var target = Math.max(0, Math.min(displayOrder.length - 1, keyIndex + dir));
         if (target === keyIndex)
             return;
-        var next = displayOrder.slice();
-        var id = next.splice(keyIndex, 1)[0];
-        next.splice(target, 0, id);
-        displayOrder = next;
+        displayOrder = StatusOrder.moveItem(displayOrder, keyIndex, target);
         keyIndex = target;
         Flags.barStatusOrder = displayOrder.join(",");
     }
@@ -138,29 +136,11 @@ Item {
     }
 
     function normalized() {
-        var raw = Flags.barStatusOrder.split(",");
-        var out = [];
-        var seen = ({});
-        for (var i = 0; i < raw.length; i++) {
-            var id = raw[i];
-            if (id.length === 0 || seen[id] !== undefined)
-                continue;
-            seen[id] = true;
-            out.push(id);
-        }
-        // Keep current custom IDs, then add known items that predate this list.
-        for (var k = 0; k < knownIds.length; k++) {
-            if (seen[knownIds[k]] === undefined)
-                out.push(knownIds[k]);
-        }
-        return out;
+        return StatusOrder.normalize(Flags.barStatusOrder.split(","), knownIds);
     }
 
     function syncOrder() {
         var next = normalized();
-        var at = next.indexOf("settings");
-        if (at >= 0 && next.indexOf("updates") < 0)
-            next.splice(at, 0, "updates");
         allIds = next.slice();
         displayOrder = next.slice();
     }
@@ -242,17 +222,13 @@ Item {
             pointerY - dragGrabY));
         dragVisualY = nextY;
         updateAutoScroll(list.findFlick(), nextY);
-        var target = Math.max(0, Math.min(allIds.length - 1,
-            Math.round(nextY / slotH)));
+        var target = StatusOrder.targetIndex(nextY, 0, slotH, allIds.length);
         if (target === dragPos)
             return;
-        var next = displayOrder.slice();
-        var from = next.indexOf(dragId);
+        var from = displayOrder.indexOf(dragId);
         if (from < 0)
             return;
-        next.splice(from, 1);
-        next.splice(target, 0, dragId);
-        displayOrder = next;
+        displayOrder = StatusOrder.moveItem(displayOrder, from, target);
         dragPos = target;
         moved = true;
     }

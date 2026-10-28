@@ -8,6 +8,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import "Singletons"
 import "lib/surfaces.js" as SurfaceCatalog
+import "lib/scroll.js" as ScrollMath
 
 /**
  * Washi pill top shell. Each monitor carries two layer-shell windows:
@@ -648,10 +649,8 @@ ShellRoot {
                 onWheel: (event) => {
                     if (SurfaceChrome.scrollMax <= 0 || SurfaceChrome.scrollTarget === null)
                         return;
-                    var limit = Math.max(24 * pill.s,
-                        Math.min(160 * pill.s, SurfaceChrome.scrollViewH * 0.22));
-                    var raw = -event.angleDelta.y * 0.55;
-                    SurfaceChrome.scrollBy(Math.max(-limit, Math.min(limit, raw)));
+                    SurfaceChrome.scrollBy(ScrollMath.stepFor(
+                        event.angleDelta.y, SurfaceChrome.scrollViewH, pill.s));
                     event.accepted = true;
                 }
                 onClicked: (mouse) => {

@@ -1,5 +1,6 @@
 import QtQuick
 import "Singletons"
+import "lib/scroll.js" as ScrollMath
 
 /**
  * Shared morph-surface base. It is a Flickable so every panel gets one reliable
@@ -48,8 +49,7 @@ Flickable {
     interactive: false
 
     function scrollBy(delta) {
-        var max = Math.max(0, contentHeight - height);
-        contentY = Math.max(0, Math.min(max, contentY + delta));
+        contentY = ScrollMath.clampOffset(contentY, contentHeight, height, delta);
     }
 
     enabled: open

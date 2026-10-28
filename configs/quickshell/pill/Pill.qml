@@ -1460,6 +1460,20 @@ Item {
     }
     readonly property real statusGap: 12 * s
 
+    function scrollPage(dir) {
+        if (!surfaceOpen || SurfaceChrome.scrollTarget === null || SurfaceChrome.scrollMax <= 0)
+            return false;
+        SurfaceChrome.scrollBy(dir * Math.max(120 * s, SurfaceChrome.scrollViewH * 0.82));
+        return true;
+    }
+
+    function scrollHomeEnd(end) {
+        if (!surfaceOpen || SurfaceChrome.scrollTarget === null || SurfaceChrome.scrollMax <= 0)
+            return false;
+        SurfaceChrome.scrollTarget.contentY = end ? SurfaceChrome.scrollMax : 0;
+        return true;
+    }
+
     function statusWidth(id) {
         switch (id) {
         case "weather":    return weatherGlance.visible ? weatherGlance.implicitWidth : 0;
@@ -3012,6 +3026,34 @@ Item {
                 ? SurfaceChrome.scrollOffset / SurfaceChrome.scrollMax * (parent.height - height)
                 : 0
             color: Qt.alpha(Theme.vermLit, 0.26)
+        }
+    }
+
+    MouseArea {
+        id: surfaceScrollGrab
+        visible: surfaceScrollTrack.visible
+        enabled: visible
+        x: surfaceScrollTrack.x - 5 * pill.s
+        y: surfaceScrollTrack.y
+        width: 12 * pill.s
+        height: surfaceScrollTrack.height
+        acceptedButtons: Qt.LeftButton
+        cursorShape: Qt.PointingHandCursor
+        z: 31
+        property real pressY: 0
+        property real pressContentY: 0
+
+        onPressed: (mouse) => {
+            pressY = mouse.y;
+            pressContentY = SurfaceChrome.scrollTarget ? SurfaceChrome.scrollTarget.contentY : 0;
+        }
+        onPositionChanged: (mouse) => {
+            if (!pressed || SurfaceChrome.scrollTarget === null)
+                return;
+            var contentH = SurfaceChrome.scrollMax + SurfaceChrome.scrollViewH;
+            var delta = (mouse.y - pressY) / Math.max(1, height) * contentH;
+            SurfaceChrome.scrollTarget.contentY = Math.max(0, Math.min(
+                SurfaceChrome.scrollMax, pressContentY + delta));
         }
     }
 

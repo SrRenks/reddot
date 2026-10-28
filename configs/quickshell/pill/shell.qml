@@ -730,6 +730,22 @@ ShellRoot {
                  * is swallowed for everything else so a held key never re-fires.
                  */
                 Keys.onPressed: (e) => {
+                    if (e.key === Qt.Key_PageDown) {
+                        e.accepted = pill.scrollPage(1);
+                        return;
+                    }
+                    if (e.key === Qt.Key_PageUp) {
+                        e.accepted = pill.scrollPage(-1);
+                        return;
+                    }
+                    if (e.key === Qt.Key_Home && pill.surfaceOpen) {
+                        e.accepted = pill.scrollHomeEnd(false);
+                        return;
+                    }
+                    if (e.key === Qt.Key_End && pill.surfaceOpen) {
+                        e.accepted = pill.scrollHomeEnd(true);
+                        return;
+                    }
                     // The focus grab can keep the compositor from seeing the
                     // global toggle while the pill is modal. Handle it here too.
                     if (e.key === Qt.Key_Space

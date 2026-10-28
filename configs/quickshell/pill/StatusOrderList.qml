@@ -28,12 +28,104 @@ Item {
     property real dragVisualY: 0
     property real dragGrabY: 0
     property bool moved: false
+    property int keyIndex: -1
+    property real pointerFlickX: 0
+    property real pointerFlickY: 0
+    property int autoDir: 0
 
     width: parent ? parent.width : 0
     height: allIds.length * slotH
     implicitHeight: height
+    focus: false
+    activeFocusOnTab: true
 
     Component.onCompleted: syncOrder()
+
+    function findFlick() {
+        var p = list.parent;
+        while (p) {
+            if (p.contentY !== undefined && p.contentHeight !== undefined)
+                return p;
+            p = p.parent;
+        }
+        return null;
+    }
+
+    function updateAutoScroll(flick, y) {
+        if (!flick) {
+            autoDir = 0;
+            autoScroll.stop();
+            return;
+        }
+        var p = list.mapToItem(flick, 0, y);
+        pointerFlickX = p.x;
+        pointerFlickY = p.y;
+        var edge = 34 * list.s;
+        var dir = 0;
+        if (p.y < edge) dir = -1;
+        else if (p.y > flick.height - edge) dir = 1;
+        if (dir === autoDir) {
+            if (dir !== 0 && !autoScroll.running) autoScroll.start();
+            return;
+        }
+        autoDir = dir;
+        if (dir === 0) autoScroll.stop();
+        else autoScroll.start();
+    }
+
+    function moveSelected(dir) {
+        if (displayOrder.length === 0)
+            return;
+        if (keyIndex < 0) keyIndex = 0;
+        var target = Math.max(0, Math.min(displayOrder.length - 1, keyIndex + dir));
+        if (target === keyIndex)
+            return;
+        var next = displayOrder.slice();
+        var id = next.splice(keyIndex, 1)[0];
+        next.splice(target, 0, id);
+        displayOrder = next;
+        keyIndex = target;
+        Flags.barStatusOrder = displayOrder.join(",");
+    }
+
+    Keys.onUpPressed: (event) => {
+        list.forceActiveFocus();
+        list.moveSelected(-1);
+        event.accepted = true;
+    }
+    Keys.onDownPressed: (event) => {
+        list.forceActiveFocus();
+        list.moveSelected(1);
+        event.accepted = true;
+    }
+    Keys.onSpacePressed: (event) => {
+        if (keyIndex >= 0 && keyIndex < displayOrder.length) {
+            var id = displayOrder[keyIndex];
+            list.setVisible(id, !list.visibleOf(id));
+            event.accepted = true;
+        }
+    }
+    Keys.onEscapePressed: (event) => {
+        keyIndex = -1;
+        event.accepted = true;
+    }
+
+    Timer {
+        id: autoScroll
+        interval: 16
+        repeat: true
+        onTriggered: {
+            var flick = list.findFlick();
+            if (!flick || list.autoDir === 0) {
+                stop();
+                return;
+            }
+            flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height,
+                flick.contentY + list.autoDir * 18 * list.s));
+            var p = flick.mapToItem(list, list.pointerFlickX, list.pointerFlickY);
+            list.dragTo(p.y);
+        }
+    }
 
     Connections {
         target: Flags
@@ -136,6 +228,9 @@ Item {
         dragGrabY = grabY;
         dragVisualY = index * slotH;
         moved = false;
+        keyIndex = index;
+        list.forceActiveFocus();
+        updateAutoScroll(list.findFlick(), dragVisualY);
     }
 
     function dragTo(pointerY) {
@@ -144,6 +239,7 @@ Item {
         var nextY = Math.max(0, Math.min((allIds.length - 1) * slotH,
             pointerY - dragGrabY));
         dragVisualY = nextY;
+        updateAutoScroll(list.findFlick(), nextY);
         var target = Math.max(0, Math.min(allIds.length - 1,
             Math.round(nextY / slotH)));
         if (target === dragPos)
@@ -160,6 +256,8 @@ Item {
     }
 
     function endDrag() {
+        autoScroll.stop();
+        autoDir = 0;
         if (dragId.length === 0)
             return;
         if (moved)
@@ -170,6 +268,8 @@ Item {
     }
 
     function cancelDrag() {
+        autoScroll.stop();
+        autoDir = 0;
         if (dragId.length === 0)
             return;
         syncOrder();
@@ -209,7 +309,7 @@ Item {
             z: dragging ? 10 : 0
             scale: dragging ? 1.018 : 1
             color: dragging ? Qt.alpha(Theme.vermLit, 0.16)
-                : (rowHover.hovered ? Qt.alpha(Theme.cream, 0.07)
+                : (rowHover.hovered || list.keyIndex === row.pos ? Qt.alpha(Theme.cream, 0.07)
                 : (row.shown ? Qt.alpha(Theme.vermLit, 0.035) : "transparent"))
             opacity: dragging ? 1 : (row.shown ? 1 : 0.42)
             border.width: dragging ? 1 : 0
@@ -293,7 +393,11 @@ Item {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 cursorShape: Qt.PointingHandCursor
-                onClicked: list.setVisible(row.modelData, !row.shown)
+                onClicked: {
+                    list.keyIndex = row.pos;
+                    list.forceActiveFocus();
+                    list.setVisible(row.modelData, !row.shown);
+                }
             }
         }
     }

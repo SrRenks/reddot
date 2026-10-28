@@ -9,14 +9,31 @@ Status of the main follow-ups after the Settings, package and scroll work.
 - Keep the docs structure and links valid.
 - Preserve one scroll path and one settings-row keyboard model.
 
-## Next
+## Done on 2026-10-28
 
-- Real PAM/unlock execution in a disposable session.
-- Gesture tests in a real compositor: scroll, drag, back and lastSurface.
-- A PSS/RAM budget defined from host measurements.
-- More aggressive adversarial tests for the updater and privileged helpers.
+- Real password and fingerprint PAM execution, with the lock auth split into
+  independent contexts.
+- Physical Bar verification: drag, Escape-cancel, wheel over an open panel,
+  scale 1.25 and `lastSurface` via the real keybind.
+- PSS budget checked on the host for fresh idle, post-surface and resident-lock
+  states.
+- Adversarial argument cases for the TLP and ThinkPad helpers.
+- Two-output lock verified with `WlSessionLock.secure=true` on `eDP-1` plus a
+  headless output.
+
+## Next / deferred
+
+- **Physical pointer click on the lock/Bar header back chip.** The IPC
+  `pill back` control traverses the same `SurfaceCatalog.parent` path and was
+  verified, but `dotool` did not deliver the synthetic click to the layer
+  surface. Confirm with a real mouse: Settings → Shell → click the left
+  chevron; it must return to Settings rather than close the pill.
+- Updater adversarial fuzz: helper arguments were covered, the update helper was
+  not fuzzed in this cycle.
+- Installer execution in VMs for the five package families.
+- Multi-monitor test on two physical outputs, including hotplug and mixed DPI.
+- Decide whether to remove the three extra enrolled `fprintd` fingers.
 - Truly data-driven critical-package detection for the package meter.
-- A multi-monitor run on hardware with two outputs.
 
 ## Later
 

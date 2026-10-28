@@ -53,6 +53,8 @@ Run these checks before declaring a change complete. The full gate is
 - [ ] drag reorder persists and cancel restores the previous order;
 - [ ] PageUp/PageDown and the scrollbar reach the end of long pages;
 - [ ] 1.25 UI scale does not clip the package page or the status list.
+- [ ] the manual lock checklist has been run in a disposable session;
+- [ ] the manual multi-monitor checklist has been run when a second output exists.
 
 ## Review
 

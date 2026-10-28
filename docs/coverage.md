@@ -8,18 +8,19 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 
 | Área | Cobertura | Evidência |
 |---|---|---|
-| QML das 40 superfícies | estática completa + smoke + módulos puros | lint em 126 arquivos, baseline de 179 ocorrências, testes Node de scroll/ordem e smoke de abertura |
+| QML das 40 superfícies | estática + módulos puros + runtime | lint em 126 arquivos, baseline de 179 ocorrências, testes Node, harness Quickshell e smoke de abertura |
 | Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML real e smoke de abertura |
 | Barra e status | boa | contrato de status, smoke, reorder manual |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
 | Helpers TLP/ThinkPad | boa | testes próprios + selftest do installer |
 | Instalador Python | lógica, matriz e deploy isolado | dry-run, selftests, matriz de 5 famílias e deploy/re-deploy/uninstall em config root temporário |
+| CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
-| Lock shell | fluxo estático | QML lint, `check-lock-static.sh`; PAM e unlock não executados para não bloquear a sessão |
+| Lock shell | estático + checklist | QML lint, `check-lock-static.sh` e roteiro manual de PAM; execução automática continua fora |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |
-| Performance/RAM | diagnóstico host-only | `perf-snapshot.sh`; sem threshold universal |
+| Performance/RAM | diagnóstico host-only | `perf-snapshot.sh` e procedimento detalhado; sem threshold universal |
 | Segurança dos helpers | parcial | allowlist, polkit, sudoers e guards verificados; sem fuzz adversarial |
 
 O lock shell foi revisado estaticamente. Ele cria `WlSessionLock` e só chama
@@ -54,7 +55,8 @@ documentação e drift entre checkout e deploy.
 ## Próximos alvos, se houver outro ciclo
 
 1. teste de gesto Qt Quick em compositor real;
-2. execução de PAM/unlock em sessão de teste;
+2. execução manual de PAM/unlock em sessão de teste;
 3. matriz de instalação em VMs por distro;
-4. fuzz adversarial dos helpers e do updater;
-5. orçamento de PSS por sessão.
+4. fuzz adversarial mais agressivo dos helpers e do updater;
+5. orçamento de PSS definido a partir de medições reais;
+6. teste multi-monitor em hardware com duas saídas.

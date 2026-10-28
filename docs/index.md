@@ -22,6 +22,8 @@ top-level README stays short; operational detail lives in the pages below.
 - [ThinkPad controls](THINKPAD.md)
 - [Measured memory and reductions](LIGHTWEIGHT.md)
 - [Performance snapshots](performance.md)
+- [Manual lock test](manual-lock-test.md)
+- [Manual multi-monitor test](manual-multimonitor.md)
 
 ## Reference
 

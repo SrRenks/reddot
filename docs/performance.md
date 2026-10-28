@@ -22,6 +22,23 @@ Run it with the pill closed, after opening one hub, and after opening System.
 Record the three snapshots separately. Opening every surface in one run is not a
 useful memory comparison because cold surfaces unload after 30 seconds.
 
+## Detailed procedure
+
+Run three snapshots in this order, waiting ten seconds between them:
+
+1. closed pill, no surface;
+2. after opening **Shell**;
+3. after opening **System** and waiting for the sensor refresh.
+
+For the lock, start it only in the disposable session described in
+[manual-lock-test.md](manual-lock-test.md), take one snapshot, then unlock and
+repeat once. Record the full output and the timestamp, not just the highest
+number.
+
+Package checks add a separate transient: run one snapshot immediately after
+`Check now` and another after the process exits. Do not compare them as if they
+were steady state.
+
 ## What to compare
 
 - closed pill versus one settings hub;

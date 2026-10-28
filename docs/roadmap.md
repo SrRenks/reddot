@@ -11,11 +11,12 @@ Status of the main follow-ups after the Settings, package and scroll work.
 
 ## Next
 
-- Qt Quick behavior tests for scroll, drag, back and lastSurface.
-- A lock-shell smoke test that does not lock the live session.
-- A PSS/RAM budget for the pill and lock processes.
-- Adversarial tests for the updater and privileged helpers.
+- Real PAM/unlock execution in a disposable session.
+- Gesture tests in a real compositor: scroll, drag, back and lastSurface.
+- A PSS/RAM budget defined from host measurements.
+- More aggressive adversarial tests for the updater and privileged helpers.
 - Truly data-driven critical-package detection for the package meter.
+- A multi-monitor run on hardware with two outputs.
 
 ## Later
 

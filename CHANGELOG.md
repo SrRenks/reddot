@@ -19,6 +19,8 @@ semantic versioning when it cuts a release.
 - Static lock-flow review and isolated deploy/re-deploy/uninstall test.
 - Host-only performance snapshot and privileged-boundary check.
 - Five-family synthetic installer matrix and a static session-target contract.
+- QML runtime harness, detailed lock/multi-monitor checks and a broader
+  performance procedure.
 
 ### Changed
 

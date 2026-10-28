@@ -52,6 +52,30 @@ has a measured problem and a narrow interface.
   Python dependency from a minimal image, reducing a measured update latency, or
   shipping a single self-contained helper.
 
+## Functional audit, 2026-10-28
+
+The Python implementation runs and passes its own tests:
+
+- `python3 tools/test-installer-matrix.py`: five package families, core plans and
+  fallbacks passed;
+- `python3 configs/hypr/scripts/test_reddot_update.py`: updater argument, clone,
+  manifest and corruption cases passed;
+- `python3 configs/hypr/scripts/test_wallcolors_apps.py`: app-specific palette
+  cases passed;
+- `python3 tools/test_deploy_sandbox.py`: deploy, re-deploy and uninstall passed;
+- `python3 -m compileall installer configs/hypr/scripts tools`: no syntax errors.
+
+There is no Rust implementation of these modules yet. A Rust rewrite would need
+equivalents for the terminal raw mode in `tui.py` (`termios`, `select`), the git
+and three-way merge behavior in `reddot-update.py`, and the package and fallback
+tables in the installer. Rust's standard library has no JSON, diff or terminal
+control crates, so a dependency-free port would be substantially larger than the
+Python code. Adding crates is a separate dependency decision.
+
+The Python modules are not resident at boot. Replacing them would not reduce the
+1.6 GB login footprint; only the QuickShell/Qt processes and optional helpers do
+that.
+
 ## Migration gate for a future Rust candidate
 
 A component can move to Rust only when all of these are true:

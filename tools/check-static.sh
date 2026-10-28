@@ -244,6 +244,33 @@ else
     printf '  skip  rustc not found\n'
 fi
 
+echo "== rust neutralize =="
+if command -v rustc >/dev/null 2>&1; then
+    neutral_bin="${TMPDIR:-/tmp}/reddot-neutralize-test-$$"
+    if rustc --edition=2021 -O "$repo/tools/reddot-neutralize.rs" -o "$neutral_bin" 2>/tmp/reddot-neutral-build.log; then
+        ok "rust neutralize build"
+        neutral_unit="${TMPDIR:-/tmp}/reddot-neutralize-unit-$$"
+        if rustc --edition=2021 --test "$repo/tools/reddot-neutralize.rs" -o "$neutral_unit" 2>/tmp/reddot-neutral-test-build.log && "$neutral_unit" >/tmp/reddot-neutral-unit.log 2>&1; then
+            ok "rust neutralize unit tests"
+        else
+            bad "rust neutralize unit tests"
+            tail -n 12 /tmp/reddot-neutral-test-build.log /tmp/reddot-neutral-unit.log 2>/dev/null | sed 's/^/        /'
+        fi
+        rm -f "$neutral_unit"
+        if command -v jq >/dev/null 2>&1; then
+            if out=$(sh "$repo/tools/test-reddot-neutralize-rust.sh" 2>&1); then ok "rust neutralize parity"; else bad "rust neutralize parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
+        else
+            printf '  skip  jq not found\n'
+        fi
+    else
+        bad "rust neutralize build"
+        sed 's/^/        /' /tmp/reddot-neutral-build.log | tail -n 12
+    fi
+    rm -f "$neutral_bin"
+else
+    printf '  skip  rustc not found\n'
+fi
+
 echo "== shell and lua =="
 for test in test_launch_guard.sh test-reddot-tlp.sh test-reddot-thinkpad.sh test-package-updates.sh; do
     file="$repo/tools/$test"

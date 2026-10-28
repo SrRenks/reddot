@@ -13,6 +13,7 @@
 | `check-privileged.sh` | polkit allowlist, sudoers absence and helper guards |
 | `perf-snapshot.sh` | host-only PSS/RSS and layer geometry snapshot |
 | `test_deploy_sandbox.py` | isolated deploy, re-deploy and uninstall |
+| `check-qml-runtime.sh` | headless Quickshell runtime harness for PillSurface, SettingsSeg and ScrubValue |
 | `check-static.sh` | headless CI gate: contracts, JS/Python tests, shell and Lua syntax |
 | `check-integration.sh` | installer dry-run/selftests plus udev, polkit, systemd and TLP checks |
 | `check-qml-warnings.mjs` | QML warning baseline by file and occurrence |

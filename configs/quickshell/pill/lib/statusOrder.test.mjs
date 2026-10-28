@@ -18,5 +18,19 @@ eq(targetIndex(0, 0, 26, 3), 0, "first slot");
 eq(targetIndex(80, 0, 26, 3), 2, "rounds to last");
 eq(targetIndex(999, 0, 26, 3), 2, "clamps");
 eq(targetIndex(0, 0, 26, 0), -1, "empty list");
+let seed = 23;
+function next() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed; }
+for (let i = 0; i < 300; i++) {
+    const size = next() % 20;
+    const order = Array.from({ length: size }, (_, n) => "id" + n);
+    const from = (next() % (size + 2)) - 1;
+    const to = (next() % (size + 2)) - 1;
+    const moved = moveItem(order, from, to);
+    if (moved.length !== size || new Set(moved).size !== size) {
+        failed++;
+        console.log("FAIL fuzz move changed the item set");
+        break;
+    }
+}
 if (failed) { console.log(`\n${failed} test(s) FAILED`); process.exit(1); }
 console.log("\nAll tests PASSED");

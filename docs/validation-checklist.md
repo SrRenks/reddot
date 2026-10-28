@@ -15,6 +15,7 @@ Run these checks before declaring a change complete. The full gate is
 ## QML and surfaces
 
 - [ ] `node tools/check-ui-contract.mjs`
+- [ ] `sh tools/check-qml-runtime.sh` carrega PillSurface, SettingsSeg e ScrubValue.
 - [ ] all 40 surfaces are present in the catalog and every request resolves;
 - [ ] the single wheel path is intact (`shell.qml` backdrop only);
 - [ ] scrollbar and keyboard navigation still work in a live session;

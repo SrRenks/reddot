@@ -9,7 +9,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Área | Cobertura | Evidência |
 |---|---|---|
 | QML das 40 superfícies | estática completa + smoke + módulos puros | lint em 126 arquivos, baseline de 179 ocorrências, testes Node de scroll/ordem e smoke de abertura |
-| Settings e hubs | boa | lint, contrato de linhas, navegação por teclado, smoke de abertura |
+| Settings e hubs | boa | lint, contrato, navegação por teclado, harness QML real e smoke de abertura |
 | Barra e status | boa | contrato de status, smoke, reorder manual |
 | Pacotes | boa | parser puro + testes Node; health por fonte, idade e fallback |
 | Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
@@ -44,6 +44,7 @@ node tools/check-ui-contract.mjs  contrato estático de UI
 node tools/check-qml-warnings.mjs baseline de warnings QML
 sh tools/check-hypr-api.sh        API Hyprland e sintaxe Lua
 node tools/check-doc-links.mjs    links relativos da documentação
+sh tools/check-qml-runtime.sh     harness Quickshell sem janela
 ```
 
 O `check.sh` roda os gates de contrato, integração, testes, lint dos QML

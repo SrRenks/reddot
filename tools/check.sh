@@ -95,6 +95,13 @@ if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad 
 echo "== privileged boundary =="
 if out=$(sh "$here/check-privileged.sh" 2>&1); then ok "privileged boundary"; else bad "privileged boundary"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 
+echo "== qml runtime =="
+if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v qs >/dev/null 2>&1; then
+    if out=$(sh "$here/check-qml-runtime.sh" 2>&1); then ok "$out"; else bad "QML runtime"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+else
+    printf '  skip  no Wayland/qs session\n'
+fi
+
 echo "== qml warnings =="
 if command -v node >/dev/null 2>&1; then
     if out=$(node "$here/check-qml-warnings.mjs" 2>&1); then ok "$out"; else bad "QML warnings"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi

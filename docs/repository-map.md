@@ -12,6 +12,7 @@ the helper tools. Generated files and Python caches are not tracked.
 | `docs/` | Committed project documentation. |
 | `installer/` | Python installer: distro detection, package planning, deployment, TUI. |
 | `tools/` | Helpers, checks, tests and privileged system policy. |
+| `tests/qs/` | Windowless Quickshell runtime harness. |
 | `install.sh` | Bootstrap that fetches the checkout and starts the Python installer. |
 | `README.md` | Short project introduction and install summary. |
 | `WALLPAPERS.md` | Wallpaper sources and licensing notes. |

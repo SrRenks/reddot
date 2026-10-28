@@ -8,13 +8,13 @@
 var pages = {
     mixer:      { title: "Mixer",             sub: "Volume, faders and audio routing",       aliases: ["audio", "volume", "faders"], tags: ["music", "sound"] },
     sound:      { title: "Sound",             sub: "Equalizer and output effects",           aliases: ["eq", "audio", "equalizer"], tags: ["music", "sound"] },
-    calendar:   { title: "Calendar",          sub: "Date and agenda",                        aliases: ["date", "agenda", "time"], tags: ["time"] },
+    calendar:   { title: "Calendar",          sub: "Date and agenda",                        aliases: ["date", "agenda", "time", "weather", "forecast", "clima"], tags: ["time"] },
     launcher:   { title: "Launcher",          sub: "Applications and commands",              aliases: ["apps", "applications", "run"], tags: ["apps"] },
     clipboard:  { title: "Clipboard",         sub: "Clipboard history",                      aliases: ["copy", "history", "paste"], tags: ["text"] },
     wallpaper:  { title: "Wallpaper",         sub: "Desktop background",                     aliases: ["background", "wall", "image"], tags: ["appearance"] },
     power:      { title: "Session",           sub: "Lock, logout, sleep, restart and shut down", aliases: ["logout", "sleep", "reboot", "shutdown"], tags: ["system", "session"] },
     media:      { title: "Media",             sub: "Now playing",                            aliases: ["music", "player", "track"], tags: ["music"] },
-    link:       { title: "Notifications",     sub: "Notification history",                    aliases: ["inbox", "messages", "alerts"], tags: ["system"] },
+    link:       { title: "Notifications",     sub: "Notification history",                    aliases: ["inbox", "messages", "alerts", "notifications"], tags: ["system"] },
     wifi:       { title: "Wi-Fi",             sub: "Wireless networks",                      aliases: ["network", "wireless", "wlan"], tags: ["network"] },
     bt:         { title: "Bluetooth",         sub: "Paired devices",                         aliases: ["devices", "peripherals"], tags: ["network"] },
     battery:    { title: "Battery",           sub: "Charge and power state",                 aliases: ["charge", "power"], tags: ["system"] },
@@ -22,7 +22,7 @@ var pages = {
     thinkpad:   { title: "ThinkPad",          sub: "Fan, LEDs, TrackPoint and function keys", aliases: ["fan", "trackpoint", "leds", "keyboard"], tags: ["hardware"], available: "thinkpad" },
     settings:   { title: "Settings",          sub: "Preferences and controls",                aliases: ["config", "preferences", "options"], tags: ["system"] },
     search:     { title: "Search",             sub: "Find any section",                       aliases: ["find", "lookup", "filter"], tags: ["navigation"], hidden: true },
-    shell:      { title: "Shell",             sub: "Bar, clock, pill and notices",            aliases: ["gui", "interface", "bar", "pill"], tags: ["appearance"] },
+    shell:      { title: "Shell",             sub: "Bar, clock, pill and notices",            aliases: ["gui", "interface", "bar", "pill", "minimized", "tray"], tags: ["appearance"] },
     clock:      { title: "Clock",             sub: "Format, seconds and date",                aliases: ["time", "date", "clock format"], tags: ["bar"] },
     pillsettings: { title: "Pill",           sub: "Geometry, opacity, blur and key notices",  aliases: ["size", "opacity", "blur", "notices"], tags: ["appearance"] },
     windows:    { title: "Windows",           sub: "Layout, gaps, borders, shadow and opacity", aliases: ["layout", "gaps", "borders", "effects"], tags: ["window"] },
@@ -44,7 +44,7 @@ var pages = {
     input:      { title: "Input",              sub: "Pointer, keyboard, touchpad and cursor",  aliases: ["keyboard", "touchpad", "pointer", "cursor"], tags: ["input"] },
     look:       { title: "Window & effects",   sub: "Layout, gaps, borders, shadow and opacity", aliases: ["gaps", "borders", "shadow", "opacity", "blur"], tags: ["window"] },
     presets:    { title: "Power presets",      sub: "Saved profile and charge combinations",   aliases: ["preset", "profile", "charge"], tags: ["power"] },
-    idlelock:   { title: "Security",           sub: "Fingerprint and idle lock",               aliases: ["lock", "fingerprint", "idle", "suspend", "security"], tags: ["security"] },
+    idlelock:   { title: "Security",           sub: "Fingerprint and idle lock",               aliases: ["lock", "fingerprint", "idle", "suspend", "security", "do not disturb", "dnd"], tags: ["security"] },
     animation:  { title: "Motion",              sub: "Animation speed, curve and reduced motion", aliases: ["animation", "speed", "motion"], tags: ["window"] },
     fontpicker: { title: "Font",                sub: "Installed font families",                 aliases: ["typography", "typeface", "font"], tags: ["appearance"] }
 };

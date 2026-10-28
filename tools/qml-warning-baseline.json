@@ -198,7 +198,8 @@
     "Unqualified access [unqualified] @ else if (pill.held || pill.hoverLatch || root.peekMon === modelData.name)#1",
     "Unqualified access [unqualified] @ else if (pill.held || pill.hoverLatch || root.peekMon === modelData.name)#2",
     "Unqualified access [unqualified] @ forcePinned: root.peekMon === overlay.modelData.name#1",
-    "Unqualified access [unqualified] @ function dismissPill() { root.closePill(modelData.name, false); }#1",
+    "Unqualified access [unqualified] @ function dismissPill() { root.closePill(modelData.name, false, false); }#1",
+    "Unqualified access [unqualified] @ function dismissPillKeyboard() { root.closePill(modelData.name, false, true); }#1",
     "Unqualified access [unqualified] @ if (root.closingMon === modelData.name) {#1",
     "Unqualified access [unqualified] @ if (root.closingMon === modelData.name) {#2",
     "Unqualified access [unqualified] @ if (root.forceHiddenMon !== overlay.modelData.name) {#1",
@@ -238,7 +239,8 @@
     "Unqualified access [unqualified] @ || root.peekMon === modelData.name#2",
     "Unqualified access [unqualified] @ || root.revealMon === modelData.name) {#1",
     "Unqualified access [unqualified] @ || root.revealMon === modelData.name) {#2",
-    "Unqualified access [unqualified] @ } else if (root.closingMon.length === 0) {#1",
+    "Unqualified access [unqualified] @ } else if (root.closingMon.length === 0 && root.forceHiddenMon.length === 0) {#1",
+    "Unqualified access [unqualified] @ } else if (root.closingMon.length === 0 && root.forceHiddenMon.length === 0) {#2",
     "Unqualified access [unqualified] @ } else if (root.forceHiddenMon.length === 0) {#1"
   ]
 }

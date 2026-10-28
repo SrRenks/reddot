@@ -43,11 +43,20 @@ if (/WheelHandler\s*\{/.test(surfaceBase)
     && !/surface\.scrollBy\(ScrollMath\.stepFor/.test(surfaceBase))
     failures.push("PillSurface.qml: WheelHandler must forward to Surface.scrollBy(ScrollMath.stepFor)");
 
+const shell = read(pillDir + "shell.qml");
+if (!/closingFromKeyboard/.test(shell))
+    failures.push("shell.qml: close state must distinguish keyboard from backdrop");
+if (!/function dismissPill\(\)/.test(shell))
+    failures.push("shell.qml: backdrop dismiss must use the mouse-close path");
+if (!/dismissPillKeyboard\(\)/.test(shell))
+    failures.push("shell.qml: keyboard dismiss must use the guarded path");
+if (!/closeWithAnimation\(mon, true\)/.test(shell))
+    failures.push("shell.qml: keyboard close must enable the hover guard");
+
 const sensors = read(pillDir + "Singletons/Sensors.qml");
 if (!/Math\.max\(next\.rpm, Math\.round\(value\)\)/.test(sensors))
     failures.push("Sensors.qml: fan RPM must keep the highest sensor value");
 
-const shell = read(pillDir + "shell.qml");
 const wheelCount = (shell.match(/\bonWheel\s*:/g) || []).length;
 if (wheelCount !== 1)
     failures.push(`shell.qml: expected one backdrop wheel handler, found ${wheelCount}`);

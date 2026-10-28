@@ -41,6 +41,8 @@ ShellRoot {
     property string forceHiddenMon: ""
     /** Keyboard close holds the pill during the surface morph, then hides it once. */
     property string closingMon: ""
+    /** True only when the current close came from a key/action, not a backdrop click. */
+    property bool closingFromKeyboard: false
     /** Keep the overlay full-screen until the retract animation has finished. */
     property string layerHoldMon: ""
 
@@ -78,9 +80,14 @@ ShellRoot {
         interval: Motion.closeRest
         repeat: false
         onTriggered: {
-            if (root.closingMon.length > 0)
+            // A backdrop click already leaves the pointer where the user aimed.
+            // Suppressing hover in that case strands the top strip until the
+            // pointer leaves and re-enters. Only a keyboard close needs the
+            // post-close guard against the warp still sitting on the pill.
+            if (root.closingMon.length > 0 && root.closingFromKeyboard)
                 root.forceHiddenMon = root.closingMon;
             root.closingMon = "";
+            root.closingFromKeyboard = false;
             layerRelease.restart();
         }
     }
@@ -230,12 +237,12 @@ ShellRoot {
         if (!mon || mon.length === 0)
             mon = root.focusedMonitorName();
         if (root.openSurface.length > 0) {
-            root.closeWithAnimation(mon);
+            root.closeWithAnimation(mon, true);
             return;
         }
         if (root.peekMon === mon) {
             root.peekMon = "";
-            root.closeWithAnimation(mon);
+            root.closeWithAnimation(mon, true);
             return;
         }
         root.resetCloseState();
@@ -295,6 +302,7 @@ ShellRoot {
         keyboardHide.stop();
         layerRelease.stop();
         root.closingMon = "";
+        root.closingFromKeyboard = false;
         root.layerHoldMon = "";
         root.forceHiddenMon = "";
     }
@@ -305,11 +313,16 @@ ShellRoot {
      * action clears it. Visual state is cleared by the overlay's closingMon
      * connection.
      */
-    function closePill(mon, resetHistory) {
+    function closePill(mon, resetHistory, fromKeyboard) {
         if (!mon || mon.length === 0)
             mon = root.focusedMonitorName();
         layerRelease.stop();
         root.closingMon = mon;
+        root.closingFromKeyboard = fromKeyboard === true;
+        // A new mouse close must not inherit a keyboard guard from an earlier
+        // cycle; otherwise the top strip stays inert until a full leave/enter.
+        if (fromKeyboard !== true)
+            root.forceHiddenMon = "";
         root.layerHoldMon = mon;
         if (resetHistory)
             Flags.lastSurface = "";
@@ -317,7 +330,7 @@ ShellRoot {
         keyboardHide.restart();
     }
 
-    function closeWithAnimation(mon) { root.closePill(mon, false); }
+    function closeWithAnimation(mon, fromKeyboard) { root.closePill(mon, false, fromKeyboard); }
 
     /** A back click lands on the pill home, not on a stale panel. */
     function back() {
@@ -520,7 +533,8 @@ ShellRoot {
             WlrLayershell.namespace: "pill"
 
             /** Close an explicitly held pill without leaving a pinned/revealed state behind. */
-            function dismissPill() { root.closePill(modelData.name, false); }
+            function dismissPill() { root.closePill(modelData.name, false, false); }
+            function dismissPillKeyboard() { root.closePill(modelData.name, false, true); }
 
             /**
              * HyprlandFocusGrab retains keyboard focus for the listed surface
@@ -709,9 +723,9 @@ ShellRoot {
                         else if (overlay.surfaceOpen)
                             pill.requestBack();
                         else if (pill.held || pill.hoverLatch || root.peekMon === modelData.name)
-                            overlay.dismissPill();
+                            overlay.dismissPillKeyboard();
                         else
-                            overlay.dismissPill();
+                            overlay.dismissPillKeyboard();
                     }
                 }
                 Keys.onUpPressed: (e) => {
@@ -964,7 +978,7 @@ ShellRoot {
                         pill.pinned = false;
                         root.peekMon = "";
                         root.revealMon = "";
-                    } else if (root.closingMon.length === 0) {
+                    } else if (root.closingMon.length === 0 && root.forceHiddenMon.length === 0) {
                         pill.suppressHover = false;
                     }
                 }

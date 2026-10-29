@@ -46,14 +46,12 @@ def _in_build(name, cmd):
     return f"cd {shlex.quote(os.path.join(BUILD_DIR, name))} && {cmd}"
 
 # One shell prelude that guarantees cargo is on PATH: bootstrap rustup when cargo
-# is missing, then source ~/.cargo/env so the freshly installed cargo is reachable
-# in this very shell. The trailing source uses ';' (not '&&') on purpose, so a box
-# that already has cargo from its distro, with no ~/.cargo/env to source, still
-# falls through to the build instead of aborting on the missing file.
+# is missing, then source ~/.cargo/env only when it exists. Distro cargo has no
+# ~/.cargo/env, so the guard keeps that case from aborting the build.
 _CARGO_PREP = (
     "command -v cargo >/dev/null 2>&1 || "
     "(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y); "
-    '. "$HOME/.cargo/env"'
+    'if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi'
 )
 
 

@@ -47,6 +47,29 @@ fn os_release(path: &Path) -> BTreeMap<String, String> {
     out
 }
 
+fn apt_has_backports(needle: &str) -> bool {
+    let mut files = vec![PathBuf::from("/etc/apt/sources.list")];
+    if let Ok(entries) = fs::read_dir("/etc/apt/sources.list.d") {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if p.extension().and_then(|e| e.to_str()).map_or(false, |e| e == "list" || e == "sources") {
+                files.push(p);
+            }
+        }
+    }
+    files.iter().any(|p| fs::read_to_string(p).map(|t| t.contains(needle)).unwrap_or(false))
+}
+fn debian_backports_release() -> Option<String> {
+    let data = os_release(Path::new("/etc/os-release"));
+    if data.get("ID").map(String::as_str) != Some("debian") {
+        return None;
+    }
+    let code = data.get("VERSION_CODENAME").cloned().unwrap_or_default();
+    if code.is_empty() { return None; }
+    let needle = format!("{code}-backports");
+    apt_has_backports(&needle).then(|| needle)
+}
+
 fn which(bin: &str) -> Option<PathBuf> {
     env::var_os("PATH").and_then(|paths| {
         env::split_paths(&paths).map(|d| d.join(bin)).find(|p| p.is_file())
@@ -67,7 +90,12 @@ fn install_argv(names: &[String], family: &str, aur: bool, root: &str) -> Result
             vec!["pacman".into(), "-S".into(), "--needed".into(), "--noconfirm".into()]
         }
     } else if family == "debian" {
-        vec!["apt-get".into(), "install".into(), "-y".into()]
+        let mut v = vec!["apt-get".into(), "install".into(), "-y".into()];
+        if let Some(release) = debian_backports_release() {
+            v.push("-t".into());
+            v.push(release);
+        }
+        v
     } else if family == "fedora" {
         vec!["dnf".into(), "install".into(), "-y".into()]
     } else if family == "gentoo" {

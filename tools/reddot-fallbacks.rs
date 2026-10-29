@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 const ZIG_VERSION: &str = "0.15.2";
-const CARGO_PREP: &str = "command -v cargo >/dev/null 2>&1 || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y); . \"$HOME/.cargo/env\"";
+const CARGO_PREP: &str = "command -v cargo >/dev/null 2>&1 || (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y); if [ -f \"$HOME/.cargo/env\" ]; then . \"$HOME/.cargo/env\"; fi";
 
 fn home() -> PathBuf {
     env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("/"))

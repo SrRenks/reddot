@@ -72,6 +72,9 @@ semantic versioning when it cuts a release.
   instead of the black default; `monitor.added`/`monitor.removed` reapply it.
 - Super+arrows fall back to the adjacent monitor when no window exists in that
   direction, so an empty second output is still reachable.
+- Debian 13 installs target `trixie-backports` for the Hyprland/quickshell set
+  instead of enabling an Ubuntu PPA, and cargo fallbacks no longer abort when a
+  distro cargo has no `~/.cargo/env`.
 - Strict string comparisons in the wallpaper, launcher and app lists.
 - Dynamic host contract in the notification toast, keeping the QML boundary explicit.
 - Nested Tooltip access to the component scale.

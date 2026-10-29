@@ -72,6 +72,11 @@
     "Unqualified access [unqualified] @ width: faderRow.colW#1",
     "Unqualified access [unqualified] @ width: faderRow.colW#2"
   ],
+  "configs/quickshell/pill/PackagesSurface.qml": [
+    "Unqualified access [unqualified] @ : modelData.source === \"flatpak\" ? \"Flatpak\"#1",
+    "Unqualified access [unqualified] @ text: modelData.line#1",
+    "Unqualified access [unqualified] @ text: modelData.source === \"aur\" ? \"AUR\"#1"
+  ],
   "configs/quickshell/pill/Pill.qml": [
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#10",

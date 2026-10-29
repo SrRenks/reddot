@@ -31,6 +31,8 @@ app.zen_browser.zen
 const p = parse(clean);
 eq(p.states, { official: "ok", aur: "ok", flatpak: "ok" }, "all sources ok");
 eq(p.total, 3, "total combines sources");
+eq(p.details.length, 3, "details keep one row per package");
+eq(p.details[0].source, "official", "official detail source");
 eq(p.important, ["linux", "mesa"], "critical names");
 eq(p.errors, [], "no errors");
 eq(p.backend, "unknown", "backend defaults to unknown");

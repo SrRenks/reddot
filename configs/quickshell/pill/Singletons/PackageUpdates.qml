@@ -22,6 +22,7 @@ Singleton {
     property var official: []
     property var aur: []
     property var flatpak: []
+    property var details: []
     property var importantNames: []
     property string lastCheck: ""
     property real lastCheckEpoch: 0
@@ -79,6 +80,7 @@ Singleton {
         root.official = result.official;
         root.aur = result.aur;
         root.flatpak = result.flatpak;
+        root.details = result.details || [];
         root.backend = result.backend || "unknown";
         root.officialState = result.states.official;
         root.aurState = result.states.aur;

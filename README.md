@@ -56,6 +56,10 @@ page uses the same order and keeps it across restarts.
 
 - **System** shows CPU, iGPU, memory, temperature, fan RPM, network, disk, swap
   and compute governor without a background daemon.
+- **System packages** lists pending native, AUR and Flatpak updates with versions
+  and marks critical stack updates such as Hyprland.
+
+![System packages](assets/packages.png)
 - **Power** covers TLP profiles, charge windows, presets and session actions.
 - **ThinkPad** exposes fan curve, TrackPoint and keyboard LEDs on supported
   hardware.

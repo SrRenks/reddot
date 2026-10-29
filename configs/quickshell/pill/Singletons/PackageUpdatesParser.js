@@ -21,7 +21,7 @@ function isImportant(name) {
 
 function parse(text, previous) {
     previous = previous || {};
-    var off = [], aur = [], flat = [];
+    var off = [], aur = [], flat = [], details = [];
     var section = "";
     var states = { official: "pending", aur: "pending", flatpak: "pending" };
     var backend = "unknown";
@@ -55,9 +55,16 @@ function parse(text, previous) {
         var name = line.split(/\s+/)[0];
         if (name.length === 0)
             continue;
-        if (section === "official") off.push(name);
-        else if (section === "aur") aur.push(name);
-        else if (section === "flatpak") flat.push(name);
+        if (section === "official") {
+            off.push(name);
+            details.push({ name: name, source: "official", line: line });
+        } else if (section === "aur") {
+            aur.push(name);
+            details.push({ name: name, source: "aur", line: line });
+        } else if (section === "flatpak") {
+            flat.push(name);
+            details.push({ name: name, source: "flatpak", line: line });
+        }
     }
 
     // A failed source keeps the previous non-empty result instead of flashing
@@ -82,6 +89,7 @@ function parse(text, previous) {
         official: off,
         aur: aur,
         flatpak: flat,
+        details: details,
         states: states,
         errors: errors,
         important: important,

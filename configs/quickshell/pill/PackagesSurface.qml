@@ -107,6 +107,63 @@ SettingsSurface {
             }
         }
 
+        SettingsLabel { s: root.s; text: "Updates" }
+
+        Item {
+            width: parent.width
+            height: 188 * root.s
+            visible: PackageUpdates.details.length > 0
+
+            ListView {
+                anchors.fill: parent
+                clip: true
+                model: PackageUpdates.details
+                spacing: 4 * root.s
+                boundsBehavior: Flickable.StopAtBounds
+
+                delegate: Item {
+                    required property var modelData
+                    width: ListView.view.width
+                    height: 23 * root.s
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width - 88 * root.s
+                        text: modelData.line
+                        color: Theme.cream
+                        font.family: Theme.font
+                        font.pixelSize: 8.5 * root.s
+                        font.features: { "tnum": 1 }
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: modelData.source === "aur" ? "AUR"
+                            : modelData.source === "flatpak" ? "Flatpak"
+                            : PackageUpdates.backendLabel
+                        color: Theme.faint
+                        font.family: Theme.font
+                        font.pixelSize: 7.5 * root.s
+                        font.letterSpacing: 0.6 * root.s
+                    }
+                }
+            }
+        }
+
+        Text {
+            width: parent.width
+            visible: PackageUpdates.details.length === 0
+            text: "No pending packages in the available sources."
+            color: Theme.subtle
+            font.family: Theme.font
+            font.pixelSize: 9 * root.s
+            font.weight: Font.Medium
+            wrapMode: Text.WordWrap
+        }
+
         SettingsLabel { s: root.s; text: "Schedule" }
 
         SettingsRow {

@@ -105,7 +105,7 @@ Non-interactive options:
 --skip-extras  skip TLP, ThinkPad and user-tool installation
 ```
 
-Supported package families: Arch, Debian, Fedora, openSUSE and Gentoo. The documented target is Hyprland on Wayland. Other compositors only make sense for the standalone rishot capture tool.
+Supported package families: Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed. openSUSE Leap 15.6 and Gentoo are rejected: the former has no OBS target for the Hyprland set, and the latter is source-only and not part of the verified binary matrix. The documented target is Hyprland on Wayland.
 
 ## Keybinds
 

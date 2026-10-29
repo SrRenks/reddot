@@ -49,6 +49,27 @@ fn field(text: &str, key: &str) -> String {
     let rest = &text[start + needle.len()..];
     rest.split('"').next().unwrap_or("").to_string()
 }
+fn os_release(key: &str) -> String {
+    let text = fs::read_to_string("/etc/os-release").unwrap_or_default();
+    text.lines().find_map(|l| l.strip_prefix(&format!("{key}="))).unwrap_or("").trim_matches(['"', '\'']).to_string()
+}
+fn unsupported(family: &str) -> Option<String> {
+    let id = os_release("ID").to_lowercase();
+    let version = os_release("VERSION_ID");
+    if family == "gentoo" || id.contains("gentoo") || id.contains("funtoo") {
+        return Some("Gentoo source builds are not part of the supported binary matrix; use Arch, Debian 13+, Fedora 44+ or openSUSE Tumbleweed".into());
+    }
+    if family == "suse" && (id.contains("leap") || id.contains("sles") || id.contains("sled") || version.starts_with("15.")) {
+        return Some("openSUSE Leap is not supported for the Hyprland set; use openSUSE Tumbleweed".into());
+    }
+    if family == "fedora" && version.split('.').next().and_then(|v| v.parse::<u32>().ok()).map_or(false, |v| v < 44) {
+        return Some("Fedora 44 or newer is required; the Hyprland COPR does not cover older Fedora releases".into());
+    }
+    if family == "debian" && version.split('.').next().and_then(|v| v.parse::<u32>().ok()).map_or(false, |v| v < 13) {
+        return Some("Debian 13 or newer is required; quickshell is in trixie-backports".into());
+    }
+    None
+}
 fn run(bin: &Path, args: &[&str]) -> Result<String, String> {
     let out = Command::new(bin).args(args).output().map_err(|e| format!("{}: {e}", bin.display()))?;
     if !out.status.success() {
@@ -121,8 +142,22 @@ fn main() {
     let bin = |name: &str| bin_dir.join(name);
     let detect = match run(&bin("reddot-detect"), &[]) { Ok(v) => v, Err(e) => { eprintln!("{e}"); std::process::exit(1); } };
     let detected_family = field(&detect, "family");
-    let family = if family_override.is_empty() { detected_family } else { family_override };
+    let family = if family_override.is_empty() { detected_family } else { family_override.clone() };
     let init = field(&detect, "init");
+    let detected_id = os_release("ID");
+    let unsupported_reason = if family_override.is_empty() {
+        unsupported(&family)
+    } else {
+        let mut reason = unsupported(&family);
+        if reason.is_none() && family == "suse" && (detected_id.contains("leap") || os_release("VERSION_ID").starts_with("15.")) {
+            reason = Some("openSUSE Leap is not supported for the Hyprland set; use openSUSE Tumbleweed".into());
+        }
+        reason
+    };
+    if let Some(reason) = unsupported_reason {
+        eprintln!("reddot-install: unsupported system: {reason}");
+        std::process::exit(2);
+    }
     if !quick {
         if !full {
             let choice = ask("Install profile: 1 Quick, 2 Full, 3 Custom", "1");

@@ -32,3 +32,4 @@
 - [ADR 0031: Rust Custom profile](0031-rust-custom-profile.md)
 - [ADR 0032: Rust final report](0032-rust-final-report.md)
 - [ADR 0033: Five-family dry-run matrix](0033-five-family-dry-run.md)
+- [ADR 0034: Supported binary matrix](0034-supported-matrix.md)

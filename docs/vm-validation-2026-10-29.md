@@ -8,9 +8,9 @@ Real cloud VMs, QEMU/KVM, cloud-init and a passwordless sudo user. Each run used
 | Debian 13 (trixie) | PASS, including reboot | Hyprland, quickshell, matugen; NetworkManager and bluetooth enabled; `reddot-update check` returned JSON after reboot |
 | openSUSE Tumbleweed 20261027 | PASS | Hyprland, quickshell, services enabled; closing report |
 | Fedora 44 | PASS, including reboot | Hyprland 0.57, quickshell, awww, matugen; NetworkManager and bluetooth enabled; `reddot-update check` returns JSON |
-| openSUSE Leap 15.6 | FAIL | OBS `home:AvengeMedia:danklinux` has no `openSUSE_Leap_15.6` target; native package batch fails; use Tumbleweed for the SUSE family |
+| openSUSE Leap 15.6 | REJECTED | no OBS target for `home:AvengeMedia:danklinux`; use Tumbleweed |
 | Arch | PASS, including reboot | Hyprland, quickshell, matugen, yay; NetworkManager and bluetooth enabled; AUR bootstrap built yay-bin; `reddot-update check` returns JSON after reboot |
-| Gentoo | not VM-tested | dry-run only |
+| Gentoo | REJECTED | source-only and outside the verified binary matrix |
 
 ## Fixes found by the VMs
 
@@ -33,9 +33,8 @@ Real cloud VMs, QEMU/KVM, cloud-init and a passwordless sudo user. Each run used
 ## Remaining validation
 
 - Fedora 44 pass replaces the earlier Fedora 43 partial result.
-- Decide whether Leap 15.6 is supported; if yes, add source fallbacks or a repo.
-- Boot-test Fedora/Tumbleweed after the package fixes.
-- Gentoo install.
+- Leap 15.6 and Gentoo are intentionally rejected with a clear message.
+- Fedora 44 and Tumbleweed boot-tested after the package fixes.
 
 ## Follow-up after the run
 

@@ -6,7 +6,7 @@ repo=$(dirname "$here")
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 sh "$here/build-rust.sh" "$tmp/bin" >/dev/null
-for family in arch debian fedora suse gentoo; do
+for family in arch debian fedora suse; do
     mkdir -p "$tmp/home-$family" "$tmp/config-$family"
     HOME="$tmp/home-$family" XDG_CONFIG_HOME="$tmp/home-$family/.config" XDG_STATE_HOME="$tmp/home-$family/.local/state" XDG_DATA_HOME="$tmp/home-$family/.local/share" \
         "$tmp/bin/reddot-install" --quickstart --dry-run --family "$family" --source "$repo/configs" --config-root "$tmp/config-$family" --bin-dir "$tmp/bin" > "$tmp/out-$family" 2>&1
@@ -15,3 +15,11 @@ for family in arch debian fedora suse gentoo; do
     echo "ok - $family quickstart dry-run"
 done
 echo 'all family dry-run tests passed'
+
+# Unsupported source-only family is rejected with a clear message, not planned.
+if "$tmp/bin/reddot-install" --quickstart --dry-run --family gentoo --source "$repo/configs" --config-root "$tmp/gentoo-config" --bin-dir "$tmp/bin" > "$tmp/gentoo.out" 2>&1; then
+    echo 'FAIL: gentoo was accepted'
+    exit 1
+fi
+grep -q 'unsupported system' "$tmp/gentoo.out"
+echo 'ok - gentoo rejected'

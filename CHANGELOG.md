@@ -64,6 +64,12 @@ semantic versioning when it cuts a release.
 - Architecture and coverage notes reflect the current warning baseline and
   verification commands.
 
+### Changed
+
+- Supported matrix is Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed.
+  Leap 15.6 and Gentoo are rejected up front instead of failing in package
+  repositories or source builds.
+
 ### Fixed
 
 - The Fedora runner no longer passes `--skip-broken`; a missing required

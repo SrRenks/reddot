@@ -1,7 +1,7 @@
 # Getting started
 
 reddot targets Arch Linux with Hyprland and Quickshell. The installer can also
-deploy the configuration on Debian, Fedora, openSUSE and Gentoo, but the
+deploy the configuration on Debian 13+, Fedora 44+ and openSUSE Tumbleweed, but the
 reference environment is Hyprland 0.56 and Quickshell 0.3.2.
 
 ## Install

@@ -173,6 +173,28 @@ ShellRoot {
     Connections {
         target: Hyprland
         function onRawEvent(event) {
+            /**
+             * A click on another monitor focuses an application there, not the
+             * open pill. Close before the focus hand-off can leave the pill's
+             * keyboard grab stranded on a different output. The focusedmon
+             * payload is "<monitor>,<workspace>".
+             */
+            if (root.openSurface.length > 0
+                    && (event.name === "focusedmon" || event.name === "focusedmonv2")) {
+                const mon = String(event.data || "").split(",")[0];
+                if (mon.length > 0 && mon !== root.openMon)
+                    root.closeWithAnimation(root.openMon);
+            }
+            /**
+             * Fallback for bare-desktop and layer-surface clicks that do not
+             * emit focusedmon on every compositor.
+             */
+            if (root.openSurface.length > 0
+                    && (event.name === "activewindow" || event.name === "activewindowv2")) {
+                const focused = Hyprland.focusedMonitor;
+                if (focused && focused.name && focused.name !== root.openMon)
+                    root.closeWithAnimation(root.openMon);
+            }
             if (root.refreshEvents[event.name])
                 root.refresh();
         }
@@ -483,6 +505,9 @@ ShellRoot {
             readonly property bool surfaceOpen: surface.length > 0
             readonly property bool modal: pill.authPending ? false : (surfaceOpen || pill.held || pill.quickChoosing)
             readonly property bool keyboardOpen: surfaceOpen || pill.held || pill.hoverLatch || pill.quickChoosing
+            /** Another monitor owns the modal surface; this layer must be click-through. */
+            readonly property bool otherSurfaceOpen: root.openSurface.length > 0 && !surfaceOpen
+            readonly property bool holdLayer: root.layerHoldMon === modelData.name
             property bool grabReady: false
             /**
              * True while this monitor's active workspace reports a fullscreen
@@ -570,12 +595,14 @@ ShellRoot {
             }
 
             anchors { top: true; left: true; right: true }
-            implicitHeight: (tall || root.layerHoldMon === modelData.name)
+            implicitHeight: (surfaceOpen || holdLayer || tall)
                 ? modelData.height : bandH
 
-            mask: modal ? fullRegion
+            mask: otherSurfaceOpen
+                ? hiddenRegion
+                : ((surfaceOpen || modal) ? fullRegion
                 : (pillHidden ? hiddenRegion
-                : (autoMode ? (autoHidden ? revealRegion : revealUnion) : pillRegion))
+                : (autoMode ? (autoHidden ? revealRegion : revealUnion) : pillRegion)))
             Region { id: hiddenRegion }
             Region {
                 id: pillRegion
@@ -616,6 +643,7 @@ ShellRoot {
             HoverHandler {
                 id: autoHover
                 enabled: overlay.autoMode && !overlay.monFullscreen
+                    && !overlay.otherSurfaceOpen
                 onHoveredChanged: {
                     if (!enabled)
                         return;
@@ -659,7 +687,7 @@ ShellRoot {
 
             MouseArea {
                 anchors.fill: parent
-                enabled: overlay.modal
+                enabled: overlay.surfaceOpen || overlay.modal
                 acceptedButtons: Qt.AllButtons
                 /**
                  * Close on the completed click, not on the press. Closing on press

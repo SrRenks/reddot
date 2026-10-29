@@ -11,6 +11,9 @@ and morphs into the page you choose.
   tag.
 - `Escape` closes the current surface; the back control returns to the parent
   page.
+- Clicking outside closes the surface, including on another monitor. While a
+  surface is open, the other outputs stay click-through instead of holding a
+  stale keyboard grab.
 - The wheel, scrollbar, `PageUp`/`PageDown`, `Home` and `End` work on long pages.
 
 ![Pill tour](../assets/pill-tour.gif)

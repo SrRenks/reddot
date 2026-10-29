@@ -82,6 +82,11 @@ semantic versioning when it cuts a release.
 
 ### Fixed
 
+- An open surface now spans the full monitor so an outside click reaches the
+  backdrop and dismisses it immediately.
+- Clicking another monitor dismisses the open surface through `focusedmon` /
+  `activewindow`; the other outputs use an empty input mask, so the click reaches
+  the desktop instead of being swallowed by a stale pill grab.
 - Lock content now renders the date/time on every monitor; secondary screens
   show a LOCKED marker while authentication stays on the primary.
 - The physical two-output lock was verified with `secure=true` on eDP-1 and

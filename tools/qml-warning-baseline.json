@@ -224,7 +224,6 @@
     "Unqualified access [unqualified] @ if (root.revealMon === modelData.name) root.revealMon = \"\";#1",
     "Unqualified access [unqualified] @ if (root.revealMon === modelData.name) root.revealMon = \"\";#2",
     "Unqualified access [unqualified] @ if (root.revealMon === overlay.modelData.name)#1",
-    "Unqualified access [unqualified] @ implicitHeight: (tall || root.layerHoldMon === modelData.name)#1",
     "Unqualified access [unqualified] @ maskSource: wall#1",
     "Unqualified access [unqualified] @ onRequestBack: root.back()#1",
     "Unqualified access [unqualified] @ onRequestClose: root.closeWithAnimation(overlay.modelData.name)#1",

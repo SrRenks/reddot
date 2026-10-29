@@ -1,7 +1,7 @@
 # Repository map
 
 The checkout separates the shell, the desktop configuration, the installer and
-the helper tools. Generated files and Python caches are not tracked.
+the helper tools. Python caches are not tracked; the old parity harness lives outside the checkout.
 
 ## Top level
 
@@ -10,10 +10,10 @@ the helper tools. Generated files and Python caches are not tracked.
 | `assets/` | Screenshots and demonstration images referenced by the README. |
 | `configs/` | Files deployed into the user's config directories. |
 | `docs/` | Committed project documentation. |
-| `installer/` | Python installer: distro detection, package planning, deployment, TUI. |
+| `installer/` | Rust installer support data: `packages.json` and starter wallpapers. |
 | `tools/` | Helpers, checks, tests and privileged system policy. |
 | `tests/qs/` | Windowless Quickshell runtime harness. |
-| `install.sh` | Bootstrap that fetches the checkout and starts the Python installer. |
+| `install.sh` | Bootstrap that installs git/rustc, fetches the checkout and starts the Rust installer. |
 | `README.md` | Short project introduction and install summary. |
 | `WALLPAPERS.md` | Wallpaper sources and licensing notes. |
 
@@ -36,23 +36,24 @@ the helper tools. Generated files and Python caches are not tracked.
 
 | Path | Role |
 |---|---|
-| `installer/reddot_install.py` | Flow orchestration and CLI. |
-| `installer/distro.py` | Distribution detection and package resolution. |
-| `installer/pkg.py` | Package-manager argv, repositories and privilege rules. |
-| `installer/fallbacks.py` | Source-build fallbacks for packages unavailable in a distro. |
-| `installer/deploy.py` | Deploy, neutralize, backup and uninstall planning. |
-| `installer/tui.py` | Interactive prompts and reports. |
-| `installer/packages.json` | Package manifest. |
+| `installer/packages.json` | Package manifest consumed by the Rust planner. |
+| `installer/starter-wallpapers/` | Seed wallpapers copied by the Rust post-install step. |
+| `tools/reddot-install.rs` | Rust orchestration entry point. |
+| `tools/reddot-distro.rs` | Distribution detection and package resolution. |
+| `tools/reddot-pkg.rs` | Package-manager argv, repositories and privilege rules. |
+| `tools/reddot-fallbacks.rs` | Source-build/download/Flatpak fallback steps. |
+| `tools/reddot-deploy.rs` | Deploy, neutralize, backup and uninstall planning. |
+| `tools/reddot-tui.rs` | TUI renderer and input. |
+| `tools/reddot-post.rs` | Post-install effects. |
 
 ## Tools
 
 | Path | Role |
 |---|---|
 | `tools/check.sh` | Main validation gate. |
-| `tools/check-integration.sh` | Installer, udev, polkit, systemd and TLP checks. |
+| `tools/check-static.sh` | Headless CI gate. |
 | `tools/check-ui-contract.mjs` | Surface and status contracts. |
 | `tools/check-qml-warnings.mjs` | QML warning baseline gate. |
-| `tools/test-installer-matrix.py` | Five-family synthetic installer matrix. |
 | `tools/check-systemd-contract.sh` | Static session target contract. |
 | `tools/check-hypr-api.sh` | Rejects legacy Hyprland syntax. |
 | `tools/smoke-surfaces.sh` | Runtime surface smoke. |

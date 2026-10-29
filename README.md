@@ -86,7 +86,7 @@ matugen derives a palette from the current wallpaper and feeds it to the pill, t
 
 ## Install
 
-The bootstrap detects the package family, installs the required tools, clones reddot and starts the Python installer.
+The bootstrap detects the package family, installs git and rustc, clones reddot and runs the Rust installer.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
@@ -150,12 +150,12 @@ The Keybinds page can edit the active file. Dynamic workspace binds from `spaces
 | Shell environment | fish |
 | Font | JetBrains Mono Nerd |
 | Palette | matugen and the Rust wallcolors engine |
-| Installer | Python 3 |
+| Installer | Rust (built from the crate-free sources) |
 | Update engine | Rust, built by the extras step |
 | Sensor snapshot | Rust, built only when needed |
 | Configuration and helpers | POSIX shell and systemd user units |
 
-The bootstrap installs git and rustc, builds the crate-free Rust installer and refuses to fall back to Python. The update and palette wrappers execute the Rust binaries directly. The Python files remain only as a test/parity harness. The update engine, palette engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`; they have no runtime crate dependency and fall back to Python only while the binaries are absent.
+The bootstrap installs git and rustc, builds the crate-free Rust installer and refuses to fall back to Python. The update, palette, deploy, installer and search wrappers execute Rust or POSIX shell directly. The old Python parity harness is archived outside the checkout; the active repository contains no `.py` files. The update engine, palette engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`.
 
 ## Project quality
 
@@ -224,7 +224,7 @@ Do not expect large wins from timer cleanups or surface unloading: cold surfaces
 
 I keep the lock process resident. It costs roughly 50 MB PSS, but a lock that is warm starts immediately and does not depend on spawning a Qt process during the critical path. I chose that trade for a personal machine where unlock latency and fail-closed behavior matter more than the last few megabytes.
 
-I moved the updater to Rust as the first migration phase. It has a closed JSON contract and a git/merge test surface, so I could prove parity without rewriting the installer at the same time. The installer remains Python because its distro logic and terminal UI are a larger risk and do not affect idle memory. The remaining plan and the fallback are in [ADR 0003](docs/decisions/0003-rust-update-engine.md).
+I moved the updater to Rust first, then the palette, installer, deploy, TUI and post-install layers. The supported binary matrix is Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed. The Python parity harness is archived outside the checkout; [ADR 0034](docs/decisions/0034-supported-matrix.md) records the matrix and [ADR 0035](docs/decisions/0035-python-harness-archive.md) records the archive.
 
 I keep one scroll implementation and one navigation vocabulary. The pill, Settings, Search and the status order all use the same surface catalog and metadata, even when that leaves the Settings pages appearing to do similar work. Duplicated behavior was causing drift, and the shared model makes the contracts testable.
 

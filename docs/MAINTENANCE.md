@@ -9,8 +9,8 @@ broke.
 |---|---|
 | `configs/hypr/` | Hyprland Lua modules, scripts, sound config. Deployed to `~/.config/hypr` |
 | `configs/quickshell/` | pill and lock QML. Deployed to `~/.config/quickshell` |
-| `installer/` | upstream Python wizard: packages, deploy, neutralize, backup |
-| `install.sh` | bootstrap: clone/update, run the wizard, then `tools/install-extras.sh` |
+| `installer/` | package manifest and starter wallpapers for the Rust installer |
+| `install.sh` | bootstrap: install git/rustc, clone/update, run the Rust installer, then `tools/install-extras.sh` |
 | `tools/` | TLP helper, TLP AC/BAT policy, bench, power report, tests, `check.sh` |
 | `docs/` | index, architecture, conventions, operations, coverage and credits |
 | `assets/` | screenshots and demo images only |
@@ -32,11 +32,9 @@ broke.
 - `tools/`: all new shell-side tooling, the TLP helper and the ThinkPad helper
   (installed only when a ThinkPad is detected).
 - `tools/reddot-update.rs`: Rust update engine built to
-  `~/.local/bin/reddot-update`; `configs/hypr/scripts/reddot-update` selects it and
-  keeps the Python engine as a rollout fallback.
-- `configs/hypr/scripts/reddot-update.py`: `DEFAULT_REMOTE` and `DEFAULT_BRANCH`
-  point at `SrRenks/reddot` and `e14g7`. An existing pristine clone with the old
-  Ricelin remote is retargeted in place on the next fetch.
+  `~/.local/bin/reddot-update`; `configs/hypr/scripts/reddot-update` executes it.
+- `tools/reddot-install.rs`: Rust installer; the old Python harness is archived
+  outside the checkout.
 - `configs/hypr/scripts/package-updates.sh`: read-only native update probe;
   pacman, dnf/RPM, zypper/RPM and apt are detected from the available backend.
   Arch uses `checkupdates` when installed, then cached `pacman -Qu`; the AUR
@@ -57,7 +55,7 @@ git -C ~/Projects/reddot pull
 sudo ~/Projects/reddot/install.sh --reinstall
 ```
 
-The Python installer only owns `~/.config`. The ThinkPad helper, polkit rule,
+The Rust installer only owns `~/.config`. The ThinkPad helper, polkit rule,
 TLP policy and user tools are outside it; after a pull that changes `tools/`:
 
 ```sh
@@ -72,8 +70,8 @@ reddot stop && reddot start
 ~/Projects/reddot/tools/check.sh          # gate: helper, QML, syntax, drift
 ~/Projects/reddot/tools/test-reddot-tlp.sh
 ~/Projects/reddot/tools/test-reddot-thinkpad.sh
-python3 ~/.config/hypr/scripts/test_reddot_update.py
-python3 ~/.config/hypr/scripts/test_wallcolors_apps.py
+sh tools/test-reddot-install-rust.sh
+sh tools/test-reddot-install-matrix.sh
 node ~/.config/quickshell/pill/lib/fuzzy.test.mjs
 node ~/.config/quickshell/pill/lib/monitors.test.mjs
 node ~/.config/quickshell/pill/lib/packageUpdates.test.mjs

@@ -28,7 +28,7 @@ PillSurface {
     /**
      * Calc mode: when the whole query parses as a real calculation (an
      * expression with at least one operation, so lone numbers and app names like
-     * i3 or python3 fall through to app search), a result row appears above the
+     * i3 or the native launcher fall through to app search), a result row appears above the
      * list and Enter copies the value. The parser in lib/calc.js never evals, so
      * a query cannot run code.
      */

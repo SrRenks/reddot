@@ -14,4 +14,9 @@ for file in \
         exit 1
     fi
 done
-echo 'ok - runtime scripts contain no python3 invocation'
+if git -C "$repo" ls-files '*.py' | grep -q .; then
+    echo "FAIL: tracked Python files remain" >&2
+    git -C "$repo" ls-files '*.py' >&2
+    exit 1
+fi
+echo 'ok - runtime scripts contain no python3 invocation and no tracked .py'

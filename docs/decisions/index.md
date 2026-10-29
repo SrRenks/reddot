@@ -33,3 +33,4 @@
 - [ADR 0032: Rust final report](0032-rust-final-report.md)
 - [ADR 0033: Five-family dry-run matrix](0033-five-family-dry-run.md)
 - [ADR 0034: Supported binary matrix](0034-supported-matrix.md)
+- [ADR 0035: Python harness archived](0035-python-harness-archive.md)

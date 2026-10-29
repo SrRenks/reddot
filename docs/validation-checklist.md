@@ -30,12 +30,9 @@ Run these checks before declaring a change complete. The full gate is
 
 ## Installer and system
 
-- [ ] `sh tools/check-integration.sh`
-- [ ] installer dry-run completes;
-- [ ] deploy/distro/pkg/fallbacks/tui selftests pass;
+- [ ] `sh tools/check-static.sh` passes;
+- [ ] `sh tools/test-reddot-install-matrix.sh` passes;
 - [ ] udev, polkit, session target and TLP checks pass.
-- [ ] `python3 tools/test_deploy_sandbox.py` passes.
-- [ ] `python3 tools/test-installer-matrix.py` passes.
 - [ ] `sh tools/check-systemd-contract.sh` passes.
 - [ ] `sh tools/check-lock-static.sh` and `sh tools/check-privileged.sh` pass.
 

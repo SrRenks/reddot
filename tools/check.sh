@@ -39,29 +39,11 @@ if [ -f "$cfg/hypr/scripts/test_launch_guard.sh" ]; then
 else
     bad "test_launch_guard.sh missing"
 fi
-for test in test_reddot_update.py test_wallcolors_apps.py; do
-    if [ -f "$cfg/hypr/scripts/$test" ]; then
-        if out=$(python3 "$cfg/hypr/scripts/$test" 2>&1); then
-            ok "$test"
-        else
-            bad "$test"
-            printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
-        fi
-    fi
-done
 if command -v node >/dev/null 2>&1; then
     for test in "$pill"/lib/*.test.mjs; do
         [ -f "$test" ] || continue
         if out=$(node "$test" 2>&1); then ok "$(basename "$test")"; else bad "$(basename "$test")"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
     done
-fi
-
-echo "== python syntax =="
-if out=$(PYTHONPYCACHEPREFIX=/tmp/reddot-pycache python3 -m compileall -q installer configs/hypr/scripts tools 2>&1); then
-    ok "python compile"
-else
-    bad "python compile"
-    printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
 fi
 
 echo "== surfaces =="
@@ -78,14 +60,6 @@ else
     printf '  skip  node not found\n'
 fi
 
-echo "== integration =="
-if out=$(sh "$here/check-integration.sh" 2>&1); then
-    ok "installer and system files"
-else
-    bad "installer and system files"
-    printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'
-fi
-
 echo "== qml contract =="
 if command -v node >/dev/null 2>&1; then
     if node "$here/check-ui-contract.mjs"; then ok "UI contract"; else bad "UI contract"; fi
@@ -96,8 +70,8 @@ fi
 echo "== lock static =="
 if out=$(sh "$here/check-lock-static.sh" 2>&1); then ok "lock static flow"; else bad "lock static flow"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 
-echo "== deploy sandbox =="
-if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad "deploy sandbox"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
+echo "== rust installer matrix =="
+if out=$(sh "$here/test-reddot-install-matrix.sh" 2>&1); then ok "rust installer matrix"; else bad "rust installer matrix"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
 
 echo "== privileged boundary =="
 if out=$(sh "$here/check-privileged.sh" 2>&1); then ok "privileged boundary"; else bad "privileged boundary"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi

@@ -12,8 +12,8 @@ Run the bootstrap from a TTY:
 curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
 ```
 
-The bootstrap installs `git` and `python3`, clones the checkout into
-`~/.local/share/reddot`, and hands off to the Python wizard. The wizard installs
+The bootstrap installs `git` and `rustc`, clones the checkout into
+`~/.local/share/reddot`, and hands off to the Rust wizard. The wizard installs
 packages, deploys the configuration to `~/.config`, backs up replaced files and
 then runs `tools/install-extras.sh` for the privileged helpers.
 
@@ -41,13 +41,11 @@ From the checkout:
 
 ```sh
 sh tools/check.sh
-sh tools/check-integration.sh
+sh tools/check-static.sh
 sh tools/smoke-surfaces.sh
 ```
 
-`check.sh` is the main gate. `check-integration.sh` validates the installer and
-the system files. `smoke-surfaces.sh` needs a running pill and opens each surface
-in sequence; it is optional outside a desktop session.
+`check.sh` is the main gate. `check-static.sh` is the headless CI gate. `smoke-surfaces.sh` needs a running pill and opens each surface in sequence; it is optional outside a desktop session.
 
 ## Configuration sources
 

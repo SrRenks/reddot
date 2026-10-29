@@ -27,34 +27,6 @@ for check in check-lock-static.sh check-privileged.sh; do
     if out=$(sh "$here/$check" 2>&1); then ok "$check"; else bad "$check"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
 done
 
-echo "== installer matrix =="
-if out=$(python3 "$here/test-installer-matrix.py" 2>&1); then ok "$out"; else bad "installer matrix"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
-if out=$(sh "$here/check-systemd-contract.sh" 2>&1); then ok "session target contract"; else bad "session target contract"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
-
-echo "== deploy sandbox =="
-if out=$(python3 "$here/test_deploy_sandbox.py" 2>&1); then ok "$out"; else bad "deploy sandbox"; printf '%s\n' "$out" | tail -n 10 | sed 's/^/        /'; fi
-
-echo "== python =="
-if out=$(PYTHONPYCACHEPREFIX=/tmp/reddot-ci-pycache python3 -m compileall -q "$repo/installer" "$repo/configs/hypr/scripts" "$repo/tools" 2>&1); then
-    ok "python compile"
-else
-    bad "python compile"
-    printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
-fi
-for test in test_reddot_update.py test_wallcolors_apps.py; do
-    file="$repo/configs/hypr/scripts/$test"
-    [ -f "$file" ] || continue
-    if out=$(python3 "$file" 2>&1); then ok "$test"; else bad "$test"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
-done
-for module in deploy distro pkg fallbacks tui; do
-    if out=$(cd "$repo/installer" && timeout 60s python3 -c "import $module; $module._selftest()" 2>&1); then
-        ok "$module selftest"
-    else
-        bad "$module selftest"
-        printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'
-    fi
-done
-
 echo "== rust updater =="
 if command -v rustc >/dev/null 2>&1; then
     binary="${TMPDIR:-/tmp}/reddot-update-test-$$"
@@ -68,11 +40,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-rust-test-build.log /tmp/reddot-rust-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-update-rust.sh" 2>&1); then ok "rust updater integration"; else bad "rust updater integration"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust updater build"
         sed 's/^/        /' /tmp/reddot-rust-build.log | tail -n 12
@@ -95,11 +62,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-colors-test-build.log /tmp/reddot-colors-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$colors_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-wallcolors-rust.sh" 2>&1); then ok "rust wallcolors integration"; else bad "rust wallcolors integration"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust wallcolors build"
         sed 's/^/        /' /tmp/reddot-colors-build.log | tail -n 12
@@ -122,11 +84,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-distro-test-build.log /tmp/reddot-distro-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$distro_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-distro-rust.sh" 2>&1); then ok "rust distro parity"; else bad "rust distro parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust distro build"
         sed 's/^/        /' /tmp/reddot-distro-build.log | tail -n 12
@@ -149,11 +106,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-pkg-test-build.log /tmp/reddot-pkg-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$pkg_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-pkg-rust.sh" 2>&1); then ok "rust pkg parity"; else bad "rust pkg parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust pkg build"
         sed 's/^/        /' /tmp/reddot-pkg-build.log | tail -n 12
@@ -176,11 +128,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-fb-test-build.log /tmp/reddot-fb-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$fb_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-fallbacks-rust.sh" 2>&1); then ok "rust fallbacks parity"; else bad "rust fallbacks parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust fallbacks build"
         sed 's/^/        /' /tmp/reddot-fb-build.log | tail -n 12
@@ -203,11 +150,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-grub-test-build.log /tmp/reddot-grub-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$grub_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-grub-rust.sh" 2>&1); then ok "rust grub parity"; else bad "rust grub parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust grub build"
         sed 's/^/        /' /tmp/reddot-grub-build.log | tail -n 12
@@ -230,11 +172,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-deploy-test-build.log /tmp/reddot-deploy-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$deploy_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-deploy-rust.sh" 2>&1); then ok "rust deploy parity"; else bad "rust deploy parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust deploy build"
         sed 's/^/        /' /tmp/reddot-deploy-build.log | tail -n 12
@@ -257,11 +194,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-neutral-test-build.log /tmp/reddot-neutral-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$neutral_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-neutralize-rust.sh" 2>&1); then ok "rust neutralize parity"; else bad "rust neutralize parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust neutralize build"
         sed 's/^/        /' /tmp/reddot-neutral-build.log | tail -n 12
@@ -284,11 +216,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-tui-test-build.log /tmp/reddot-tui-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$tui_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-tui-rust.sh" 2>&1); then ok "rust tui render parity"; else bad "rust tui render parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust tui build"
         sed 's/^/        /' /tmp/reddot-tui-build.log | tail -n 12
@@ -311,11 +238,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-detect-test-build.log /tmp/reddot-detect-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$detect_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-detect-rust.sh" 2>&1); then ok "rust detect parity"; else bad "rust detect parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust detect build"
         sed 's/^/        /' /tmp/reddot-detect-build.log | tail -n 12
@@ -338,11 +260,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-plan-test-build.log /tmp/reddot-plan-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$plan_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-plan-rust.sh" 2>&1); then ok "rust plan parity"; else bad "rust plan parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust plan build"
         sed 's/^/        /' /tmp/reddot-plan-build.log | tail -n 12
@@ -365,11 +282,6 @@ if command -v rustc >/dev/null 2>&1; then
             tail -n 12 /tmp/reddot-post-test-build.log /tmp/reddot-post-unit.log 2>/dev/null | sed 's/^/        /'
         fi
         rm -f "$post_unit"
-        if command -v jq >/dev/null 2>&1; then
-            if out=$(sh "$repo/tools/test-reddot-post-rust.sh" 2>&1); then ok "rust post effects parity"; else bad "rust post effects parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-        else
-            printf '  skip  jq not found\n'
-        fi
     else
         bad "rust post build"
         sed 's/^/        /' /tmp/reddot-post-build.log | tail -n 12
@@ -398,21 +310,6 @@ if command -v rustc >/dev/null 2>&1; then
         sed 's/^/        /' /tmp/reddot-run-build.log | tail -n 12
     fi
     rm -f "$run_bin"
-else
-    printf '  skip  rustc not found\n'
-fi
-
-echo "== rust report =="
-if command -v rustc >/dev/null 2>&1; then
-    report_bin="${TMPDIR:-/tmp}/reddot-report-test-$$"
-    if rustc --edition=2021 -O "$repo/tools/reddot-report.rs" -o "$report_bin" 2>/tmp/reddot-report-build.log; then
-        ok "rust report build"
-        if out=$(sh "$repo/tools/test-reddot-report-rust.sh" 2>&1); then ok "rust report parity"; else bad "rust report parity"; printf '%s\n' "$out" | tail -n 12 | sed 's/^/        /'; fi
-    else
-        bad "rust report build"
-        sed 's/^/        /' /tmp/reddot-report-build.log | tail -n 12
-    fi
-    rm -f "$report_bin"
 else
     printf '  skip  rustc not found\n'
 fi

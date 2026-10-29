@@ -5,17 +5,17 @@
 # Thin entrypoint for `curl -fsSL .../install.sh | bash`. It does the bare
 # minimum to get the real installer running on a fresh machine: detect the
 # distro family (so it knows the package manager), make sure git and rustc
-# are present, fetch the rice, then hand the whole flow to the Python installer.
-# The wizard, the package logic and the config deploy all live in
-# installer/reddot_install.py, not here.
+# are present, fetch the rice, then hand the whole flow to the Rust installer.
+# The wizard, package logic and config deploy live in tools/reddot-install.rs,
+# not here.
 
 set -e
 
 REPO_URL="https://github.com/SrRenks/reddot.git"
 DIR="${XDG_DATA_HOME:-$HOME/.local/share}/reddot"
 
-# os-release ID / ID_LIKE tokens per family, mirroring installer/distro.py so the
-# bootstrap picks the same package manager the Python installer expects.
+# os-release ID / ID_LIKE tokens per family, mirroring tools/reddot-distro.rs so the
+# bootstrap picks the same package manager the Rust installer expects.
 ARCH_IDS="arch cachyos endeavouros manjaro garuda artix arcolinux archcraft rebornos athena blackarch archbang crystal snigdha parabola obarun arch32 hyperbola steamos omarchy xerolinux archman biglinux ctlos tromjaro bluestar arkane blendos acreetionos mabox"
 DEBIAN_IDS="debian ubuntu linuxmint pop elementary zorin raspbian"
 FEDORA_IDS="fedora nobara rhel centos rocky almalinux"

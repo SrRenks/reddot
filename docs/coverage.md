@@ -18,6 +18,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Helpers TLP/ThinkPad | boa + adversarial | testes próprios, casos de metacaracteres/argumentos extras e selftest do installer |
 | Instalador Rust | quatro famílias em VM real + recusas explícitas | Arch/Debian 13/Fedora 44/Tumbleweed; quickstart, apply, uninstall e reboot; Leap/Gentoo recusados antes do plano |
 | CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local; Ubuntu verde após os fixes de portabilidade |
+| Harness Python | arquivado | fora do checkout; testes de paridade Python saíram do CI |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
 | Lock shell | PAM real + two outputs | QML lint, `check-lock-static.sh`, senha/fingerprint supervisionados e `WlSessionLock.secure=true` em eDP-1 + headless |
@@ -65,7 +66,6 @@ individuais das superfícies.
 ```text
 sh tools/check.sh                 gate padrão
 sh tools/smoke-surfaces.sh        smoke visual de runtime
-sh tools/check-integration.sh     instalador + arquivos de sistema
 node tools/check-ui-contract.mjs  contrato estático de UI
 node tools/check-qml-warnings.mjs baseline de warnings QML
 sh tools/check-hypr-api.sh        API Hyprland e sintaxe Lua
@@ -82,8 +82,7 @@ documentação e drift entre checkout e deploy.
 1. updater real: aplicar uma atualização e validar conflitos/rollback;
 2. hotplug físico, DPI misto e lock nas duas saídas físicas;
 3. foco/ativação linha a linha na Search e controles individuais das 41 superfícies;
-4. remover o harness Python de paridade depois que a matriz fechar;
-5. decidir sobre dedos extras do `fprintd`.
+4. decidir sobre dedos extras do `fprintd`.
 
 Leap 15.6 e Gentoo não são pendências de teste: foram removidos do suporte oficial
 pela [ADR 0034](decisions/0034-supported-matrix.md).

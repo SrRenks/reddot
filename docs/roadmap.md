@@ -31,15 +31,16 @@ Status of the main follow-ups after the Settings, package and scroll work.
 - Search row-level focus: open a page and focus a specific setting row.
 - Updater adversarial fuzz: helper arguments were covered, the update helper was
   not fuzzed in this cycle.
-- Installer execution in VMs for the five package families.
-- Multi-monitor test on two physical outputs, including hotplug and mixed DPI.
+- Installer execution in VMs for the supported four families; done in the
+  Arch/Debian/Fedora/Tumbleweed matrix (Leap and Gentoo intentionally rejected).
+- Multi-monitor physical test of hotplug, mixed DPI and a two-output lock.
 - Decide whether to remove the three extra enrolled `fprintd` fingers.
 - Truly data-driven critical-package detection for the package meter.
 
 ## Later
 
-- Re-evaluate a Rust updater only after the migration gate in
-  [ADR 0002](decisions/0002-python-rust-boundary.md) is met.
+- The Rust runtime migration is complete for the supported matrix; the Python
+  parity harness is archived per [ADR 0035](decisions/0035-python-harness-archive.md).
 
 - Split the largest QML files only where a tested lifecycle boundary exists.
 - Replace synchronous Loader use with LazyLoader only after a startup and RAM measurement.

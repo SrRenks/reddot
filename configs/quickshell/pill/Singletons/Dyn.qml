@@ -5,7 +5,7 @@ import Quickshell.Io
 
 /**
  * Live wallpaper-derived palette. matugen writes a small colour JSON on every
- * wallpaper change (via wallcolors.py) and this singleton watches it, so the
+ * wallpaper change (via the Rust wallcolors engine) and this singleton watches it, so the
  * tokens update the moment the wallpaper does. Theme reads these only while the
  * dynamic-palette flag is on; otherwise the curated washi hex wins. Defaults are
  * a black-and-red fallback so a missing file still yields a usable scheme. Surfaces and

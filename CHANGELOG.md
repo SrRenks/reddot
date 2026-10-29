@@ -76,6 +76,10 @@ semantic versioning when it cuts a release.
 
 ### Fixed
 
+- The `swww` source fallback now installs the Wayland XML/protocol headers on
+  Debian, Fedora, openSUSE and Gentoo; a reinstall no longer fails at
+  `waybackend-scanner` with "could not find wayland.xml".
+
 - The Fedora runner no longer passes `--skip-broken`; a missing required
   Hyprland package now fails the install instead of printing success.
 

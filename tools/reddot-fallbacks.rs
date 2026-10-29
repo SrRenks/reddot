@@ -95,12 +95,12 @@ fn pm_install(family: &str, root: &str, pkgs: &[&str]) -> Vec<String> {
 
 fn swww_deps(family: &str, root: &str) -> Step {
     let deps = match family {
-        "arch" => vec!["base-devel", "pkgconf", "lz4"],
-        "debian" => vec!["build-essential", "pkg-config", "liblz4-dev"],
-        "fedora" => vec!["gcc", "pkgconf-pkg-config", "lz4-devel"],
-        "suse" => vec!["gcc", "pkg-config", "liblz4-devel"],
-        "gentoo" => vec!["app-arch/lz4"],
-        _ => vec!["build-essential", "pkg-config", "liblz4-dev"],
+        "arch" => vec!["base-devel", "pkgconf", "lz4", "wayland", "wayland-protocols"],
+        "debian" => vec!["build-essential", "pkg-config", "liblz4-dev", "libwayland-dev", "wayland-protocols", "libxkbcommon-dev"],
+        "fedora" => vec!["gcc", "pkgconf-pkg-config", "lz4-devel", "wayland-devel", "wayland-protocols-devel", "libxkbcommon-devel"],
+        "suse" => vec!["gcc", "pkg-config", "liblz4-devel", "wayland-devel", "wayland-protocols-devel", "libxkbcommon-devel"],
+        "gentoo" => vec!["app-arch/lz4", "dev-libs/wayland", "dev-libs/wayland-protocols", "x11-libs/libxkbcommon"],
+        _ => vec!["build-essential", "pkg-config", "liblz4-dev", "libwayland-dev", "wayland-protocols", "libxkbcommon-dev"],
     };
     Step::Run("install the C toolchain, pkg-config and the liblz4 headers swww links against".into(), pm_install(family, root, &deps))
 }

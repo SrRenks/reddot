@@ -17,7 +17,7 @@ same file so the Settings → Keybinds editor can see them; the old
 | `Super+F` | fullscreen |
 | `Super+1..0` | focus workspace |
 | `Super+Shift+1..0` | move window to workspace |
-| `Super+Left/Right/Up/Down` | focus |
+| `Super+Left/Right/Up/Down` | focus window, or the adjacent monitor when the direction has no window |
 | `Super+Shift+Left/Right/Up/Down` | move window |
 | `Super+Space` | keyboard layout |
 | `Super+Shift+Space` | open/close the pill, restoring the last surface; Escape backs out one level |

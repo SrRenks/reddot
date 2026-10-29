@@ -70,6 +70,8 @@ semantic versioning when it cuts a release.
   reopened from the top strip immediately after an outside click.
 - A monitor connected after the awww daemon starts now gets the current wallpaper
   instead of the black default; `monitor.added`/`monitor.removed` reapply it.
+- Super+arrows fall back to the adjacent monitor when no window exists in that
+  direction, so an empty second output is still reachable.
 - Strict string comparisons in the wallpaper, launcher and app lists.
 - Dynamic host contract in the notification toast, keeping the QML boundary explicit.
 - Nested Tooltip access to the component scale.

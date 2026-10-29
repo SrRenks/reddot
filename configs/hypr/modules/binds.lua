@@ -14,8 +14,8 @@ hl.bind(mod .. " + SHIFT + M", hl.dsp.workspace.toggle_special("minimized")) -- 
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-hl.bind(mod .. " + Left",       hl.dsp.focus({ direction = "l" })) -- Focus left Window
-hl.bind(mod .. " + Right",      hl.dsp.focus({ direction = "r" })) -- Focus Right Window
+hl.bind(mod .. " + Left",       hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/focus-direction.sh l")) -- Focus left window or monitor
+hl.bind(mod .. " + Right",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/focus-direction.sh r")) -- Focus right window or monitor
 hl.bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "r-1" }))
 hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
 
@@ -74,8 +74,8 @@ hl.bind("XF86AudioNext",        hl.dsp.global("quickshell:mediaNext"),          
 hl.bind("XF86AudioPrev",        hl.dsp.global("quickshell:mediaPrev"),                             { locked = true })
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd("hyprctl switchxkblayout all next")) -- Toggle Keyboard Layout
 hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("qs -c pill ipc call pill toggle \"\"")) -- Open/close pill, last surface
-hl.bind(mod .. " + Up",   hl.dsp.focus({ direction = "u" })) -- Focus Up Window
-hl.bind(mod .. " + Down", hl.dsp.focus({ direction = "d" })) -- Focus Below Window
+hl.bind(mod .. " + Up",   hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/focus-direction.sh u")) -- Focus upper window or monitor
+hl.bind(mod .. " + Down", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/focus-direction.sh d")) -- Focus lower window or monitor
 hl.bind(mod .. " + SHIFT + Left",  hl.dsp.window.move({ direction = "l" })) -- Move Window Left
 hl.bind(mod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "r" })) -- Move Window Right
 hl.bind(mod .. " + SHIFT + Up",    hl.dsp.window.move({ direction = "u" })) -- Move Window Up

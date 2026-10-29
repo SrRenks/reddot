@@ -79,16 +79,37 @@ fn argv_json(argv: &[String]) -> String {
     format!("[{}]", argv.iter().map(|s| json(s)).collect::<Vec<_>>().join(","))
 }
 
+fn debian_backports() -> Option<String> {
+    let text = fs::read_to_string("/etc/os-release").ok()?;
+    let id = text.lines().find_map(|l| l.strip_prefix("ID=")).unwrap_or("").trim_matches(['"', '\'']);
+    if id != "debian" { return None; }
+    let code = text.lines().find_map(|l| l.strip_prefix("VERSION_CODENAME=")).unwrap_or("").trim_matches(['"', '\'']);
+    if code.is_empty() { return None; }
+    let needle = format!("{code}-backports");
+    let mut files = vec![PathBuf::from("/etc/apt/sources.list")];
+    if let Ok(entries) = fs::read_dir("/etc/apt/sources.list.d") {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if p.extension().and_then(|e| e.to_str()).map_or(false, |e| e == "list" || e == "sources") {
+                files.push(p);
+            }
+        }
+    }
+    files.iter().any(|p| fs::read_to_string(p).map(|t| t.contains(&needle)).unwrap_or(false)).then(|| needle)
+}
 fn pm_install(family: &str, root: &str, pkgs: &[&str]) -> Vec<String> {
     let mut out = vec![root.to_string()];
-    let base: Vec<&str> = match family {
+    let mut base: Vec<String> = match family {
         "arch" => vec!["pacman", "-S", "--needed", "--noconfirm"],
         "debian" => vec!["apt-get", "install", "-y"],
         "fedora" => vec!["dnf", "install", "-y"],
         "gentoo" => vec!["emerge", "--noreplace"],
         _ => vec!["zypper", "--non-interactive", "install"],
-    };
-    out.extend(base.into_iter().map(str::to_string));
+    }.into_iter().map(str::to_string).collect();
+    if family == "debian" {
+        if let Some(release) = debian_backports() { base.push("-t".into()); base.push(release); }
+    }
+    out.extend(base);
     out.extend(pkgs.iter().map(|s| s.to_string()));
     out
 }

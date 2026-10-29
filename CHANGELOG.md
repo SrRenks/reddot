@@ -91,3 +91,4 @@ semantic versioning when it cuts a release.
 
 - Arch AUR packages now bootstrap `yay-bin` when no helper is present, instead
   of failing with `yay: No such file or directory`.
+- Arch cloud VM validation: install, AUR build, services and reboot pass.

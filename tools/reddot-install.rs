@@ -195,7 +195,7 @@ fn main() {
     }
     if !no_deps {
         let root = "sudo";
-        let mut args = vec!["--plan", &plan_arg, "--family", &family, "--root", root, "--services", "--init", &init];
+        let mut args = vec!["--plan", &plan_arg, "--family", &family, "--root", root, "--services", "--init", &init, "--aur-helper", &aur];
         if !apply { args.push("--dry-run"); }
         let fb_arg = fallback_path.to_string_lossy().into_owned();
         if !fallback_pairs.is_empty() { args.extend(["--fallbacks-json", &fb_arg]); }

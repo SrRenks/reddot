@@ -88,3 +88,6 @@ semantic versioning when it cuts a release.
 - Fedora Hyprland packages now use the `hermitfeather/hyprland` COPR, which
   has Fedora 43+ builds; openSUSE Leap uses its matching OBS target instead of
   the Tumbleweed URL.
+
+- Arch AUR packages now bootstrap `yay-bin` when no helper is present, instead
+  of failing with `yay: No such file or directory`.

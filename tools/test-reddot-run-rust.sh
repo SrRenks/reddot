@@ -15,8 +15,6 @@ cat > "$tmp/expected" <<'EXP'
 EXP
 diff -u "$tmp/expected" "$tmp/out"
 echo 'ok - package runner order'
-echo 'all Rust runner tests passed'
-
 printf '%s\n' '{"repos":[],"native":[],"aur":[]}' > "$tmp/service-plan.json"
 "$bin" --plan "$tmp/service-plan.json" --family arch --root doas --dry-run --services --init systemd > "$tmp/service.out"
 grep -q 'doas systemctl enable --now NetworkManager.service' "$tmp/service.out"
@@ -28,3 +26,10 @@ printf '[{"desc":"build thing","run":["echo","hi"]},{"desc":"pipe thing","shell"
 grep -q 'would run: echo hi' "$tmp/fallback.out"
 grep -q "would run: sh -c 'echo shell'" "$tmp/fallback.out"
 echo 'ok - fallback step ordering'
+
+printf '%s\n' '{"native":[],"aur":["mpvpaper"],"repos":[],"fallbacks":[]}' > "$tmp/aur.json"
+PATH=/nonexistent "$bin" --plan "$tmp/aur.json" --family arch --dry-run --aur-helper yay > "$tmp/aur.out"
+grep -q 'git clone https://aur.archlinux.org/yay-bin.git' "$tmp/aur.out"
+grep -q 'yay -S --needed --noconfirm mpvpaper' "$tmp/aur.out"
+echo 'ok - AUR helper bootstrap'
+echo 'all Rust runner tests passed'

@@ -121,8 +121,16 @@ fn main() {
     if !native.is_empty() { let mut s = vec![root.clone()]; s.extend(batch(&family, &native)); commands.push(s); }
     let aur_names = strings(&plan, "aur");
     if !aur_names.is_empty() {
-        let helper = if aur.is_empty() { ["yay","paru"].iter().find(|h| env::var_os("PATH").map(|p| env::split_paths(&p).any(|d| d.join(*h).is_file())).unwrap_or(false)).map(|s| s.to_string()).unwrap_or_else(|| "yay".into()) } else { aur };
-        let mut s = vec![helper, "-S".into(), "--needed".into(), "--noconfirm".into()]; s.extend(aur_names); commands.push(s);
+        let found = ["yay","paru"].iter().find(|h| env::var_os("PATH").map(|p| env::split_paths(&p).any(|d| d.join(*h).is_file())).unwrap_or(false)).map(|s| s.to_string());
+        let helper = if !aur.is_empty() && aur != "none" { aur.clone() } else { found.clone().unwrap_or_else(|| "yay".into()) };
+        if found.is_none() && aur != "none" {
+            commands.push(vec![root.clone(), "pacman".into(), "-S".into(), "--needed".into(), "--noconfirm".into(), "git".into(), "base-devel".into()]);
+            commands.push(vec!["sh".into(), "-c".into(), "rm -rf /tmp/reddot-yay-build && git clone https://aur.archlinux.org/yay-bin.git /tmp/reddot-yay-build".into()]);
+            commands.push(vec!["sh".into(), "-c".into(), "cd /tmp/reddot-yay-build && makepkg -si --noconfirm".into()]);
+        }
+        if aur != "none" {
+            let mut s = vec![helper, "-S".into(), "--needed".into(), "--noconfirm".into()]; s.extend(aur_names); commands.push(s);
+        }
     }
     if !fallbacks_path.as_os_str().is_empty() {
         let text = fs::read_to_string(&fallbacks_path).unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1); });

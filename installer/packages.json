@@ -18,8 +18,8 @@
 
     { "id": "quickshell", "group": "core", "required": true, "desc": "The QtQuick shell that draws the pill", "aur": false,
       "names": { "arch": "quickshell", "debian": "quickshell", "fedora": "quickshell", "suse": "quickshell", "gentoo": "gui-apps/quickshell" },
-      "note": "not in the official Fedora repos (only the errornointernet COPR) and on debian only in testing/sid; Ubuntu-likes get the avengemedia PPA, plain Debian stays on the archive name",
-      "repo": { "gentoo": "overlay:guru", "fedora": "copr:errornointernet/quickshell", "debian": "ppa:avengemedia/danklinux", "suse": "obs:home:AvengeMedia:danklinux" }, "fallback": null },
+      "note": "not in the official Fedora repos (only the errornointernet COPR); Debian 13 ships it in trixie-backports under the archive name, so no PPA is enabled there",
+      "repo": { "gentoo": "overlay:guru", "fedora": "copr:errornointernet/quickshell", "suse": "obs:home:AvengeMedia:danklinux" }, "fallback": null },
 
     { "id": "qt6-multimedia", "group": "core", "required": true, "desc": "Qt Multimedia QML module the pill's video wallpaper imports", "aur": false,
       "names": { "arch": "qt6-multimedia-ffmpeg", "debian": "qml6-module-qtmultimedia", "fedora": "qt6-qtmultimedia", "suse": "qt6-multimedia-imports", "gentoo": "dev-qt/qtmultimedia" },

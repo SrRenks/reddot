@@ -226,7 +226,7 @@ def _selftest():
     assert repo_for(by_id["hyprland"], "fedora") == "copr:solopasha/hyprland"
     assert repo_for(by_id["quickshell"], "suse") == "obs:home:AvengeMedia:danklinux"
     assert repo_for(by_id["quickshell"], "fedora") == "copr:errornointernet/quickshell"
-    assert repo_for(by_id["quickshell"], "debian") == "ppa:avengemedia/danklinux"
+    assert repo_for(by_id["quickshell"], "debian") is None
     assert repo_for(by_id["hyprland"], "arch") is None
     assert repo_for(by_id["hyprland"], "gentoo") == "overlay:hyproverlay"
     assert repo_for(by_id["quickshell"], "gentoo") == "overlay:guru"

@@ -35,6 +35,10 @@
     "Cannot assign binding of type QVariantMap to QVariantHash [incompatible-type] @ environment: ({ REDDOT_PALETTE: Flags.paletteMode })#3",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1"
   ],
+  "configs/quickshell/pill/BarCommandItem.qml": [
+    "Property \"state\" already exists in base type \"QQuickItem\", use a different name. [property-override] @ property string state: \"idle\"#1",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1"
+  ],
   "configs/quickshell/pill/BatterySurface.qml": [
     "Unqualified access [unqualified] @ ? Math.max(2 * root.s, (modelData / Math.max(1, PowerHistory.peak24h)) * parent.height)#1",
     "Unqualified access [unqualified] @ color: modelData > 0 ? Theme.verm : Theme.threadBg#1",
@@ -86,7 +90,6 @@
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#14",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#15",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#16",
-    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#17",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#2",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#3",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#4",
@@ -101,6 +104,9 @@
   ],
   "configs/quickshell/pill/Singletons/Backlight.qml": [
     "Type Backlight not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
+  "configs/quickshell/pill/Singletons/BarLayout.qml": [
+    "Type BarLayout not declared as singleton in qmldir but using pragma Singleton [import]#1"
   ],
   "configs/quickshell/pill/Singletons/Battery.qml": [
     "Type Battery not declared as singleton in qmldir but using pragma Singleton [import]#1"

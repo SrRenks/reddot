@@ -836,13 +836,15 @@ Item {
             return recorderIcon.mapToItem(pill, recorderIcon.width / 2, recorderIcon.height + drop * 0.55);
         if (soulTarget === "sysmon")
             return sysmonIcon.mapToItem(pill, sysmonIcon.width / 2, sysmonIcon.height + drop * 0.55);
-        if (soulTarget === "ws" && soulWsIndex >= 0) {
-            void ws.activeName;
-            void ws.width;
-            const p = ws.mapToItem(pill, ws.slotCenterX(soulWsIndex), ws.height / 2);
+        if (soulTarget === "ws" && pill.ws !== null && soulWsIndex >= 0) {
+            void pill.ws.activeName;
+            void pill.ws.width;
+            const p = pill.ws.mapToItem(pill, pill.ws.slotCenterX(soulWsIndex), pill.ws.height / 2);
             return Qt.point(p.x, p.y + drop);
         }
-        return ws.mapToItem(pill, ws.activeDotPoint.x, ws.activeDotPoint.y + drop);
+        if (soulTarget === "ws" && pill.ws !== null)
+            return pill.ws.mapToItem(pill, pill.ws.activeDotPoint.x, pill.ws.activeDotPoint.y + drop);
+        return Qt.point(pill.width / 2, 0);
     }
 
     /**
@@ -1403,15 +1405,16 @@ Item {
         }
     }
 
+    property var ws: null
+
     readonly property var statusOrder: {
-        var base = Flags.barStatusOrder.split(",");
-        // Older flag files predate the package meter; append it before settings.
-        if (base.indexOf("updates") < 0) {
-            var at = base.indexOf("settings");
-            if (at < 0) base.push("updates");
-            else base.splice(at, 0, "updates");
-        }
+        var base = BarLayout.statusOrder.slice();
         return Flags.barStatusReverse ? base.slice().reverse() : base;
+    }
+
+    function statusOnBar(id) {
+        return BarLayout.enabled(id) && BarLayout.hostOf(id) === "bar.right"
+            && BarLayout.mode(id) === "icon";
     }
     readonly property real statusGap: 12 * s
 
@@ -1500,74 +1503,79 @@ Item {
                 : (Flags.barAlign === "right" ? parent.width - width - 18 * pill.s
                 : (parent.width - width) / 2)
 
-            Workspaces {
-                id: ws
+            Row {
+                id: leftHost
                 anchors.verticalCenter: parent.verticalCenter
-                visible: Flags.barWorkspaces
-                width: visible ? implicitWidth : 0
-                screenName: pill.screenName
-                s: pill.s
-                gap: 8 * pill.s
-                enabled: hover.live
-                onHoverIndexChanged: if (hoverIndex >= 0) {
-                    pill.soulTarget = "ws";
-                    pill.soulWsIndex = hoverIndex;
+                spacing: 20 * pill.s
+                layoutDirection: hoverRow.layoutDirection
+
+                Repeater {
+                    model: BarLayout.instancesFor("bar.left")
+
+                    BarComponentHost {
+                        id: hostItem
+                        required property var modelData
+                        componentId: modelData.component || modelData.id
+                        instance: modelData
+                        mode: modelData.mode
+                        s: pill.s
+                        screenName: pill.screenName
+                        active: hover.live
+                        onRequestSurface: (name) => pill.requestSurface(name)
+                        onWorkspacesHover: (index) => {
+                            pill.soulTarget = "ws";
+                            pill.soulWsIndex = index;
+                        }
+                        Component.onCompleted: if (modelData.id === "workspaces")
+                            pill.ws = hostItem.workspacesView
+                        Component.onDestruction: if (pill.ws === hostItem.workspacesView)
+                            pill.ws = null
+                    }
                 }
             }
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: Flags.barWorkspaces && Flags.barClock
+                visible: leftHost.width > 0 && centerHost.width > 0
                 width: visible ? 1 : 0
                 height: 22 * pill.s
                 color: Theme.hair
             }
 
-            Item {
+            Row {
+                id: centerHost
                 anchors.verticalCenter: parent.verticalCenter
-                visible: Flags.barClock
-                width: visible ? hoverClock.implicitWidth : 0
-                height: hoverClock.implicitHeight
+                spacing: 20 * pill.s
+                layoutDirection: hoverRow.layoutDirection
 
-                Column {
-                    id: hoverClock
-                    anchors.centerIn: parent
-                    spacing: 2 * pill.s
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: clock.hhmm
-                        color: Theme.cream
-                        font.family: Theme.font
-                        font.pixelSize: Typography.size("display", pill.s)
-                        font.weight: Font.DemiBold
-                        font.features: { "tnum": 1 }
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        visible: Flags.barDate
-                        text: clock.date
-                        color: Theme.dim
-                        font.family: Theme.font
-                        font.pixelSize: Typography.size("micro", pill.s)
-                        font.weight: Font.Medium
-                        font.capitalization: Font.AllUppercase
-                        font.letterSpacing: 1.6 * pill.s
-                    }
-                }
+                Repeater {
+                    model: BarLayout.instancesFor("bar.center")
 
-                MouseArea {
-                    anchors.centerIn: parent
-                    width: hoverClock.implicitWidth + 22 * pill.s
-                    height: hoverClock.implicitHeight + 10 * pill.s
-                    enabled: hover.live
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: pill.requestSurface("calendar")
+                    BarComponentHost {
+                        id: centerItem
+                        required property var modelData
+                        componentId: modelData.component || modelData.id
+                        instance: modelData
+                        mode: modelData.mode
+                        s: pill.s
+                        screenName: pill.screenName
+                        active: hover.live
+                        onRequestSurface: (name) => pill.requestSurface(name)
+                        onWorkspacesHover: (index) => {
+                            pill.soulTarget = "ws";
+                            pill.soulWsIndex = index;
+                        }
+                        Component.onCompleted: if (modelData.id === "workspaces")
+                            pill.ws = centerItem.workspacesView
+                        Component.onDestruction: if (pill.ws === centerItem.workspacesView)
+                            pill.ws = null
+                    }
                 }
             }
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: Flags.barClock
+                visible: centerHost.width > 0 && pill.statusTotalWidth > 0
                 width: visible ? 1 : 0
                 height: 22 * pill.s
                 color: Theme.hair
@@ -1583,7 +1591,7 @@ Item {
                     id: weatherGlance
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("weather")
-                    visible: Flags.barWeather && Weather.ready
+                    visible: pill.statusOnBar("weather") && Weather.ready
                     width: visible ? implicitWidth : 0
                     spacing: 5 * pill.s
 
@@ -1624,7 +1632,7 @@ Item {
                     s: pill.s
                     screenName: pill.screenName
                     enabled: hover.live
-                    visible: Flags.barMinimized && count > 0
+                    visible: pill.statusOnBar("minimized") && count > 0
                     width: visible ? implicitWidth : 0
                 }
 
@@ -1632,7 +1640,7 @@ Item {
                     id: trayItem
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("tray")
-                    visible: Flags.barTray
+                    visible: pill.statusOnBar("tray")
                     width: visible ? implicitWidth : 0
                     s: pill.s
                     barWindow: pill.barWindow
@@ -1643,7 +1651,7 @@ Item {
                     id: dndIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("dnd")
-                    visible: Flags.barDnd && Flags.dnd
+                    visible: pill.statusOnBar("dnd") && Flags.dnd
                     width: visible ? 16 * pill.s : 0
                     height: 16 * pill.s
 
@@ -1705,7 +1713,7 @@ Item {
                     id: networkGroup
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("network")
-                    visible: Flags.barNetwork && (pill.wifiDev !== null || pill.btAdapter !== null || Battery.present)
+                    visible: pill.statusOnBar("network") && (pill.wifiDev !== null || pill.btAdapter !== null || Battery.present)
                     spacing: 12 * pill.s
 
                     Item {
@@ -1914,7 +1922,7 @@ Item {
                     id: inboxIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("inbox")
-                    visible: Flags.barInbox
+                    visible: pill.statusOnBar("inbox")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -1953,7 +1961,7 @@ Item {
                     id: mixerIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("mixer")
-                    visible: Flags.barMixer
+                    visible: pill.statusOnBar("mixer")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -1980,7 +1988,7 @@ Item {
                     id: soundIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("sound")
-                    visible: Flags.barSound
+                    visible: pill.statusOnBar("sound")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -2007,7 +2015,7 @@ Item {
                     id: thinkpadIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("thinkpad")
-                    visible: Flags.barThinkpad && ThinkPad.present
+                    visible: pill.statusOnBar("thinkpad") && ThinkPad.present
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -2045,7 +2053,7 @@ Item {
                     id: sysmonIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("sysmon")
-                    visible: Flags.barSysmon
+                    visible: pill.statusOnBar("sysmon")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -2072,7 +2080,7 @@ Item {
                     id: updatesIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("updates")
-                    visible: Flags.barUpdates && PackageUpdates.enabled
+                    visible: pill.statusOnBar("updates") && PackageUpdates.enabled
                         && (PackageUpdates.total > 0 || PackageUpdates.hasError)
                     width: visible ? updatesLabel.implicitWidth + 17 * pill.s : 0
                     height: 17 * pill.s
@@ -2119,7 +2127,7 @@ Item {
                     id: recorderIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("recorder")
-                    visible: Flags.barRecorder
+                    visible: pill.statusOnBar("recorder")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -2174,7 +2182,7 @@ Item {
                     id: settingsIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("settings")
-                    visible: Flags.barSettings
+                    visible: pill.statusOnBar("settings")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -2201,7 +2209,7 @@ Item {
                     id: powerIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: pill.statusX("power")
-                    visible: Flags.barPower
+                    visible: pill.statusOnBar("power")
                     width: visible ? 17 * pill.s : 0
                     height: 17 * pill.s
 
@@ -2221,6 +2229,30 @@ Item {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: pill.requestSurface("power")
                         onContainsMouseChanged: if (containsMouse) pill.soulTarget = "power"
+                    }
+                }
+            }
+
+            Row {
+                id: statusWidgets
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 20 * pill.s
+                visible: statusWidgetRepeater.count > 0
+                layoutDirection: hoverRow.layoutDirection
+
+                Repeater {
+                    id: statusWidgetRepeater
+                    model: BarLayout.instancesForMode("bar.right", "widget")
+
+                    BarComponentHost {
+                        required property var modelData
+                        componentId: modelData.component || modelData.id
+                        instance: modelData
+                        mode: modelData.mode
+                        s: pill.s
+                        screenName: pill.screenName
+                        active: hover.live
+                        onRequestSurface: (name) => pill.requestSurface(name)
                     }
                 }
             }

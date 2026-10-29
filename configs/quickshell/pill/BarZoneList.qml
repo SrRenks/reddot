@@ -13,11 +13,11 @@ Column {
     ]
 
     function shown(id) {
-        return id === "workspaces" ? Flags.barWorkspaces : false;
+        return id === "workspaces" ? BarLayout.enabled("workspaces") : false;
     }
     function toggle(id) {
         if (id === "workspaces")
-            Flags.barWorkspaces = !Flags.barWorkspaces;
+            BarLayout.setEnabled("workspaces", !BarLayout.enabled("workspaces"));
     }
 
     width: parent ? parent.width : 0

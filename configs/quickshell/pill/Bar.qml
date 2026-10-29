@@ -84,6 +84,35 @@ SettingsSurface {
             BarSection { s: root.s; text: "Status · drag grip · tap to show/hide" }
             StatusOrderList { s: root.s; width: root.width }
 
+            BarSection { s: root.s; text: "Components · host and mode" }
+
+            BarComponentEditorRow { surface: root; componentId: "workspaces" }
+            BarComponentEditorRow { surface: root; componentId: "clock" }
+            BarComponentEditorRow { surface: root; componentId: "weather" }
+            BarComponentEditorRow { surface: root; componentId: "minimized" }
+            BarComponentEditorRow { surface: root; componentId: "tray" }
+            BarComponentEditorRow { surface: root; componentId: "dnd" }
+            BarComponentEditorRow { surface: root; componentId: "network" }
+            BarComponentEditorRow { surface: root; componentId: "inbox" }
+            BarComponentEditorRow { surface: root; componentId: "mixer" }
+            BarComponentEditorRow { surface: root; componentId: "sound" }
+            BarComponentEditorRow { surface: root; componentId: "thinkpad" }
+            BarComponentEditorRow { surface: root; componentId: "sysmon" }
+            BarComponentEditorRow { surface: root; componentId: "updates" }
+            BarComponentEditorRow { surface: root; componentId: "recorder" }
+            BarComponentEditorRow { surface: root; componentId: "settings" }
+            BarComponentEditorRow { surface: root; componentId: "power" }
+
+            SettingsRow {
+                surface: root
+                name: "Bar"
+                icon: "layers"
+                sub: "Container · settings.catalog"
+            }
+
+            BarSection { s: root.s; text: "Bar widget · settings.catalog" }
+            BarWidget { s: root.s }
+
             Text {
                 width: parent.width
                 topPadding: 8 * root.s

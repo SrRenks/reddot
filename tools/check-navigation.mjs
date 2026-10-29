@@ -25,13 +25,16 @@ for (const id of catalog) if (!pages.has(id)) fail(`catalog surface ${id} has no
 for (const id of pages) if (!catalog.has(id)) fail(`navigation page ${id} is not in the catalog`);
 if (!failures.length) ok("catalog and navigation pages match");
 
-const order = fs.readFileSync(path.join(root, "configs/quickshell/pill/StatusOrderList.qml"), "utf8");
-const knownBlock = order.match(/knownIds:\s*\[([\s\S]*?)\]/);
-const known = knownBlock ? [...knownBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]) : [];
-if (known.length === 0) fail("StatusOrderList.qml has no knownIds");
-for (const id of known) if (!statusIds.has(id)) fail(`status ${id} has no navigation entry`);
-for (const id of statusIds) if (!known.includes(id)) fail(`navigation status ${id} is not in StatusOrderList.knownIds`);
-if (known.length && !failures.length) ok("status order and navigation status match");
+const barCatalog = fs.readFileSync(path.join(root, "configs/quickshell/pill/Singletons/BarCatalog.qml"), "utf8");
+for (const id of statusIds) {
+    if (!barCatalog.includes(`id: "${id}"`))
+        fail(`navigation status ${id} is not in BarCatalog`);
+}
+const catalogStatuses = (barCatalog.match(/status:\s*true/g) || []).length;
+if (catalogStatuses === 0) fail("BarCatalog.qml has no status components");
+if (catalogStatuses !== statusIds.size)
+    fail(`BarCatalog declares ${catalogStatuses} statuses, navigation has ${statusIds.size}`);
+if (!failures.length) ok("status catalog and navigation status match");
 
 const settings = fs.readFileSync(path.join(root, "configs/quickshell/pill/Settings.qml"), "utf8");
 const settingsSurfaces = [...settings.matchAll(/surface:\s*"([^"]+)"/g)].map((m) => m[1]);

@@ -12,7 +12,7 @@ SettingsSurface {
     rows: [
         { item: timeRow, kind: "seg", vals: [false, true], get: function () { return Flags.time12h; }, set: function (v) { Flags.time12h = v; } },
         { item: secondsRow, kind: "toggle", get: function () { return Flags.clockSeconds; }, set: function (v) { Flags.clockSeconds = v; } },
-        { item: clockRow, kind: "toggle", get: function () { return Flags.barClock; }, set: function (v) { Flags.barClock = v; } },
+        { item: clockRow, kind: "toggle", get: function () { return BarLayout.enabled("clock"); }, set: function (v) { BarLayout.setEnabled("clock", v); } },
         { item: dateRow, kind: "toggle", get: function () { return Flags.barDate; }, set: function (v) { Flags.barDate = v; } }
     ]
 
@@ -61,8 +61,8 @@ SettingsSurface {
             icon: "clock"
             LinkToggle {
                 s: root.s
-                on: Flags.barClock
-                onToggled: Flags.barClock = !Flags.barClock
+                on: BarLayout.enabled("clock")
+                onToggled: BarLayout.setEnabled("clock", !BarLayout.enabled("clock"))
             }
         }
 

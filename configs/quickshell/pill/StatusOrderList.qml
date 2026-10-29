@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import "Singletons"
 import "lib/statusOrder.js" as StatusOrder
-import "lib/navigation.js" as Navigation
 
 /**
  * Drag-to-reorder status cluster. The grip is the drag handle; the following
@@ -16,12 +15,6 @@ Item {
     property real s: 1
     property real rowH: 24 * list.s
     property real slotH: rowH + 2 * list.s
-
-    readonly property var knownIds: [
-        "weather", "minimized", "tray", "dnd", "network", "inbox",
-        "mixer", "sound", "thinkpad", "sysmon", "updates",
-        "recorder", "settings", "power"
-    ]
 
     property var allIds: []
     property var displayOrder: []
@@ -84,7 +77,7 @@ Item {
             return;
         displayOrder = StatusOrder.moveItem(displayOrder, keyIndex, target);
         keyIndex = target;
-        Flags.barStatusOrder = displayOrder.join(",");
+        BarLayout.setStatusOrder(displayOrder);
     }
 
     Keys.onUpPressed: (event) => {
@@ -129,15 +122,15 @@ Item {
     }
 
     Connections {
-        target: Flags
-        function onBarStatusOrderChanged() {
+        target: BarLayout
+        function onStatusOrderChanged() {
             if (list.dragId.length === 0)
                 list.syncOrder();
         }
     }
 
     function normalized() {
-        return StatusOrder.normalize(Flags.barStatusOrder.split(","), knownIds);
+        return BarLayout.statusOrder.slice();
     }
 
     function syncOrder() {
@@ -147,46 +140,15 @@ Item {
     }
 
     function label(id) {
-        return Navigation.statusLabel(id);
+        return BarCatalog.label(id);
     }
 
     function visibleOf(id) {
-        switch (id) {
-        case "weather": return Flags.barWeather;
-        case "minimized": return Flags.barMinimized;
-        case "tray": return Flags.barTray;
-        case "dnd": return Flags.barDnd;
-        case "network": return Flags.barNetwork;
-        case "inbox": return Flags.barInbox;
-        case "mixer": return Flags.barMixer;
-        case "sound": return Flags.barSound;
-        case "thinkpad": return Flags.barThinkpad;
-        case "sysmon": return Flags.barSysmon;
-        case "updates": return Flags.barUpdates;
-        case "recorder": return Flags.barRecorder;
-        case "settings": return Flags.barSettings;
-        case "power": return Flags.barPower;
-        }
-        return true;
+        return BarLayout.enabled(id);
     }
 
     function setVisible(id, v) {
-        switch (id) {
-        case "weather": Flags.barWeather = v; break;
-        case "minimized": Flags.barMinimized = v; break;
-        case "tray": Flags.barTray = v; break;
-        case "dnd": Flags.barDnd = v; break;
-        case "network": Flags.barNetwork = v; break;
-        case "inbox": Flags.barInbox = v; break;
-        case "mixer": Flags.barMixer = v; break;
-        case "sound": Flags.barSound = v; break;
-        case "thinkpad": Flags.barThinkpad = v; break;
-        case "sysmon": Flags.barSysmon = v; break;
-        case "updates": Flags.barUpdates = v; break;
-        case "recorder": Flags.barRecorder = v; break;
-        case "settings": Flags.barSettings = v; break;
-        case "power": Flags.barPower = v; break;
-        }
+        BarLayout.setEnabled(id, v);
     }
 
     function beginDrag(id, index, grabY) {
@@ -224,7 +186,7 @@ Item {
         if (dragId.length === 0)
             return;
         if (moved)
-            Flags.barStatusOrder = displayOrder.join(",");
+            BarLayout.setStatusOrder(displayOrder);
         dragId = "";
         dragPos = -1;
         moved = false;

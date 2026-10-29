@@ -33,6 +33,30 @@ hero     30     large numerals
 At 125% the SYSTEM gauges keep their columns and the content scrolls vertically;
 small labels and values grow together instead of staying at fixed pixel sizes.
 
+## Bar components
+
+Bar chrome is moving from per-item flags to a catalog of definitions plus
+persisted instances:
+
+```text
+Singletons/BarCatalog.qml   identity, name, icon, modes, hosts
+Singletons/BarLayout.qml    bar.json, ordering, visibility, migration
+Singletons/barLayout.js     pure normalize/migrate/order policy
+```
+
+`BarLayout` seeds `~/.local/state/reddot/bar.json` once from the legacy
+`barWorkspaces`, `barClock`, `bar*` visibility flags and `barStatusOrder`.
+After that the file is authoritative. The Bar, Clock, Workspaces and status
+settings read and write it. Clock and Workspaces render through the generic
+`BarComponentHost`; status components keep their current right-cluster QML when
+in `bar.right` and fall back to a catalog glyph when moved to another host. The
+generic right-cluster renderer and widget mode for statuses remain to be built.
+
+Each catalog definition declares `icon` and `widget` modes, a default host and
+the hosts it accepts. `bar` is registered as a definition without a default
+instance: it is the container component, so Settings can treat it like any
+other catalog entry instead of a special case.
+
 ## Shell
 
 The pill is a single morphing surface family. `configs/quickshell/pill/shell.qml`

@@ -70,22 +70,25 @@ if (!/function pick\(\)/.test(search))
     failures.push("Search.qml: missing pick() activation helper");
 
 const order = read(pillDir + "StatusOrderList.qml");
-const knownBlock = order.match(/knownIds:\s*\[([\s\S]*?)\]/);
-const known = knownBlock ? [...knownBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]) : [];
-if (known.length === 0)
-    failures.push("StatusOrderList.qml: knownIds is empty");
+const barCatalog = read(pillDir + "Singletons/BarCatalog.qml");
+const barLayout = read(pillDir + "Singletons/BarLayout.qml");
+const known = ["weather", "minimized", "tray", "dnd", "network", "inbox",
+    "mixer", "sound", "thinkpad", "sysmon", "updates", "recorder", "settings", "power"];
+if (!/BarLayout\.statusOrder/.test(order) || !/BarCatalog\.label/.test(order))
+    failures.push("StatusOrderList.qml: ids/labels must come from the bar catalog and layout");
+if (!/BarLayout\.setStatusOrder/.test(order) || !/BarLayout\.setEnabled/.test(order))
+    failures.push("StatusOrderList.qml: order and visibility must use BarLayout");
+if ((barCatalog.match(/status:\s*true/g) || []).length !== known.length)
+    failures.push("BarCatalog.qml: status catalog count changed without updating the contract");
 for (const id of known) {
-    const hits = (order.match(new RegExp(`case "${id}"`, "g")) || []).length;
-    if (hits < 2)
-        failures.push(`StatusOrderList.qml: ${id} lacks visible/set cases`);
+    if (!barCatalog.includes(`id: "${id}"`))
+        failures.push(`BarCatalog.qml: ${id} is missing`);
     const pill = read(pillDir + "Pill.qml");
     if (!pill.includes(`case "${id}":`))
         failures.push(`Pill.qml: status width is missing for ${id}`);
 }
-for (const id of ["weather", "updates", "settings", "power"]) {
-    if (!known.includes(id))
-        failures.push(`StatusOrderList.qml: ${id} is missing from knownIds`);
-}
+if (!/migrateFlags/.test(barLayout) || !/bar\.json/.test(barLayout))
+    failures.push("BarLayout.qml: missing migration or persisted layout path");
 
 if (failures.length) {
     console.error(failures.join("\n"));

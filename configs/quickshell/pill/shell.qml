@@ -437,6 +437,14 @@ ShellRoot {
         function open(mon: string, name: string): void { root.toggleSurface(mon, name); }
         function close(): void { root.close(); }
 
+        /** Layout mutations used by the component editor and future import/export. */
+        function barEnabled(id: string, on: bool): void { BarLayout.setEnabled(id, on); }
+        function barMode(id: string, mode: string): void { BarLayout.setMode(id, mode); }
+        function barHost(id: string, host: string): void { BarLayout.setHost(id, host); }
+        function barOrder(ids: string): void { BarLayout.setStatusOrder(ids.split(",")); }
+        function barExport(): string { return BarLayout.exportJson(); }
+        function barImport(json: string): string { return BarLayout.importJson(json); }
+
         /**
          * The two halves of the SUPER+M minimize toggle, driven by the
          * minimize-toggle script which has already read the focused window. A

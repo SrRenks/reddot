@@ -58,6 +58,47 @@ package meter opens the matching surface; the status cluster can be reordered,
 hidden and moved between zones. Settings → Shell → Bar mirrors the same order and
 survives a restart.
 
+## Command providers
+
+A `command` component runs a local executable with an argv array and reads one
+JSON object from stdout. It is exported with the rest of the layout:
+
+```json
+{
+  "id": "provider.balance",
+  "component": "command",
+  "host": "bar.right",
+  "mode": "widget",
+  "enabled": true,
+  "config": {
+    "label": "Balance",
+    "icon": "sparkles",
+    "command": ["/home/me/.local/bin/balance"],
+    "interval": 300,
+    "timeout": 10,
+    "surface": "packages"
+  }
+}
+```
+
+The provider prints:
+
+```json
+{"label":"Balance","value":"42","detail":"tokens left","state":"ok","tooltip":"API balance"}
+```
+
+`state` may be `ok`, `warn` or `error`. The optional `surface` opens an existing
+pill page; `url` opens a URL when no surface is set. Keep credentials in the
+environment or a keyring, not in `config`.
+
+```sh
+reddot bar export ~/bar.json
+reddot bar import ~/bar.json
+```
+
+Import validates the JSON before replacing the live layout. Export includes the
+command and its arguments, so review a shared file before importing it.
+
 ## Keybinds
 
 The active map is `configs/hypr/modules/binds.lua`. Core bindings:

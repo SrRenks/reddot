@@ -30,3 +30,5 @@ singleton PackageUpdates PackageUpdates.qml
 singleton WindowBlur WindowBlur.qml
 singleton SurfaceChrome SurfaceChrome.qml
 singleton Typography 1.0 Typography.qml
+singleton BarCatalog 1.0 BarCatalog.qml
+singleton BarLayout 1.0 BarLayout.qml

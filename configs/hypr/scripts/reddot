@@ -62,6 +62,8 @@ usage() {
     urow log     "[pill·lock]"     "follow the quickshell log"      "(pill)"
     urow update  ""                "check, then apply an update"     ""
     urow status  ""                "what's running and the version"  ""
+    urow bar     "export [file]"   "export the normalized bar layout" ""
+    urow bar     "import <file>"   "validate and import a bar layout" ""
     urow uninstall ""              "remove the configs, restore backups" ""
     gap
 }
@@ -219,6 +221,34 @@ cmd_status() {
     gap
 }
 
+cmd_bar() {
+    action="$1"
+    file="$2"
+    is_up pill || die "pill is not running"
+    case "$action" in
+        export)
+            json=$(qs -c pill ipc call pill barExport 2>/dev/null) || die "bar export failed"
+            if [ -n "$file" ]; then
+                printf '%s\n' "$json" > "$file" || die "cannot write $file"
+                act exported "$file"
+            else
+                printf '%s\n' "$json"
+            fi
+            ;;
+        import)
+            [ -n "$file" ] || die "usage: reddot bar import <file>"
+            [ -f "$file" ] || die "file not found: $file"
+            payload=$(cat "$file") || die "cannot read $file"
+            result=$(qs -c pill ipc call pill barImport "$payload" 2>&1)
+            [ -z "$result" ] || die "$result"
+            act imported "$file"
+            ;;
+        *)
+            die "usage: reddot bar export [file] | reddot bar import <file>"
+            ;;
+    esac
+}
+
 cmd="$1"
 [ $# -gt 0 ] && shift
 case "$cmd" in
@@ -228,6 +258,7 @@ case "$cmd" in
     log) cmd_log "$@" ;;
     update) cmd_update ;;
     status) cmd_status ;;
+    bar) cmd_bar "$@" ;;
     uninstall) cmd_uninstall ;;
     "" | -h | --help | help) usage ;;
     *) die "unknown command '$cmd' (try: reddot help)" ;;

@@ -7,6 +7,21 @@ semantic versioning when it cuts a release.
 
 ### Added
 
+- Bar component catalog (`BarCatalog.qml`) and persisted instance layout
+  (`BarLayout.qml`, `bar.json`) with a pure `barLayout.js` model. Clock,
+  Workspaces, Bar and the 14 status components now share metadata, mode and host
+  declarations.
+- One-time migration from the legacy bar flags to `bar.json`; Bar, Clock and
+  Workspaces settings now read and write the persisted layout.
+- Generic `BarComponentHost` with Clock/Workspaces icon and widget modes, host
+  moves through Settings and IPC, and a catalog glyph fallback for status
+  components placed outside the right cluster. Status components also render a
+  generic widget chip when switched to widget mode. Settings uses static editor
+  rows for every catalog definition, including the Bar container, which now has
+  a persisted instance mounted at `settings.catalog` and a static widget preview.
+- Optional `command` bar provider with argv-only execution, interval, timeout,
+  JSON output, and icon/widget rendering. `reddot bar export` and
+  `reddot bar import` validate and move the persisted layout.
 - QML warning baseline and gate, tracking each warning occurrence per file.
 - Hyprland API and legacy-syntax check.
 - Documentation index, getting-started guide, repository map, roadmap and

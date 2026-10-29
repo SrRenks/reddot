@@ -912,42 +912,36 @@ ShellRoot {
             }
 
             /**
-             * One-glyph back control in the pill's left gutter. The gutter exists
-             * only while a surface is open; the panel content keeps its original
-             * width because the target width grows by the same amount.
+             * Back chevron integrated into the left gutter. No tile, fill or
+             * border: the glyph is the control, with a soft hover lift and the
+             * same tooltip as the keyboard action.
              */
-            Rectangle {
+            Item {
                 id: surfaceBackChip
                 visible: overlay.surfaceOpen
                 z: 20
-                x: pillRegion.x + 1 * overlay.s
-                y: pillRegion.y + 2 * overlay.s
-                width: 22 * overlay.s
-                height: 30 * overlay.s
-                radius: 5 * overlay.s
-                opacity: backMouse.containsMouse ? 1 : 0.9
-                color: backMouse.containsMouse
-                    ? Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.16)
-                    : Qt.rgba(Theme.tileBg.r, Theme.tileBg.g, Theme.tileBg.b, 0.9)
-                border.width: 1
-                border.color: backMouse.containsMouse
-                    ? Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.72)
-                    : Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.35)
-                Behavior on color { ColorAnimation { duration: Motion.fast } }
-                Behavior on border.color { ColorAnimation { duration: Motion.fast } }
+                x: pillRegion.x + 7 * overlay.s
+                y: pillRegion.y + 5 * overlay.s
+                width: 28 * overlay.s
+                height: 32 * overlay.s
+                opacity: backMouse.containsMouse ? 1 : 0.72
+                scale: backMouse.containsMouse ? 1.08 : 1
+                Behavior on opacity { NumberAnimation { duration: Motion.fast } }
+                Behavior on scale { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
 
                 GlyphIcon {
                     anchors.centerIn: parent
-                    width: 17 * overlay.s
-                    height: 17 * overlay.s
+                    width: 18 * overlay.s
+                    height: 18 * overlay.s
                     name: "chevron-left"
-                    color: Theme.vermLit
-                    stroke: 2.5
+                    color: backMouse.containsMouse ? Theme.cream : Theme.vermLit
+                    stroke: 2.4
                 }
 
                 MouseArea {
                     id: backMouse
                     anchors.fill: parent
+                    anchors.margins: -2 * overlay.s
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: pill.surfaceBack()

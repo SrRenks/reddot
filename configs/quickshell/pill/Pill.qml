@@ -3086,7 +3086,7 @@ Item {
             y: SurfaceChrome.scrollMax > 0
                 ? SurfaceChrome.scrollOffset / SurfaceChrome.scrollMax * (parent.height - height)
                 : 0
-            color: Qt.alpha(Theme.vermLit, 0.26)
+            color: Qt.alpha(Theme.vermLit, 0.56)
         }
     }
 

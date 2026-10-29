@@ -115,7 +115,9 @@ SettingsSurface {
             visible: PackageUpdates.details.length > 0
 
             ListView {
+                id: updatesList
                 anchors.fill: parent
+                anchors.rightMargin: 9 * root.s
                 clip: true
                 model: PackageUpdates.details
                 spacing: 4 * root.s
@@ -150,6 +152,41 @@ SettingsSurface {
                         font.letterSpacing: 0.6 * root.s
                     }
                 }
+            }
+
+            Rectangle {
+                id: updatesScrollTrack
+                visible: updatesList.contentHeight > updatesList.height
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: 3 * root.s
+                radius: 1.5 * root.s
+                color: Qt.alpha(Theme.onGlow, 0.11)
+
+                Rectangle {
+                    width: parent.width
+                    radius: parent.radius
+                    height: Math.max(12 * root.s,
+                        parent.height * updatesList.height / Math.max(updatesList.contentHeight, 1))
+                    y: (parent.height - height) * updatesList.contentY
+                        / Math.max(1, updatesList.contentHeight - updatesList.height)
+                    color: Qt.alpha(Theme.vermLit, 0.58)
+                }
+            }
+
+            Text {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 10 * root.s
+                anchors.bottomMargin: 2 * root.s
+                visible: updatesList.contentHeight > updatesList.height
+                    && updatesList.contentY + updatesList.height < updatesList.contentHeight - 1
+                text: "▾"
+                color: Theme.vermLit
+                font.family: Theme.font
+                font.pixelSize: 10 * root.s
+                font.weight: Font.DemiBold
             }
         }
 

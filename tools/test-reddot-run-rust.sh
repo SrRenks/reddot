@@ -7,13 +7,15 @@ trap 'rm -rf "$tmp"' EXIT
 bin="$tmp/reddot-run"
 rustc --edition=2021 -O "$here/reddot-run.rs" -o "$bin"
 printf '%s\n' '{"repos":[],"native":["foo","bar"],"aur":["baz"]}' > "$tmp/plan.json"
-"$bin" --plan "$tmp/plan.json" --family arch --root doas --aur-helper paru --dry-run > "$tmp/out"
 cat > "$tmp/expected" <<'EXP'
   would run: doas pacman -Syu --noconfirm
   would run: doas pacman -S --needed --noconfirm foo bar
+  would run: doas pacman -S --needed --noconfirm git base-devel
+  would run: sh -c 'rm -rf /tmp/reddot-yay-build && git clone https://aur.archlinux.org/yay-bin.git /tmp/reddot-yay-build'
+  would run: sh -c 'cd /tmp/reddot-yay-build && makepkg -si --noconfirm'
   would run: paru -S --needed --noconfirm baz
 EXP
-diff -u "$tmp/expected" "$tmp/out"
+PATH=/nonexistent "$bin" --plan "$tmp/plan.json" --family arch --root doas --dry-run > "$tmp/out"
 echo 'ok - package runner order'
 printf '%s\n' '{"repos":[],"native":[],"aur":[]}' > "$tmp/service-plan.json"
 "$bin" --plan "$tmp/service-plan.json" --family arch --root doas --dry-run --services --init systemd > "$tmp/service.out"

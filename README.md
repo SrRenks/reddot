@@ -6,7 +6,7 @@ A Hyprland desktop built around one morphing Quickshell pill.
 
 Personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), maintained on a ThinkPad E14 Gen 7.
 
-![reddot](assets/hero.png)
+![reddot showcase](assets/showcase.gif)
 
 </div>
 

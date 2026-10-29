@@ -169,7 +169,7 @@ mod tests {
     #[test]
     fn batch_shape() {
         assert_eq!(batch("arch", &["foo".into()]), vec!["pacman","-S","--needed","--noconfirm","foo"]);
-        assert!(batch("fedora", &["foo".into()]).contains(&"--skip-broken".into()));
+        assert!(!batch("fedora", &["foo".into()]).contains(&"--skip-broken".into()));
     }
     #[test]
     fn quote_spaces() { assert_eq!(quote("a b"), "'a b'"); }

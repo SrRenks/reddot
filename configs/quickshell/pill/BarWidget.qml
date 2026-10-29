@@ -1,17 +1,13 @@
 import QtQuick
 import "Singletons"
 
-/**
- * Static widget representation of the Bar container mounted in
- * settings.catalog. It avoids a Repeater over the catalog: creating several
- * catalog delegates while the settings surface opens can crash Quickshell.
- */
+/** Lightweight static preview of the Bar container; no live child widgets. */
 Item {
     id: root
 
     property real s: 1
 
-    implicitHeight: 38 * root.s
+    implicitHeight: 42 * root.s
     width: parent ? parent.width : 0
     height: implicitHeight
 
@@ -25,27 +21,34 @@ Item {
 
     Row {
         anchors.centerIn: parent
-        spacing: 10 * root.s
+        spacing: 8 * root.s
 
-        BarComponentHost {
-            componentId: "workspaces"
-            mode: BarLayout.mode("workspaces")
-            s: root.s
-            screenName: ""
-            active: false
-        }
-
-        BarComponentHost {
-            componentId: "clock"
-            mode: BarLayout.mode("clock")
-            s: root.s
-            active: false
+        GlyphIcon {
+            width: 14 * root.s
+            height: 14 * root.s
+            name: "layers"
+            color: Theme.vermLit
+            stroke: 1.7
         }
 
         Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: BarLayout.statusOrder.length + " status"
+            text: "Bar"
+            color: Theme.cream
+            font.family: Theme.font
+            font.pixelSize: Typography.size("bodyLarge", root.s)
+            font.weight: Font.DemiBold
+        }
+
+        Text {
+            text: "settings.catalog"
             color: Theme.faint
+            font.family: Theme.font
+            font.pixelSize: Typography.size("caption", root.s)
+        }
+
+        Text {
+            text: "· " + BarLayout.statusOrder.length + " status"
+            color: Theme.subtle
             font.family: Theme.font
             font.pixelSize: Typography.size("caption", root.s)
         }

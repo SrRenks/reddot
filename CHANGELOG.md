@@ -25,6 +25,9 @@ semantic versioning when it cuts a release.
 - Removed the hot-trio surface preload and replaced the 16 inline component
   editors with one selected-item editor plus a compact selector. Tighter PSS
   budgets: 180 MB idle, 230 MB post, 55 MB lock.
+- Paused the Ame canvas/timer whenever its form is off, eliminating the 6-8%
+  CPU loop after closing a surface. Replaced the live Bar preview with a static
+  card so opening Bar no longer leaves a redraw loop.
 - QML warning baseline and gate, tracking each warning occurrence per file.
 - Hyprland API and legacy-syntax check.
 - Documentation index, getting-started guide, repository map, roadmap and

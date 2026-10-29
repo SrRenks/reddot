@@ -317,7 +317,7 @@ Item {
     }
 
     FrameAnimation {
-        running: root.visible && root.busy
+        running: root.visible && root.busy && root.form !== "off"
         onTriggered: {
             root.swirl += frameTime * 0.5;
             canvas.requestPaint();
@@ -325,7 +325,7 @@ Item {
     }
 
     Timer {
-        running: root.visible && !root.busy
+        running: root.visible && !root.busy && root.form !== "off"
         interval: root.blinking ? 33 : 83
         repeat: true
         onTriggered: {

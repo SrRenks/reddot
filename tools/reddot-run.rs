@@ -80,6 +80,15 @@ fn batch(family: &str, names: &[String]) -> Vec<String> {
     if family == "fedora" { a.push("--skip-broken".into()); }
     a
 }
+fn suse_target() -> String {
+    let text = fs::read_to_string("/etc/os-release").unwrap_or_default();
+    let version = text.lines().find_map(|l| l.strip_prefix("VERSION_ID=")).unwrap_or("").trim_matches(['"', '\'']);
+    if version.split('.').count() == 2 && version.split('.').all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit())) {
+        format!("openSUSE_Leap_{version}")
+    } else {
+        "openSUSE_Tumbleweed".into()
+    }
+}
 fn repo_steps(repo: &str, family: &str) -> Vec<Vec<String>> {
     if repo.starts_with("copr:") && family == "fedora" {
         return vec![vec!["sh".into(), "-c".into(), "dnf install -y dnf-plugins-core 2>/dev/null; dnf install -y dnf5-plugins 2>/dev/null; true".into()], vec!["dnf".into(), "copr".into(), "enable".into(), "-y".into(), repo[5..].into()]];
@@ -90,7 +99,7 @@ fn repo_steps(repo: &str, family: &str) -> Vec<Vec<String>> {
     }
     if repo.starts_with("obs:") && family == "suse" {
         let project = &repo[4..];
-        return vec![vec!["zypper".into(), "--non-interactive".into(), "addrepo".into(), format!("https://download.opensuse.org/repositories/{}/openSUSE_Tumbleweed/", project.replace(':', ":/")), project.replace(':', "_")], vec!["zypper".into(), "--non-interactive".into(), "--gpg-auto-import-keys".into(), "refresh".into()]];
+        return vec![vec!["zypper".into(), "--non-interactive".into(), "addrepo".into(), format!("https://download.opensuse.org/repositories/{}/{}/", project.replace(':', ":/"), suse_target()), project.replace(':', "_")], vec!["zypper".into(), "--non-interactive".into(), "--gpg-auto-import-keys".into(), "refresh".into()]];
     }
     Vec::new()
 }

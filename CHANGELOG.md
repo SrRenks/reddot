@@ -81,3 +81,7 @@ semantic versioning when it cuts a release.
 - Dynamic host contract in the notification toast, keeping the QML boundary explicit.
 - Nested Tooltip access to the component scale.
 - Package parser test path after the parser move.
+
+- Fedora Hyprland packages now use the `hermitfeather/hyprland` COPR, which
+  has Fedora 43+ builds; openSUSE Leap uses its matching OBS target instead of
+  the Tumbleweed URL.

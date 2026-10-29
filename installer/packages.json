@@ -14,7 +14,7 @@
     { "id": "hyprland", "group": "core", "required": true, "desc": "The Wayland compositor the whole rice runs on", "aur": false,
       "names": { "arch": "hyprland", "debian": "hyprland", "fedora": "hyprland", "suse": "hyprland", "gentoo": "gui-wm/hyprland" },
       "note": "repo hyprland 0.55+ ships the native lua config the rice uses (require/hyprland.lua), so the stable binary is enough and no AUR build is needed",
-      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:solopasha/hyprland" }, "fallback": null },
+      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:hermitfeather/hyprland" }, "fallback": null },
 
     { "id": "quickshell", "group": "core", "required": true, "desc": "The QtQuick shell that draws the pill", "aur": false,
       "names": { "arch": "quickshell", "debian": "quickshell", "fedora": "quickshell", "suse": "quickshell", "gentoo": "gui-apps/quickshell" },
@@ -41,19 +41,19 @@
 
     { "id": "hyprpicker", "group": "core", "required": true, "desc": "Picks a color from anywhere on screen", "aur": false,
       "names": { "arch": "hyprpicker", "debian": "hyprpicker", "fedora": "hyprpicker", "suse": "hyprpicker", "gentoo": "gui-apps/hyprpicker" },
-      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:solopasha/hyprland" }, "fallback": null },
+      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:hermitfeather/hyprland" }, "fallback": null },
 
     { "id": "hyprpolkitagent", "group": "core", "required": true, "desc": "Pops the password prompt when something needs root", "aur": false,
       "names": { "arch": "hyprpolkitagent", "debian": "hyprpolkitagent", "fedora": "hyprpolkitagent", "suse": "hyprpolkitagent", "gentoo": "sys-auth/hyprpolkitagent" },
-      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:solopasha/hyprland" }, "fallback": null },
+      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:hermitfeather/hyprland" }, "fallback": null },
 
     { "id": "hypridle", "group": "core", "required": true, "desc": "Dims the screen and locks on idle", "aur": false,
       "names": { "arch": "hypridle", "debian": "hypridle", "fedora": "hypridle", "suse": "hypridle", "gentoo": "gui-apps/hypridle" },
-      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:solopasha/hyprland" }, "fallback": null },
+      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:hermitfeather/hyprland" }, "fallback": null },
 
     { "id": "hyprsunset", "group": "core", "required": false, "desc": "Warms the screen for the night-light filter", "aur": false,
       "names": { "arch": "hyprsunset", "debian": "hyprsunset", "fedora": "hyprsunset", "suse": "hyprsunset", "gentoo": "gui-apps/hyprsunset" },
-      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:solopasha/hyprland" }, "fallback": null },
+      "repo": { "gentoo": "overlay:hyproverlay", "fedora": "copr:hermitfeather/hyprland" }, "fallback": null },
 
     { "id": "dotool", "group": "core", "required": true, "desc": "Types and moves the pointer for the rice automations", "aur": true,
       "names": { "arch": "dotool", "debian": null, "fedora": null, "suse": null, "gentoo": "x11-misc/dotool" },

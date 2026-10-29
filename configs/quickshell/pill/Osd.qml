@@ -213,15 +213,6 @@ Item {
     }
 
     Connections {
-        target: Battery
-        enabled: Battery.present
-        function onChargingChanged() {
-            if (Battery.charging)
-                root.flash("battery");
-        }
-    }
-
-    Connections {
         target: ScreenRec
         function onRecordingChanged() {
             root.recordStarted = ScreenRec.recording;
@@ -238,6 +229,13 @@ Item {
 
     Connections {
         target: KeyNotice
+        function onNotice(icon, label, value) {
+            root.showNotice(icon, label, value);
+        }
+    }
+
+    Connections {
+        target: EventNotices
         function onNotice(icon, label, value) {
             root.showNotice(icon, label, value);
         }

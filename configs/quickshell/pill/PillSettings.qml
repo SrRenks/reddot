@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import "Singletons"
 
-/** Pill geometry, material and key notices. */
+/** Pill geometry, material, key notices and configurable system notices. */
 SettingsSurface {
     id: root
 
@@ -17,7 +17,14 @@ SettingsSurface {
         { item: opacityRow, kind: "scrub", bump: function (d) { opacityScrub.bump(d); } },
         { item: blurRow, kind: "toggle", get: function () { return UiBlur.enabled; }, set: function (v) { UiBlur.setEnabled(v); } },
         { item: noticeRow, kind: "toggle", get: function () { return Flags.keyNoticeEnabled; }, set: function (v) { Flags.keyNoticeEnabled = v; } },
-        { item: holdRow, kind: "scrub", bump: function (d) { holdMs.bump(d); } }
+        { item: holdRow, kind: "scrub", bump: function (d) { holdMs.bump(d); } },
+        { item: lowBatteryRow, kind: "toggle", get: function () { return Flags.notifyBatteryLow; }, set: function (v) { Flags.notifyBatteryLow = v; } },
+        { item: lowPctRow, kind: "scrub", bump: function (d) { lowPct.bump(d); } },
+        { item: chargerRow, kind: "toggle", get: function () { return Flags.notifyCharger; }, set: function (v) { Flags.notifyCharger = v; } },
+        { item: fullRow, kind: "toggle", get: function () { return Flags.notifyBatteryFull; }, set: function (v) { Flags.notifyBatteryFull = v; } },
+        { item: micMuteRow, kind: "toggle", get: function () { return Flags.notifyMicMute; }, set: function (v) { Flags.notifyMicMute = v; } },
+        { item: micPlugRow, kind: "toggle", get: function () { return Flags.notifyMicPlug; }, set: function (v) { Flags.notifyMicPlug = v; } },
+        { item: peripheralRow, kind: "toggle", get: function () { return Flags.notifyPeripheralLow; }, set: function (v) { Flags.notifyPeripheralLow = v; } }
     ]
 
     Column {
@@ -144,6 +151,101 @@ SettingsSurface {
                 openValue: 500
                 from: 200; to: 2000; step: 50; unit: "ms"
                 onEdited: v => Flags.keyNoticeMs = v
+            }
+        }
+
+        SettingsLabel { s: root.s; text: "System notices" }
+
+        SettingsRow {
+            id: lowBatteryRow
+            surface: root
+            name: "Low battery"
+            sub: "Notify once per discharge cycle"
+            icon: "bolt"
+            LinkToggle {
+                s: root.s
+                on: Flags.notifyBatteryLow
+                onToggled: Flags.notifyBatteryLow = !Flags.notifyBatteryLow
+            }
+        }
+
+        SettingsRow {
+            id: lowPctRow
+            surface: root
+            name: "Low threshold"
+            sub: "5–15%"
+            icon: "bolt"
+            ScrubValue {
+                id: lowPct
+                s: root.s
+                value: Flags.notifyBatteryLowPct
+                openValue: 15
+                from: 5; to: 15; step: 1; unit: "%"
+                onEdited: v => Flags.notifyBatteryLowPct = Math.round(v)
+            }
+        }
+
+        SettingsRow {
+            id: chargerRow
+            surface: root
+            name: "Charger"
+            sub: "Plugged and unplugged"
+            icon: "bolt"
+            LinkToggle {
+                s: root.s
+                on: Flags.notifyCharger
+                onToggled: Flags.notifyCharger = !Flags.notifyCharger
+            }
+        }
+
+        SettingsRow {
+            id: fullRow
+            surface: root
+            name: "Battery full"
+            icon: "bolt"
+            LinkToggle {
+                s: root.s
+                on: Flags.notifyBatteryFull
+                onToggled: Flags.notifyBatteryFull = !Flags.notifyBatteryFull
+            }
+        }
+
+        SettingsRow {
+            id: micMuteRow
+            surface: root
+            name: "Mic mute"
+            sub: "Live and muted"
+            icon: "mic"
+            LinkToggle {
+                s: root.s
+                on: Flags.notifyMicMute
+                onToggled: Flags.notifyMicMute = !Flags.notifyMicMute
+            }
+        }
+
+        SettingsRow {
+            id: micPlugRow
+            surface: root
+            name: "Mic plugged"
+            sub: "Connect and disconnect"
+            icon: "mic"
+            LinkToggle {
+                s: root.s
+                on: Flags.notifyMicPlug
+                onToggled: Flags.notifyMicPlug = !Flags.notifyMicPlug
+            }
+        }
+
+        SettingsRow {
+            id: peripheralRow
+            surface: root
+            name: "Peripheral low"
+            sub: "Bluetooth and USB batteries"
+            icon: "bluetooth"
+            LinkToggle {
+                s: root.s
+                on: Flags.notifyPeripheralLow
+                onToggled: Flags.notifyPeripheralLow = !Flags.notifyPeripheralLow
             }
         }
 

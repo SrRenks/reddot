@@ -71,6 +71,10 @@ The watchdog also starts `reddot-recycle.sh` for the pill. After two consecutive
 220 MB, it recycles the process once; the replacement returns to the idle floor.
 This is a cache safety net, not a per-page reload.
 
+`EventNotices.qml` owns configurable system-event notices (battery, charger,
+microphone and low peripherals). It emits through the same monochrome pill OSD
+as `KeyNotice`, but has its own flags and is independent from keybind notices.
+
 ## Shell
 
 The pill is a single morphing surface family. `configs/quickshell/pill/shell.qml`

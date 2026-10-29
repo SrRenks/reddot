@@ -64,6 +64,21 @@ running BIOS; when a newer package exists, **Download** opens Lenovo's official
 support page in the default browser. The check is on demand and only runs from
 the ThinkPad surface.
 
+## System notices
+
+Settings → Shell → Pill → System notices controls the short pill notices for
+state changes that are not key presses:
+
+- low laptop battery, with a 5–15% threshold;
+- charger connected or unplugged;
+- battery full;
+- microphone muted/unmuted;
+- microphone connected/disconnected;
+- low battery on Bluetooth/USB peripherals.
+
+The key-notice section above those rows controls only keyboard-layout notices.
+Both pipelines survive a restart through `flags.json`.
+
 The Workspaces component has a `workspaceDisplay` setting in its `config`:
 
 ```json

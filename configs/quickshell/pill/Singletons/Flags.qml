@@ -33,6 +33,13 @@ Singleton {
     property alias windowBlur: adapter.windowBlur
     property alias keyNoticeEnabled: adapter.keyNoticeEnabled
     property alias keyNoticeMs: adapter.keyNoticeMs
+    property alias notifyBatteryLow: adapter.notifyBatteryLow
+    property alias notifyBatteryLowPct: adapter.notifyBatteryLowPct
+    property alias notifyCharger: adapter.notifyCharger
+    property alias notifyBatteryFull: adapter.notifyBatteryFull
+    property alias notifyMicMute: adapter.notifyMicMute
+    property alias notifyMicPlug: adapter.notifyMicPlug
+    property alias notifyPeripheralLow: adapter.notifyPeripheralLow
     property alias pillMode: adapter.pillMode
     property alias pillReserve: adapter.pillReserve
     property alias topGap: adapter.topGap
@@ -131,6 +138,14 @@ Singleton {
             /** Brief pill feedback for keybind changes (keyboard layout, etc.). */
             property bool keyNoticeEnabled: true
             property int keyNoticeMs: 500
+            /** System-event notices; independent from key notices. */
+            property bool notifyBatteryLow: true
+            property int notifyBatteryLowPct: 15
+            property bool notifyCharger: true
+            property bool notifyBatteryFull: true
+            property bool notifyMicMute: true
+            property bool notifyMicPlug: true
+            property bool notifyPeripheralLow: true
             /** "always" rests the pill on screen; "auto" retracts it and reveals it when the pointer touches the top strip. */
             property string pillMode: "auto"
             /** Reserve the top band so tiled windows start below the pill. Auto mode ignores it (the strip must stay reachable). */

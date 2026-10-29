@@ -81,7 +81,7 @@ Singleton {
             seen[key] = true;
             if (lowest < 0 || p < lowest)
                 lowest = p;
-            if (p <= lowAt && !charging(d)) {
+            if (p <= lowAt && !charging(d) && Flags.notifyPeripheralLow) {
                 if (!notified[key]) {
                     notified[key] = true;
                     notifyProc.command = ["notify-send", "-a", "reddot", "-i", "battery-caution",

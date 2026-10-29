@@ -277,6 +277,9 @@
     "Unqualified access [unqualified] @ readonly property string surfaceContainerLow: adapter.surface_container_low#1",
     "Unqualified access [unqualified] @ readonly property string tickRest: adapter.tick_rest#1"
   ],
+  "configs/quickshell/pill/Singletons/EventNotices.qml": [
+    "Type EventNotices not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
   "configs/quickshell/pill/Singletons/Flags.qml": [
     "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
     "Type Flags not declared as singleton in qmldir but using pragma Singleton [import]#1"

@@ -41,6 +41,9 @@ semantic versioning when it cuts a release.
 - ThinkPad gained an on-demand BIOS check against Lenovo's official catalog for
   the detected machine type, with an official download page button when a newer
   version exists.
+- Added configurable system notices for battery low (5–15% threshold), charger
+  plug/unplug, battery full, microphone mute, microphone plug/unplug, and low
+  peripheral batteries. Key notices remain independent.
 - Added watchdog-driven memory recycling: after two idle checks over 220 MB PSS
   with no open surface or top-strip pointer, the pill process is replaced to
   release the QML type cache. The cold restart takes about 1.75 s and keeps a

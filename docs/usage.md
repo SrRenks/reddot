@@ -50,8 +50,10 @@ gui          → Bar layout
 
 ![Bar layout](../assets/bar.gif)
 
-The status cluster can be reordered, hidden and moved between zones. Settings →
-Shell → Bar mirrors the same order and survives a restart.
+The normal bar exposes the clock and status icons. Clicking Wi‑Fi, battery or the
+package meter opens the matching surface; the status cluster can be reordered,
+hidden and moved between zones. Settings → Shell → Bar mirrors the same order and
+survives a restart.
 
 ## Keybinds
 

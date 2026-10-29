@@ -49,8 +49,9 @@ gui          → Bar layout
 
 ![Bar layout](assets/bar.gif)
 
-The status cluster can be reordered, hidden and moved between zones. The Bar
-page uses the same order and keeps it across restarts.
+The normal bar exposes the clock and status icons. The GIF shows the bar with
+the cursor clicking Wi‑Fi, battery and the package meter; each icon opens its
+surface. The Bar page mirrors the same order and keeps it across restarts.
 
 ## System and security
 

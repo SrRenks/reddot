@@ -28,7 +28,7 @@ ThinkPadGroup {
             options: ThinkPad.kbdMax >= 2
                 ? [{ label: "Off", value: 0 }, { label: "Dim", value: 1 }, { label: "Full", value: 2 }]
                 : [{ label: "Off", value: 0 }, { label: "On", value: 1 }]
-            value: ThinkPad.ledValue("tpacpi::kbd_backlight", ThinkPad.kbd)
+            value: ThinkPad.kbd
             enabled: !lighting.surface.busy
             onPicked: (v) => lighting.surface.setKbd(v)
         }
@@ -37,7 +37,7 @@ ThinkPadGroup {
     SettingsField {
         surface: lighting.surface
         label: "Mic mute"
-        caption: "Audio capture mute, independent from the LED"
+        caption: "Audio capture mute · drives the mic-mute LED"
         visible: Sound.source !== null && Sound.source.audio !== null
 
         LinkToggle {
@@ -55,7 +55,7 @@ ThinkPadGroup {
     SettingsField {
         surface: lighting.surface
         label: "Speaker mute"
-        caption: "Audio output mute, independent from the LED"
+        caption: "Audio output mute · drives the mute LED"
         visible: Sound.sink !== null && Sound.sink.audio !== null
 
         LinkToggle {

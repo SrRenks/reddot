@@ -67,8 +67,15 @@ the ThinkPad surface.
 ThinkPad LED writes go through the privileged helper and polkit. The UI only
 marks a LED as changed after the helper succeeds; if authentication is cancelled
 or the helper fails, the switch stays on the kernel's last known value and the
-failure is shown at the foot of the surface. Keyboard backlight, Caps/Num/Scroll
-and other LED rows therefore require an authorization prompt.
+failure is shown at the foot of the surface. Caps/Num/Scroll and the other LED
+rows require an authorization prompt.
+
+The keyboard backlight uses UPower's
+`org.freedesktop.UPower.KbdBacklight` interface. `BrightnessChanged` keeps the
+menu in sync with Fn+Space and the firmware, and `SetBrightness` changes the
+hardware without polkit. The **Audio** `Mic mute` and `Speaker mute` rows also
+drive `platform::micmute` and `platform::mute` through `brightnessctl`, so the
+same keys and rows settle the hardware indicators without authentication.
 
 ## System notices
 

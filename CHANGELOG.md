@@ -48,6 +48,12 @@ semantic versioning when it cuts a release.
   succeeded. Failed or cancelled polkit authentication now leaves the last
   kernel state visible and reports the failure instead of pretending the LED
   turned on.
+- Keyboard backlight now uses UPower's KbdBacklight D-Bus API: menu changes no
+  longer require polkit, and Fn+Space/firmware changes update the menu through
+  `BrightnessChanged`.
+- Mute LEDs now follow the PipeWire source/sink mute state through
+  `brightnessctl`; keyboard mute keys, the audio rows and the OSD keep the
+  hardware indicators in sync.
 - Added watchdog-driven memory recycling: after two idle checks over 220 MB PSS
   with no open surface or top-strip pointer, the pill process is replaced to
   release the QML type cache. The cold restart takes about 1.75 s and keeps a

@@ -105,7 +105,12 @@ Singleton {
     readonly property var ledOther: {
         var out = [];
         for (var i = 0; i < ledsAll.length; i++) {
-            if (primaryLeds.indexOf(ledsAll[i].name) < 0)
+            var name = ledsAll[i].name;
+            // These two indicators now follow the PipeWire mute state through
+            // MuteLed. The dedicated Mic/Speaker mute rows are their control.
+            if (name === "platform::micmute" || name === "platform::mute")
+                continue;
+            if (primaryLeds.indexOf(name) < 0)
                 out.push(ledsAll[i]);
         }
         return out;
@@ -174,6 +179,21 @@ Singleton {
                 next[bits[0]] = v;
         }
         root.liveLeds = next;
+    }
+
+    function readKbd() {
+        if (!kbdRead.running)
+            kbdRead.running = true;
+    }
+
+    function setKbd(value) {
+        var v = Math.max(0, Math.min(root.kbdMax || 2, Math.round(value)));
+        if (kbdWrite.running)
+            return;
+        kbdWrite.command = ["busctl", "--system", "call",
+            "org.freedesktop.UPower", "/org/freedesktop/UPower/KbdBacklight",
+            "org.freedesktop.UPower.KbdBacklight", "SetBrightness", "i", String(v)];
+        kbdWrite.running = true;
     }
 
     function extractMachineType(raw) {
@@ -364,6 +384,8 @@ Singleton {
         }
     }
 
+    onLiveWatchChanged: if (liveWatch) readKbd()
+
     /**
      * Live LED state while the surface is open. sysfs has no inotify contract
      * for LED brightness, so this is a single 500 ms read of the class directory,
@@ -386,6 +408,49 @@ Singleton {
             "echo \"$n|$v\"; done"]
         stdout: StdioCollector {
             onStreamFinished: root.parseLive(this.text)
+        }
+    }
+
+    Process {
+        id: kbdRead
+        command: ["busctl", "--system", "call",
+            "org.freedesktop.UPower", "/org/freedesktop/UPower/KbdBacklight",
+            "org.freedesktop.UPower.KbdBacklight", "GetBrightness"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var m = this.text.match(/i\s+(-?\d+)/);
+                if (m) {
+                    root.kbd = parseInt(m[1], 10);
+                    if (root.kbd > root.kbdMax)
+                        root.kbdMax = root.kbd;
+                }
+            }
+        }
+    }
+
+    Process {
+        id: kbdWrite
+        onExited: (code) => {
+            if (code === 0) {
+                root.readKbd();
+            } else {
+                root.error = "Keyboard backlight update failed (" + code + ")";
+            }
+        }
+    }
+
+    /** UPower's BrightnessChanged also covers Fn+Space and firmware changes. */
+    Process {
+        id: kbdMonitor
+        running: root.liveWatch
+        command: ["dbus-monitor", "--system",
+            "type='signal',interface='org.freedesktop.UPower.KbdBacklight',member='BrightnessChanged'"]
+        stdout: SplitParser {
+            onRead: (line) => {
+                var m = String(line).match(/int32\s+(-?\d+)/);
+                if (m)
+                    root.kbd = parseInt(m[1], 10);
+            }
         }
     }
 

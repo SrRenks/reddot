@@ -105,8 +105,7 @@ PillSurface {
     }
 
     function setKbd(value) {
-        root.run(["led", "kbd", String(value)],
-            () => ThinkPad.markLed("tpacpi::kbd_backlight", value));
+        ThinkPad.setKbd(value);
     }
 
     function ledCanonical(name) {

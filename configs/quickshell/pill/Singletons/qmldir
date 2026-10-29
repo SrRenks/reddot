@@ -27,6 +27,7 @@ singleton Sensors Sensors.qml
 singleton UiBlur UiBlur.qml
 singleton KeyNotice KeyNotice.qml
 singleton EventNotices EventNotices.qml
+singleton MuteLed MuteLed.qml
 singleton PackageUpdates PackageUpdates.qml
 singleton WindowBlur WindowBlur.qml
 singleton SurfaceChrome SurfaceChrome.qml

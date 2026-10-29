@@ -290,6 +290,9 @@
   "configs/quickshell/pill/Singletons/Motion.qml": [
     "Type Motion not declared as singleton in qmldir but using pragma Singleton [import]#1"
   ],
+  "configs/quickshell/pill/Singletons/MuteLed.qml": [
+    "Type MuteLed not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
   "configs/quickshell/pill/Singletons/NightLight.qml": [
     "Type NightLight not declared as singleton in qmldir but using pragma Singleton [import]#1"
   ],

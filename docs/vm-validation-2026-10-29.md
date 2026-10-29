@@ -42,3 +42,17 @@ Real cloud VMs, QEMU/KVM, cloud-init and a passwordless sudo user. Each run used
   `hermitfeather/hyprland` package set lacked the required runtime libraries.
 - Tumbleweed's Hyprland/quickshell services were present after install.
 - The remaining test gaps are recorded in [coverage.md](coverage.md).
+
+
+## Follow-up: updater, reinstall and physical lock
+
+- Debian updater: 17 commits behind; `reddot-update apply` returned
+  `applied=true`, `codeChanged=true`, no conflicts and no dependency failures.
+- Debian reinstall: `install.sh --reinstall --quickstart` completed after adding
+  Wayland headers and Debian backports to the `swww` fallback; `swww` and
+  `swww-daemon` are installed in `~/.local/bin`.
+- Physical outputs: eDP-1 1920x1200@60 and HDMI-A-1 2560x1080@74.99.
+  `WlSessionLock.secure=true` covered both; the primary shows authentication and
+  the secondary shows date, clock and a LOCKED marker.
+- Headless hotplug: `HEADLESS-1` received a pill layer and the current wallpaper,
+  then was removed cleanly. A physical cable unplug/replug was not performed.

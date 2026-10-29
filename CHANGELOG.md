@@ -76,6 +76,11 @@ semantic versioning when it cuts a release.
 
 ### Fixed
 
+- Lock content now renders the date/time on every monitor; secondary screens
+  show a LOCKED marker while authentication stays on the primary.
+- The physical two-output lock was verified with `secure=true` on eDP-1 and
+  HDMI-A-1, including the HDMI 2560x1080@75 mode.
+
 - The `swww` source fallback now installs the Wayland XML/protocol headers on
   Debian, Fedora, openSUSE and Gentoo; a reinstall no longer fails at
   `waybackend-scanner` with "could not find wayland.xml". Debian fallback

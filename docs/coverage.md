@@ -21,7 +21,7 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Harness Python | arquivado | fora do checkout; testes de paridade Python saíram do CI |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
-| Lock shell | PAM real + two outputs | QML lint, `check-lock-static.sh`, senha/fingerprint supervisionados e `WlSessionLock.secure=true` em eDP-1 + headless |
+| Lock shell | PAM real + duas saídas físicas | QML lint, `check-lock-static.sh`, senha/fingerprint supervisionados; `secure=true` e UI em eDP-1 + HDMI-A-1; autenticação PAM não repetida nesta rodada |
 | Documentação | estrutura e links | `check-doc-links.mjs` e docs obrigatórios |
 | Performance/RAM | medida e orçamento nesta máquina | PSS/RSS de pill, lock e estados de Settings; `test-perf-budget.sh` host-only |
 | Segurança dos helpers | boa | allowlist, polkit, sudoers, guards e casos adversariais de argumentos |
@@ -35,8 +35,8 @@ bloquear a sessão, então a execução fica fora do gate automático.
 - que o layout de cada superfície está bonito ou legível em toda fonte/escala;
 - que cada interação física funciona em todos os temas, escalas e monitores;
 - que o instalador real é idempotente em reinstalações repetidas nas quatro famílias;
-- que o updater aplica uma atualização real sem conflito em toda instalação;
-- que hotplug físico, DPI misto e lock com duas saídas físicas funcionam em todas as combinações;
+- que o updater aplica uma atualização real com conflito e rollback em toda instalação;
+- que o hotplug por cabo físico e o DPI misto funcionam em todas as combinações;
 - que todas as interações individuais de cada superfície estão corretas;
 - que o consumo de RAM obedece ao orçamento em máquinas diferentes.
 
@@ -80,10 +80,11 @@ e nos testes Rust de instalação.
 
 ## Próximos alvos, se houver outro ciclo
 
-1. updater real: aplicar uma atualização e validar conflitos/rollback;
-2. hotplug físico, DPI misto e lock nas duas saídas físicas;
+1. updater real com conflito de arquivo e rollback (o apply limpo já passou);
+2. hotplug por cabo físico e DPI misto; o lock físico e o hotplug headless já passaram;
 3. foco/ativação linha a linha na Search e controles individuais das 41 superfícies;
-4. decidir sobre dedos extras do `fprintd`.
+4. reinstall idempotente nas outras três famílias;
+5. decidir sobre dedos extras do `fprintd`.
 
 Leap 15.6 e Gentoo não são pendências de teste: foram removidos do suporte oficial
 pela [ADR 0034](decisions/0034-supported-matrix.md).

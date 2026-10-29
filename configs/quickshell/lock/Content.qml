@@ -113,7 +113,7 @@ Item {
     }
 
     Text {
-        visible: content.isMain
+        visible: true
         x: parent.width * 0.055
         y: parent.height * 0.065
         text: content.dateText
@@ -136,7 +136,7 @@ Item {
 
     Text {
         id: clockText
-        visible: content.isMain
+        visible: true
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.24
         color: Theme.bright
@@ -165,7 +165,20 @@ Item {
     }
 
     Text {
-        visible: content.isMain && Flags.time12h
+        visible: !content.isMain
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: clockText.y + clockText.height + 18 * content.s
+        text: "LOCKED"
+        color: Theme.cream
+        opacity: 0.55
+        font.family: Theme.font
+        font.weight: 600
+        font.pixelSize: 9 * content.s
+        font.letterSpacing: 2.5 * content.s
+    }
+
+    Text {
+        visible: Flags.time12h
         anchors.left: clockText.right
         anchors.leftMargin: 12 * content.s
         anchors.baseline: clockText.baseline

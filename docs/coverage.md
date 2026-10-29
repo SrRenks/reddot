@@ -14,9 +14,9 @@ a impressão de que um `check.sh` verde significa que todo o projeto foi testado
 | Search | página funcional | `Search.qml`, `lib/search.js`, testes Node, aliases/tags/disponibilidade |
 | Barra e status | boa | contrato, smoke, wheel no painel, reorder físico, Escape-cancel, back por catálogo, lastSurface e uiScale 1.25 |
 | Pacotes | boa | parser puro + testes Node; backends pacman/dnf/zypper/apt, health por fonte, idade e fallback |
-| Scripts Hyprland | parcial | `sh -n`, testes de launch-guard, updater e wallcolors |
+| Scripts Hyprland | parcial | `sh -n`, launch-guard, updater, wallcolors, wallpaper-search sem Python e auditoria de runtime |
 | Helpers TLP/ThinkPad | boa + adversarial | testes próprios, casos de metacaracteres/argumentos extras e selftest do installer |
-| Instalador Python | lógica, matriz e deploy isolado | dry-run, selftests, matriz de 5 famílias e deploy/re-deploy/uninstall em config root temporário |
+| Instalador Rust | quatro famílias em VM real + recusas explícitas | Arch/Debian 13/Fedora 44/Tumbleweed; quickstart, apply, uninstall e reboot; Leap/Gentoo recusados antes do plano |
 | CI | gate estático | workflow em push/PR; QML e Hyprland ficam no gate local; Ubuntu verde após os fixes de portabilidade |
 | Systemd/udev/polkit/TLP | parcial | udev verify, sintaxe JS da regra polkit, contrato estático do target, política TLP |
 | Hyprland/Lua | parcial | `Hyprland --verify-config`, `luac -p` |
@@ -33,8 +33,10 @@ bloquear a sessão, então a execução fica fora do gate automático.
 
 - que o layout de cada superfície está bonito ou legível em toda fonte/escala;
 - que cada interação física funciona em todos os temas, escalas e monitores;
-- que o instalador real (não dry-run) é idempotente em todas as distros;
+- que o instalador real é idempotente em reinstalações repetidas nas quatro famílias;
 - que o updater aplica uma atualização real sem conflito em toda instalação;
+- que hotplug físico, DPI misto e lock com duas saídas físicas funcionam em todas as combinações;
+- que todas as interações individuais de cada superfície estão corretas;
 - que o consumo de RAM obedece ao orçamento em máquinas diferentes.
 
 ## Leitura quantitativa
@@ -49,14 +51,14 @@ Ela usa os gates e os testes executados nesta sessão.
 | Lógica pura e busca | 15% | fuzzy, scroll, ordem, pacotes, search e navegação com testes Node | 100% |
 | Runtime das superfícies | 20% | Search, Settings, Bar, lock e smoke das superfícies; não todas manualmente | 85% |
 | Lock e autenticação | 15% | PAM real, fingerprint, duas saídas headless | 95% |
-| Instalador | 10% | matriz de 5 famílias + dry-run + deploy sandbox; sem VMs reais | 75% |
+| Instalador Rust | 10% | quatro famílias em VM real; duas recusadas por design; updater apply real ainda não exercitado | 90% |
 | CI e documentação | 10% | CI Ubuntu verde; links e docs obrigatórios | 100% |
-| Hardware e performance | 5% | PSS na máquina de referência; sem duas saídas físicas | 80% |
+| Hardware e performance | 5% | PSS na máquina de referência; duas saídas físicas no shell; hotplug/DPI misto/lock físico pendentes | 85% |
 
-**Estimativa atual: ~93% dos caminhos críticos e ~82% do projeto total.**
-
-Os maiores descontos são os testes que exigem VMs reais, duas saídas físicas,
-foco por linha na Search e uma aplicação real do updater.
+A estimativa numérica anterior ficou desatualizada com as VMs reais. O repositório
+não tem instrumentação de cobertura; a tabela acima é a leitura qualitativa atual,
+e os descontos principais são updater apply, hotplug/DPI/lock físico e interações
+individuais das superfícies.
 
 ## Comandos
 
@@ -77,6 +79,11 @@ documentação e drift entre checkout e deploy.
 
 ## Próximos alvos, se houver outro ciclo
 
-1. matriz de instalação em VMs por distro;
-2. decisão sobre remover dedos extras do `fprintd`;
-3. teste multi-monitor em hardware físico com duas saídas.
+1. updater real: aplicar uma atualização e validar conflitos/rollback;
+2. hotplug físico, DPI misto e lock nas duas saídas físicas;
+3. foco/ativação linha a linha na Search e controles individuais das 41 superfícies;
+4. remover o harness Python de paridade depois que a matriz fechar;
+5. decidir sobre dedos extras do `fprintd`.
+
+Leap 15.6 e Gentoo não são pendências de teste: foram removidos do suporte oficial
+pela [ADR 0034](decisions/0034-supported-matrix.md).

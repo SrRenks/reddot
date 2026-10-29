@@ -56,6 +56,10 @@ semantic versioning when it cuts a release.
 
 ### Changed
 
+- `reddot update`, `reddot uninstall`, the updater wrapper, the palette wrapper
+  and the wallpaper search no longer invoke Python; the remaining `.py` files are
+  parity tests only.
+
 - Renamed `docs/ARCHITECTURE.md` to `docs/architecture.md` and
   `docs/COVERAGE.md` to `docs/coverage.md`.
 - Moved the package parser into `Singletons/PackageUpdatesParser.js` so the QML

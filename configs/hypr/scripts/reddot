@@ -137,11 +137,10 @@ cmd_log() {
 }
 
 cmd_update() {
-    [ -f "$ENGINE" ] || die "update engine missing ($ENGINE)"
-    command -v python3 >/dev/null 2>&1 || die "python3 not found"
+    [ -x "$ENGINE" ] || die "update engine missing ($ENGINE); run tools/install-extras.sh"
     command -v jq >/dev/null 2>&1 || die "jq not found"
 
-    json=$(python3 "$ENGINE" check) || die "update check failed"
+    json=$("$ENGINE" check) || die "update check failed"
     status=$(printf '%s' "$json" | jq -r '.status // "error"')
     case "$status" in
         devmode) note "dev install, update with git pull"; return 0 ;;
@@ -182,9 +181,9 @@ cmd_update() {
 
     ids=$(printf '%s' "$json" | jq -r '[.missingDeps[]?.id] | join(",")')
     if [ -n "$ids" ]; then
-        result=$(python3 "$ENGINE" apply --install-deps "$ids") || die "apply failed"
+        result=$("$ENGINE" apply --install-deps "$ids") || die "apply failed"
     else
-        result=$(python3 "$ENGINE" apply) || die "apply failed"
+        result=$("$ENGINE" apply) || die "apply failed"
     fi
 
     nfail=$(printf '%s' "$result" | jq -r '.depFailures | length')
@@ -201,10 +200,9 @@ cmd_update() {
 }
 
 cmd_uninstall() {
-    installer="${XDG_DATA_HOME:-$HOME/.local/share}/reddot/installer/reddot_install.py"
-    [ -f "$installer" ] || die "installer not found ($installer); remove ~/.config/hypr and ~/.config/quickshell by hand, your originals sit next to them as .bak"
-    command -v python3 >/dev/null 2>&1 || die "python3 not found"
-    exec python3 "$installer" --uninstall
+    installer="${XDG_BIN_HOME:-$HOME/.local/bin}/reddot-install"
+    [ -x "$installer" ] || die "Rust installer not found ($installer); run tools/install-extras.sh"
+    exec "$installer" --uninstall --apply --config-root "${XDG_CONFIG_HOME:-$HOME/.config}" --bin-dir "${XDG_BIN_HOME:-$HOME/.local/bin}"
 }
 
 cmd_status() {

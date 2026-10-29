@@ -3,55 +3,33 @@
 UA="Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/126.0"
 
 search_moewalls() {
-    local query="${1:-}"
-    UA="$UA" python3 - "$query" <<'PYEOF'
-import concurrent.futures
-import json
-import os
-import re
-import sys
-import urllib.parse
-import urllib.request
+    local query="${1:-}" enc page posts tmp url html prev token thumb res w h
+    [ -n "$query" ] || { printf '[]\n'; return 0; }
+    enc=$(jq -rn --arg q "$query" '$q|@uri') || { printf '[]\n'; return 0; }
+    page=$(curl -fsSL --max-time 12 -A "$UA" -e "https://moewalls.com/" "https://moewalls.com/?s=${enc}") || { printf '[]\n'; return 0; }
+    posts=$(printf '%s' "$page" | grep -oP 'href="\Khttps://moewalls\.com/[a-z0-9-]+/[a-z0-9-]+-live-wallpaper/' | awk '!seen[$0]++' | head -n 24)
+    [ -n "$posts" ] || { printf '[]\n'; return 0; }
 
-ua = os.environ.get("UA", "Mozilla/5.0")
-
-def fetch(url, timeout=10):
-    req = urllib.request.Request(url, headers={"User-Agent": ua, "Referer": "https://moewalls.com/"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", "ignore")
-
-def post_entry(url):
-    html = fetch(url)
-    prev = re.search(r'<source src="(/wp-content/uploads/preview/[^"]+)"', html)
-    token = re.search(r'id="moe-download"[^>]*data-url="([^"]+)"', html)
-    thumb = re.search(r'poster="([^"]+)"', html)
-    if not prev or not token:
-        return None
-    res = re.search(r'resolutions-(\d+)x(\d+)', html)
-    return {
-        "image": "https://go.moewalls.com/download.php?video=" + token.group(1),
-        "thumb": urllib.parse.urljoin("https://moewalls.com/", thumb.group(1)) if thumb else "",
-        "preview": urllib.parse.urljoin("https://moewalls.com/", prev.group(1)),
-        "w": int(res.group(1)) if res else 0,
-        "h": int(res.group(2)) if res else 0,
-    }
-
-try:
-    q = urllib.parse.quote(sys.argv[1])
-    page = fetch("https://moewalls.com/?s=" + q, timeout=12)
-    posts = []
-    for m in re.finditer(r'href="(https://moewalls\.com/[a-z0-9-]+/[a-z0-9-]+-live-wallpaper/)"', page):
-        if m.group(1) not in posts:
-            posts.append(m.group(1))
-    out = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
-        for entry in ex.map(post_entry, posts[:24]):
-            if entry:
-                out.append(entry)
-    print(json.dumps(out))
-except Exception:
-    print("[]")
-PYEOF
+    tmp=$(mktemp "${TMPDIR:-/tmp}/moewalls.XXXXXX")
+    trap 'rm -f "$tmp"' EXIT
+    : > "$tmp"
+    while IFS= read -r url; do
+        [ -n "$url" ] || continue
+        html=$(curl -fsSL --max-time 10 -A "$UA" -e "https://moewalls.com/" "$url") || continue
+        prev=$(printf '%s' "$html" | grep -oP '<source src="\K/wp-content/uploads/preview/[^"]+' | head -1)
+        token=$(printf '%s' "$html" | grep -oP 'id="moe-download"[^>]*data-url="\K[^"]+' | head -1)
+        thumb=$(printf '%s' "$html" | grep -oP 'poster="\K[^"]+' | head -1)
+        res=$(printf '%s' "$html" | grep -oP 'resolutions-\K[0-9]+x[0-9]+' | head -1)
+        [ -n "$prev" ] && [ -n "$token" ] || continue
+        case "$prev" in http*) ;; *) prev="https://moewalls.com$prev" ;; esac
+        case "$thumb" in "" ) thumb="" ;; http*) ;; *) thumb="https://moewalls.com$thumb" ;; esac
+        w=0 h=0
+        [ -n "$res" ] && { w=${res%x*}; h=${res#*x}; }
+        jq -cn --arg image "https://go.moewalls.com/download.php?video=${token}" --arg thumb "$thumb" --arg preview "$prev" --argjson w "${w:-0}" --argjson h "${h:-0}"             '{image:$image, thumb:$thumb, preview:$preview, w:$w, h:$h}' >> "$tmp" 2>/dev/null || true
+    done <<EOF
+$posts
+EOF
+    jq -s '.' "$tmp" 2>/dev/null || printf '[]\n'
 }
 
 search() {

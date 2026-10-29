@@ -441,6 +441,8 @@ for f in "$repo"/configs/hypr/scripts/reddot "$repo"/configs/hypr/scripts/reddot
     sh -n "$f" 2>/dev/null || bad "sh -n $(basename "$f")"
 done
 ok "wrapper syntax"
+if out=$(sh "$repo/tools/test-runtime-python.sh" 2>&1); then ok "runtime Python audit"; else bad "runtime Python audit"; printf '%s\n' "$out" | tail -n 8 | sed 's/^/        /'; fi
+
 luac_bin=
 for candidate in luac luac5.4 luac5.3; do
     if command -v "$candidate" >/dev/null 2>&1; then luac_bin=$(command -v "$candidate"); break; fi

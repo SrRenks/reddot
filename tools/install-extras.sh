@@ -68,7 +68,7 @@ if command -v rustc >/dev/null 2>&1; then
     fi
     rm -f "$updater_tmp"
 else
-    echo "warning: rustc not found; updater keeps the Python fallback" >&2
+    echo "warning: rustc not found; updater not installed" >&2
 fi
 
 if command -v rustc >/dev/null 2>&1; then
@@ -82,7 +82,7 @@ if command -v rustc >/dev/null 2>&1; then
     fi
     rm -f "$colors_tmp"
 else
-    echo "warning: rustc not found; wallcolors keeps the Python fallback" >&2
+    echo "warning: rustc not found; wallcolors not installed" >&2
 fi
 
 install -m 0755 -o root -g root "$here/reddot-tlp" /usr/local/bin/reddot-tlp
@@ -117,6 +117,34 @@ command -v pkexec >/dev/null 2>&1 || \
     echo "warning: pkexec not found; install polkit for authentication" >&2
 
 install -d -m 0755 -o "$user" -g "$group" "$home/.local/bin"
+if command -v rustc >/dev/null 2>&1; then
+    deploy_tmp=$(mktemp)
+    if rustc --edition=2021 -O -C strip=symbols "$here/reddot-deploy.rs" -o "$deploy_tmp"; then
+        install -d -m 0755 -o "$user" -g "$group" "$home/.local/bin"
+        install -m 0755 -o "$user" -g "$group" "$deploy_tmp" "$home/.local/bin/reddot-deploy"
+        echo "  $home/.local/bin/reddot-deploy"
+    else
+        echo "warning: could not build reddot-deploy" >&2
+    fi
+    rm -f "$deploy_tmp"
+else
+    echo "warning: rustc not found; deploy helper not installed" >&2
+fi
+
+if command -v rustc >/dev/null 2>&1; then
+    installer_tmp=$(mktemp)
+    if rustc --edition=2021 -O -C strip=symbols "$here/reddot-install.rs" -o "$installer_tmp"; then
+        install -d -m 0755 -o "$user" -g "$group" "$home/.local/bin"
+        install -m 0755 -o "$user" -g "$group" "$installer_tmp" "$home/.local/bin/reddot-install"
+        echo "  $home/.local/bin/reddot-install"
+    else
+        echo "warning: could not build reddot-install" >&2
+    fi
+    rm -f "$installer_tmp"
+else
+    echo "warning: rustc not found; installer not installed" >&2
+fi
+
 install -m 0755 -o "$user" -g "$group" "$here/reddot-bench.sh" \
     "$home/.local/bin/reddot-bench"
 install -m 0755 -o "$user" -g "$group" "$here/reddot-power-report" \

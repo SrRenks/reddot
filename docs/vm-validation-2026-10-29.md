@@ -34,12 +34,11 @@ Real cloud VMs, QEMU/KVM, cloud-init and a passwordless sudo user. Each run used
 
 - Fedora 44 pass replaces the earlier Fedora 43 partial result.
 - Leap 15.6 and Gentoo are intentionally rejected with a clear message.
-- Fedora 44 and Tumbleweed boot-tested after the package fixes.
+- Arch, Debian and Fedora were reboot-tested; Tumbleweed was validated without a reboot.
 
 ## Follow-up after the run
 
-- The Fedora COPR still lacks `libaquamarine.so.10` and `libhyprutils.so.12`
-  for both `hyprland` and `hyprland-git`; the installer now fails instead of
-  reporting success with Hyprland absent.
-- Fedora 43's `quickshell`, `matugen` and services did install.
+- Fedora 44 uses `lionheartp/Hyprland` and `awww`; the older Fedora 43
+  `hermitfeather/hyprland` package set lacked the required runtime libraries.
 - Tumbleweed's Hyprland/quickshell services were present after install.
+- The remaining test gaps are recorded in [coverage.md](coverage.md).

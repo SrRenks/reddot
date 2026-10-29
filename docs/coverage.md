@@ -73,9 +73,10 @@ node tools/check-doc-links.mjs    links relativos da documentação
 sh tools/check-qml-runtime.sh     harness Quickshell sem janela
 ```
 
-O `check.sh` roda os gates de contrato, integração, testes, lint dos QML
-deployados, baseline de warnings do checkout, scripts, Lua, API Hyprland,
-documentação e drift entre checkout e deploy.
+O `check.sh` roda os gates de contrato, testes, lint dos QML deployados,
+baseline de warnings do checkout, scripts, Lua, API Hyprland, documentação e
+drift entre checkout e deploy. A matriz de instalação fica em `check-static.sh`
+e nos testes Rust de instalação.
 
 ## Próximos alvos, se houver outro ciclo
 

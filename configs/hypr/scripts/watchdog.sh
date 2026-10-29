@@ -17,6 +17,17 @@ if [ -x "$(dirname -- "$0")/reddot-migrate" ]; then
     ( flock -n 8 || exit 0; "$(dirname -- "$0")/reddot-migrate" ) 8>"$run/reddot-migrate.lock"
 fi
 
+# Pill-only memory hygiene: recycle a long-idle process once its QML type
+# cache grows past the threshold. The helper must not hold the watchdog lock.
+if [ "$name" = "pill" ]; then
+    recycle="$(dirname -- "$0")/reddot-recycle.sh"
+    if [ -x "$recycle" ]; then
+        "$recycle" 9>&- &
+        recycle_pid=$!
+        trap 'kill "$recycle_pid" 2>/dev/null' EXIT INT TERM
+    fi
+fi
+
 while :; do
     qs -c "$name" 9>&- >/dev/null 2>&1
     [ -S "$run/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket.sock" ] || exit 0

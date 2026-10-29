@@ -66,6 +66,11 @@ The right-side status cluster lives in `BarStatusRow.qml` and is instantiated by
 a Loader only while the bar is expanded. Its width and Ame anchors are exposed
 by the component; idle keeps only the rest capsule and the shell services.
 
+The watchdog also starts `reddot-recycle.sh` for the pill. After two consecutive
+20 s checks with no open surface, no pointer in the bar strip and PSS above
+220 MB, it recycles the process once; the replacement returns to the idle floor.
+This is a cache safety net, not a per-page reload.
+
 ## Shell
 
 The pill is a single morphing surface family. `configs/quickshell/pill/shell.qml`

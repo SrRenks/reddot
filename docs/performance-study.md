@@ -182,3 +182,17 @@ sem matar o processo. Com dez páginas abertas, a PSS foi de 243,3 MB antes para
 247,5 MB depois do reload; ele não devolveu memória. Reciclagem só funcionou com
 processo novo (volta ao piso de ~159 MB com dois monitores). Isso confirma que a
 engine recriada não libera o cache residente que interessa aqui.
+
+
+## Reciclagem de processo
+
+O watchdog agora inicia `reddot-recycle.sh`. No teste com dez páginas:
+
+```text
+antes: 269,9 MB PSS
+depois de 2 checagens de 20 s: 170,4 MB PSS
+restart: ~1,75 s, uma instância, sem crash reporter
+```
+
+O helper não roda com superfície aberta nem com o ponteiro na faixa superior da
+barra. O limite é 220 MB PSS; o idle normal (~159–184 MB) fica abaixo dele.

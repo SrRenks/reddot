@@ -34,6 +34,10 @@ semantic versioning when it cuts a release.
 - Added a persisted `workspaceDisplay` setting for the Workspaces bar component:
   `dots` (clearer current strip) or `number` (active workspace numeral), editable
   from the component editor and through `barConfig`.
+- Added watchdog-driven memory recycling: after two idle checks over 220 MB PSS
+  with no open surface or top-strip pointer, the pill process is replaced to
+  release the QML type cache. The cold restart takes about 1.75 s and keeps a
+  single instance.
 - QML warning baseline and gate, tracking each warning occurrence per file.
 - Hyprland API and legacy-syntax check.
 - Documentation index, getting-started guide, repository map, roadmap and

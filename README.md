@@ -6,7 +6,7 @@ A Hyprland desktop built around one morphing Quickshell pill.
 
 Personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), maintained on a ThinkPad E14 Gen 7.
 
-![reddot launcher](assets/showcase/launcher.gif)
+![reddot opening tour](assets/showcase/hero.gif)
 
 </div>
 
@@ -14,7 +14,7 @@ One pill replaces the status bar and the usual launcher, mixer and settings
 windows. It starts as a thin strip, expands in place, and returns to the strip
 when you leave. **42 surfaces**, no background daemon for the shell itself.
 
-Every clip starts on a bare workspace. The pill appears after the tour begins,
+Every clip starts on a bare workspace. The opening tour is deliberately slow (under six seconds). The pill appears after the tour begins,
 then the pointer opens and navigates the surface. All clips run at **30 fps**.
 Network names, window titles and notification examples are redacted or generic.
 

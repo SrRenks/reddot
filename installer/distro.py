@@ -223,7 +223,7 @@ def _selftest():
     assert is_aur(by_id["cava"], "arch") is False
 
     # repos
-    assert repo_for(by_id["hyprland"], "fedora") == "copr:hermitfeather/hyprland"
+    assert repo_for(by_id["hyprland"], "fedora") == "copr:lionheartp/Hyprland"
     assert repo_for(by_id["quickshell"], "suse") == "obs:home:AvengeMedia:danklinux"
     assert repo_for(by_id["quickshell"], "fedora") == "copr:errornointernet/quickshell"
     assert repo_for(by_id["quickshell"], "debian") is None

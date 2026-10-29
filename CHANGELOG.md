@@ -92,3 +92,6 @@ semantic versioning when it cuts a release.
 - Arch AUR packages now bootstrap `yay-bin` when no helper is present, instead
   of failing with `yay: No such file or directory`.
 - Arch cloud VM validation: install, AUR build, services and reboot pass.
+
+- Fedora's Hyprland packages now use `lionheartp/Hyprland`, which has complete
+  Fedora 43/44 builds; Fedora 44 is the validation target.

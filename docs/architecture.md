@@ -48,14 +48,19 @@ Singletons/barLayout.js     pure normalize/migrate/order policy
 `barWorkspaces`, `barClock`, `bar*` visibility flags and `barStatusOrder`.
 After that the file is authoritative. The Bar, Clock, Workspaces and status
 settings read and write it. Clock and Workspaces render through the generic
-`BarComponentHost`; status components keep their current right-cluster QML when
-in `bar.right` and fall back to a catalog glyph when moved to another host. The
-generic right-cluster renderer and widget mode for statuses remain to be built.
+`BarComponentHost` in icon or widget mode. Status components keep their current
+right-cluster visual in icon mode, render a generic widget row in widget mode,
+and fall back to a catalog glyph when moved outside `bar.right`.
 
 Each catalog definition declares `icon` and `widget` modes, a default host and
-the hosts it accepts. `bar` is registered as a definition without a default
-instance: it is the container component, so Settings can treat it like any
-other catalog entry instead of a special case.
+the hosts it accepts. `bar` is a container with a persisted instance mounted at
+`settings.catalog` and a static preview. The optional `command` component runs
+an argv-based provider, parses one JSON object from stdout and renders icon or
+widget output. Settings uses one selected-item editor and a compact selector
+instead of allocating a full control block for every definition.
+
+The hot trio no longer preloads; surfaces build on first open. The host-only
+performance gate uses 180 MB PSS idle, 230 MB post and 55 MB lock limits.
 
 ## Shell
 

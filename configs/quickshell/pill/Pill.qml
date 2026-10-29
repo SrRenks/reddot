@@ -2265,19 +2265,9 @@ Item {
      * synchronously on its first open. Each loader fills the pill so
      * the PillSurface inside anchors exactly as it did as a direct child.
      *
-     * The hot trio preloads shortly after startup: the mixer needs its Pipewire
-     * trackers bound before it looks right, so a cold first open visibly popped
-     * faders in. Startup itself stays light.
+     * The former hot-trio preload was removed to cut idle memory. A surface is
+     * now built on first open; the loader path still makes it synchronous.
      */
-    Timer {
-        interval: 2500
-        running: true
-        onTriggered: {
-            ldMixer.active = true;
-            ldMedia.active = true;
-            ldLink.active = true;
-        }
-    }
 
     Loader {
         id: ldMixer

@@ -12,6 +12,7 @@ SettingsSurface {
     id: root
 
     implicitHeight: content.implicitHeight
+    property string selectedComponent: "clock"
 
     rows: [
         { item: alignRow, kind: "seg", vals: ["left", "center", "right"], get: function () { return Flags.barAlign; }, set: function (v) { Flags.barAlign = v; } },
@@ -84,24 +85,26 @@ SettingsSurface {
             BarSection { s: root.s; text: "Status · drag grip · tap to show/hide" }
             StatusOrderList { s: root.s; width: root.width }
 
-            BarSection { s: root.s; text: "Components · host and mode" }
+            BarSection { s: root.s; text: "Components · selected item" }
+            BarComponentEditorRow { surface: root; componentId: root.selectedComponent }
 
-            BarComponentEditorRow { surface: root; componentId: "workspaces" }
-            BarComponentEditorRow { surface: root; componentId: "clock" }
-            BarComponentEditorRow { surface: root; componentId: "weather" }
-            BarComponentEditorRow { surface: root; componentId: "minimized" }
-            BarComponentEditorRow { surface: root; componentId: "tray" }
-            BarComponentEditorRow { surface: root; componentId: "dnd" }
-            BarComponentEditorRow { surface: root; componentId: "network" }
-            BarComponentEditorRow { surface: root; componentId: "inbox" }
-            BarComponentEditorRow { surface: root; componentId: "mixer" }
-            BarComponentEditorRow { surface: root; componentId: "sound" }
-            BarComponentEditorRow { surface: root; componentId: "thinkpad" }
-            BarComponentEditorRow { surface: root; componentId: "sysmon" }
-            BarComponentEditorRow { surface: root; componentId: "updates" }
-            BarComponentEditorRow { surface: root; componentId: "recorder" }
-            BarComponentEditorRow { surface: root; componentId: "settings" }
-            BarComponentEditorRow { surface: root; componentId: "power" }
+            BarSection { s: root.s; text: "Components · tap to select" }
+            BarComponentSelectorRow { s: root.s; componentId: "workspaces"; selected: root.selectedComponent === "workspaces"; onPicked: root.selectedComponent = "workspaces" }
+            BarComponentSelectorRow { s: root.s; componentId: "clock"; selected: root.selectedComponent === "clock"; onPicked: root.selectedComponent = "clock" }
+            BarComponentSelectorRow { s: root.s; componentId: "weather"; selected: root.selectedComponent === "weather"; onPicked: root.selectedComponent = "weather" }
+            BarComponentSelectorRow { s: root.s; componentId: "minimized"; selected: root.selectedComponent === "minimized"; onPicked: root.selectedComponent = "minimized" }
+            BarComponentSelectorRow { s: root.s; componentId: "tray"; selected: root.selectedComponent === "tray"; onPicked: root.selectedComponent = "tray" }
+            BarComponentSelectorRow { s: root.s; componentId: "dnd"; selected: root.selectedComponent === "dnd"; onPicked: root.selectedComponent = "dnd" }
+            BarComponentSelectorRow { s: root.s; componentId: "network"; selected: root.selectedComponent === "network"; onPicked: root.selectedComponent = "network" }
+            BarComponentSelectorRow { s: root.s; componentId: "inbox"; selected: root.selectedComponent === "inbox"; onPicked: root.selectedComponent = "inbox" }
+            BarComponentSelectorRow { s: root.s; componentId: "mixer"; selected: root.selectedComponent === "mixer"; onPicked: root.selectedComponent = "mixer" }
+            BarComponentSelectorRow { s: root.s; componentId: "sound"; selected: root.selectedComponent === "sound"; onPicked: root.selectedComponent = "sound" }
+            BarComponentSelectorRow { s: root.s; componentId: "thinkpad"; selected: root.selectedComponent === "thinkpad"; onPicked: root.selectedComponent = "thinkpad" }
+            BarComponentSelectorRow { s: root.s; componentId: "sysmon"; selected: root.selectedComponent === "sysmon"; onPicked: root.selectedComponent = "sysmon" }
+            BarComponentSelectorRow { s: root.s; componentId: "updates"; selected: root.selectedComponent === "updates"; onPicked: root.selectedComponent = "updates" }
+            BarComponentSelectorRow { s: root.s; componentId: "recorder"; selected: root.selectedComponent === "recorder"; onPicked: root.selectedComponent = "recorder" }
+            BarComponentSelectorRow { s: root.s; componentId: "settings"; selected: root.selectedComponent === "settings"; onPicked: root.selectedComponent = "settings" }
+            BarComponentSelectorRow { s: root.s; componentId: "power"; selected: root.selectedComponent === "power"; onPicked: root.selectedComponent = "power" }
 
             SettingsRow {
                 surface: root

@@ -22,6 +22,9 @@ semantic versioning when it cuts a release.
 - Optional `command` bar provider with argv-only execution, interval, timeout,
   JSON output, and icon/widget rendering. `reddot bar export` and
   `reddot bar import` validate and move the persisted layout.
+- Removed the hot-trio surface preload and replaced the 16 inline component
+  editors with one selected-item editor plus a compact selector. Tighter PSS
+  budgets: 180 MB idle, 230 MB post, 55 MB lock.
 - QML warning baseline and gate, tracking each warning occurrence per file.
 - Hyprland API and legacy-syntax check.
 - Documentation index, getting-started guide, repository map, roadmap and

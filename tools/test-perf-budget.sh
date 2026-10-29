@@ -4,9 +4,9 @@
 set -u
 state=${1:-idle}
 case "$state" in
-    idle) limit=270000 ;;
-    post) limit=310000 ;;
-    lock) limit=60000 ;;
+    idle) limit=180000 ;;
+    post) limit=230000 ;;
+    lock) limit=55000 ;;
     *) echo "usage: $0 idle|post|lock" >&2; exit 2 ;;
 esac
 

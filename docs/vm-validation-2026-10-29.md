@@ -34,3 +34,11 @@ Real cloud VMs, QEMU/KVM, cloud-init and a passwordless sudo user. Each run used
 - Decide whether Leap 15.6 is supported; if yes, add source fallbacks or a repo.
 - Boot-test Fedora/Tumbleweed after the package fixes.
 - Real Arch and Gentoo installs.
+
+## Follow-up after the run
+
+- The Fedora COPR still lacks `libaquamarine.so.10` and `libhyprutils.so.12`
+  for both `hyprland` and `hyprland-git`; the installer now fails instead of
+  reporting success with Hyprland absent.
+- Fedora 43's `quickshell`, `matugen` and services did install.
+- Tumbleweed's Hyprland/quickshell services were present after install.

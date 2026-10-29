@@ -75,6 +75,8 @@ semantic versioning when it cuts a release.
 - Debian 13 installs target `trixie-backports` for the Hyprland/quickshell set
   instead of enabling an Ubuntu PPA, and cargo fallbacks no longer abort when a
   distro cargo has no `~/.cargo/env`.
+- The package runner stops claiming success when a native install fails; the
+  installer exits nonzero instead of printing the closing "reddot is in" report.
 - Strict string comparisons in the wallpaper, launcher and app lists.
 - Dynamic host contract in the notification toast, keeping the QML boundary explicit.
 - Nested Tooltip access to the component scale.

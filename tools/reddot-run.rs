@@ -42,11 +42,36 @@ fn execute(argv: &[String], dry: bool) -> Result<(), String> {
     let status = Command::new(&argv[0]).args(&argv[1..]).status().map_err(|e| format!("{e}: {}", argv.join(" ")))?;
     if status.success() { Ok(()) } else { Err(format!("exit {}: {}", status.code().unwrap_or(-1), argv.join(" "))) }
 }
+fn apt_has_backports(needle: &str) -> bool {
+    let mut files = vec![std::path::PathBuf::from("/etc/apt/sources.list")];
+    if let Ok(entries) = fs::read_dir("/etc/apt/sources.list.d") {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if p.extension().and_then(|e| e.to_str()).map_or(false, |e| e == "list" || e == "sources") {
+                files.push(p);
+            }
+        }
+    }
+    files.iter().any(|p| fs::read_to_string(p).map(|t| t.contains(needle)).unwrap_or(false))
+}
+fn debian_backports() -> Option<String> {
+    let text = fs::read_to_string("/etc/os-release").ok()?;
+    let id = text.lines().find(|l| l.starts_with("ID=")).map(|l| l[3..].trim_matches(['"', '\''].as_ref())).unwrap_or("");
+    if id != "debian" { return None; }
+    let code = text.lines().find(|l| l.starts_with("VERSION_CODENAME=")).map(|l| l[15..].trim_matches(['"', '\''].as_ref())).unwrap_or("");
+    if code.is_empty() { return None; }
+    let needle = format!("{code}-backports");
+    apt_has_backports(&needle).then(|| needle)
+}
 fn batch(family: &str, names: &[String]) -> Vec<String> {
     if names.is_empty() { return Vec::new(); }
     let mut a = match family {
         "arch" => vec!["pacman".into(), "-S".into(), "--needed".into(), "--noconfirm".into()],
-        "debian" => vec!["apt-get".into(), "install".into(), "-y".into()],
+        "debian" => {
+            let mut a = vec!["apt-get".into(), "install".into(), "-y".into()];
+            if let Some(release) = debian_backports() { a.push("-t".into()); a.push(release); }
+            a
+        },
         "fedora" => vec!["dnf".into(), "install".into(), "-y".into()],
         "gentoo" => vec!["emerge".into(), "--noreplace".into()],
         _ => vec!["zypper".into(), "--non-interactive".into(), "install".into()],

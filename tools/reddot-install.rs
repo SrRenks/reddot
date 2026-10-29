@@ -73,6 +73,7 @@ fn main() {
     let mut aur = "yay".to_string();
     let mut optional = String::new();
     let mut family_override = String::new();
+    let mut failed = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -200,7 +201,7 @@ fn main() {
         if !fallback_pairs.is_empty() { args.extend(["--fallbacks-json", &fb_arg]); }
         match run(&bin("reddot-run"), &args) {
             Ok(out) => print!("{out}"),
-            Err(e) => eprintln!("{e}"),
+            Err(e) => { eprintln!("{e}"); failed = true; }
         }
     }
     let src_arg = source.to_string_lossy().into_owned();
@@ -252,6 +253,12 @@ fn main() {
         let updater = config_root.join("hypr/scripts/reddot-update");
         let updater_arg = updater.to_string_lossy().into_owned();
         let _ = run(&bin("reddot-post"), &["baseline", "--source", &src_arg, "--config-root", &root_arg, "--updater", &updater_arg]);
+    }
+    if failed {
+        eprintln!("reddot-install: finished with failures; not reporting success");
+        let _ = fs::remove_file(&plan);
+        let _ = fs::remove_file(&fallback_path);
+        std::process::exit(1);
     }
     let mut fargs = vec!["--plan", &plan_arg, "--family", &family, "--final", "--init", &init];
     if !apply { fargs.push("--dry-run"); }

@@ -173,3 +173,12 @@ todas as 41 surfaces         328,0 MB PSS
 A diferença de ~29 MB entre idle e hover mostra o ganho do carregamento lazy.
 O stress de páginas continua sendo cache de tipos QML; ele não é resolvido por
 esse carregamento e segue como o próximo alvo arquitetural.
+
+
+## Teste de reciclagem em processo
+
+`ShellRoot.reload(true)` foi testado como forma de descarregar o cache de tipos
+sem matar o processo. Com dez páginas abertas, a PSS foi de 243,3 MB antes para
+247,5 MB depois do reload; ele não devolveu memória. Reciclagem só funcionou com
+processo novo (volta ao piso de ~159 MB com dois monitores). Isso confirma que a
+engine recriada não libera o cache residente que interessa aqui.

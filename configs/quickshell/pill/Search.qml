@@ -41,7 +41,8 @@ PillSurface {
                 title: entry.title,
                 sub: entry.sub,
                 aliases: entry.aliases,
-                tags: entry.tags
+                tags: entry.tags,
+                keywords: entry.keywords || []
             });
         }
         return out;

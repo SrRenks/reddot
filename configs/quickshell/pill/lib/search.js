@@ -40,7 +40,7 @@ function subsequence(needle, haystack) {
     return j === needle.length;
 }
 
-function scoreField(field, query) {
+function scoreField(field, query, allowFuzzy) {
     var f = normalize(field);
     if (f.length === 0) return 99;
     if (f === query) return 0;
@@ -49,21 +49,24 @@ function scoreField(field, query) {
     for (var i = 0; i < words.length; i++)
         if (words[i].indexOf(query) === 0) return 2;
     if (f.indexOf(query) !== -1) return 3;
-    if (query.length >= 4 && distance(query, f) <= 1) return 5;
-    if (query.length >= 6 && distance(query, f) <= 2) return 7;
-    if (query.length >= 3 && subsequence(query, f)) return 9;
+    if (allowFuzzy !== false && query.length >= 4 && distance(query, f) <= 1) return 5;
+    if (allowFuzzy !== false && query.length >= 6 && distance(query, f) <= 2) return 7;
+    if (allowFuzzy !== false && query.length >= 3 && subsequence(query, f)) return 9;
     return 99;
 }
 
 function scoreEntry(entry, query) {
-    var best = scoreField(entry.title, query);
+    var best = scoreField(entry.title, query, query.length >= 4);
     var aliases = entry.aliases || [];
     for (var i = 0; i < aliases.length; i++)
-        best = Math.min(best, scoreField(aliases[i], query) + 0.5);
+        best = Math.min(best, scoreField(aliases[i], query, query.length >= 4) + 0.5);
     var tags = entry.tags || [];
     for (var j = 0; j < tags.length; j++)
-        best = Math.min(best, scoreField(tags[j], query) + 1.5);
-    best = Math.min(best, scoreField(entry.sub, query) + 2);
+        best = Math.min(best, scoreField(tags[j], query, false) + 1.5);
+    var keywords = entry.keywords || [];
+    for (var k = 0; k < keywords.length; k++)
+        best = Math.min(best, scoreField(keywords[k], query, false) + 1.2);
+    best = Math.min(best, scoreField(entry.sub, query, false) + 2);
     return best;
 }
 

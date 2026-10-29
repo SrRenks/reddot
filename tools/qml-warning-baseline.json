@@ -152,7 +152,7 @@
     "Unqualified access [unqualified] @ visible: statusOnBar(\"sysmon\")#1",
     "Unqualified access [unqualified] @ visible: statusOnBar(\"thinkpad\") && ThinkPad.present#1",
     "Unqualified access [unqualified] @ visible: statusOnBar(\"tray\")#1",
-    "Unqualified access [unqualified] @ visible: statusOnBar(\"updates\") && PackageUpdates.enabled && hasUpdates#1",
+    "Unqualified access [unqualified] @ visible: statusOnBar(\"updates\") && PackageUpdates.enabled#1",
     "Unqualified access [unqualified] @ visible: statusOnBar(\"weather\") && Weather.ready#1",
     "Unqualified access [unqualified] @ width: 12 * pill.s#1",
     "Unqualified access [unqualified] @ width: 13 * pill.s#1",
@@ -162,8 +162,9 @@
     "Unqualified access [unqualified] @ width: 5 * pill.s#1",
     "Unqualified access [unqualified] @ width: totalWidth#1",
     "Unqualified access [unqualified] @ width: updatesLabel.implicitWidth + 9 * pill.s#1",
-    "Unqualified access [unqualified] @ width: visible ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 0#1",
-    "Unqualified access [unqualified] @ width: visible ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 0#2",
+    "Unqualified access [unqualified] @ width: visible ? (hasUpdates ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 13 * pill.s) : 0#1",
+    "Unqualified access [unqualified] @ width: visible ? (hasUpdates ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 13 * pill.s) : 0#2",
+    "Unqualified access [unqualified] @ width: visible ? (hasUpdates ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 13 * pill.s) : 0#3",
     "Unqualified access [unqualified] @ width: visible ? 15 * pill.s + (btLowPct.visible ? btLowPct.implicitWidth + 4 * pill.s : 0) : 0#1",
     "Unqualified access [unqualified] @ width: visible ? 15 * pill.s + (btLowPct.visible ? btLowPct.implicitWidth + 4 * pill.s : 0) : 0#2",
     "Unqualified access [unqualified] @ width: visible ? 15 * pill.s : 0#1",
@@ -197,6 +198,9 @@
     "Unqualified access [unqualified] @ height: modelData > 0#1",
     "Unqualified access [unqualified] @ opacity: modelData > 0 ? 0.55 + 0.45 * (modelData / Math.max(1, PowerHistory.peak24h)) : 0.5#1",
     "Unqualified access [unqualified] @ opacity: modelData > 0 ? 0.55 + 0.45 * (modelData / Math.max(1, PowerHistory.peak24h)) : 0.5#2"
+  ],
+  "configs/quickshell/pill/GameModeSurface.qml": [
+    "Unqualified access [unqualified] @ s: root.s#1"
   ],
   "configs/quickshell/pill/Keybinds.qml": [
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1",
@@ -237,6 +241,8 @@
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#1",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#10",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#11",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#12",
+    "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#13",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#2",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#3",
     "var declaration in block scope is hoisted to function scope @ Replace it with const or let to silence the warning#4",
@@ -283,9 +289,6 @@
   "configs/quickshell/pill/Singletons/Flags.qml": [
     "Property \"adapter\" has incomplete type \"FileViewAdapter\". You may be missing an import. [unresolved-type] @ JsonAdapter {#1",
     "Type Flags not declared as singleton in qmldir but using pragma Singleton [import]#1"
-  ],
-  "configs/quickshell/pill/Singletons/GameMode.qml": [
-    "Type GameMode not declared as singleton in qmldir but using pragma Singleton [import]#1"
   ],
   "configs/quickshell/pill/Singletons/Motion.qml": [
     "Type Motion not declared as singleton in qmldir but using pragma Singleton [import]#1"

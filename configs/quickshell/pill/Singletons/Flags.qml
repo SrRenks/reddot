@@ -62,6 +62,9 @@ Singleton {
     property alias gamePrevViz: adapter.gamePrevViz
     property alias gamePrevAwake: adapter.gamePrevAwake
     property alias gamePrevProfile: adapter.gamePrevProfile
+    property alias gameModeTargetClass: adapter.gameModeTargetClass
+    property alias gameModeKeepClasses: adapter.gameModeKeepClasses
+    property alias gameModeKillOthers: adapter.gameModeKillOthers
     property alias nightLightMode: adapter.nightLightMode
     property alias nightLightTemp: adapter.nightLightTemp
     property alias nightLightOnMin: adapter.nightLightOnMin
@@ -172,6 +175,9 @@ Singleton {
             property bool gamePrevViz: true
             property bool gamePrevAwake: false
             property string gamePrevProfile: ""
+            property string gameModeTargetClass: ""
+            property string gameModeKeepClasses: ""
+            property bool gameModeKillOthers: false
             property string nightLightMode: "off"
             property int nightLightTemp: 4000
             property int nightLightOnMin: 1260

@@ -20,7 +20,7 @@ const catalog = new Set([...surfacesText.matchAll(/^    ([a-zA-Z0-9_]+):\s*\{/gm
 const pages = new Set(nav.allPageIds());
 const statusIds = new Set(nav.allStatusIds());
 
-if (catalog.size !== 41) fail(`expected 41 catalog surfaces, found ${catalog.size}`);
+if (catalog.size !== 42) fail(`expected 42 catalog surfaces, found ${catalog.size}`);
 for (const id of catalog) if (!pages.has(id)) fail(`catalog surface ${id} has no navigation entry`);
 for (const id of pages) if (!catalog.has(id)) fail(`navigation page ${id} is not in the catalog`);
 if (!failures.length) ok("catalog and navigation pages match");

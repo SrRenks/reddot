@@ -32,6 +32,7 @@ var definitions = {
     pillsettings: { parent: "shell",   settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldPillSettings" },
     windows:    { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldWindows" },
     powerhub:   { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldPowerhub" },
+    gamemode:   { parent: "powerhub",  settingsLike: false, cold: true  , loader: "ldGameMode" },
     shortcuts:  { parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldShortcuts" },
     maintenance:{ parent: "settings",  settingsLike: true,  inlineBack: true,  cold: true  , loader: "ldMaintenance" },
     packages:   { parent: "maintenance", settingsLike: true, inlineBack: true, cold: true , loader: "ldPackages" },

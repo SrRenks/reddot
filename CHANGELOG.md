@@ -36,6 +36,19 @@ semantic versioning when it cuts a release.
   from the component editor and through `barConfig`.
 - Updates now render as a compact, dynamic-width count badge and disappear when
   the package count is zero (unless the check itself failed).
+- Updates has a dedicated widget renderer: the download icon is always present
+  and the count badge is omitted at zero. The catalog default is now `widget`.
+- Navigation metadata now carries search keywords for every page and status,
+  with short-query fuzzy matching disabled for keywords/tags. Titles and hub
+  labels were aligned across Search, Settings and the Bar picker.
+- Added a target-aware Game mode surface: select a running window, keep
+  allowlisted apps, optionally terminate other user windows with SIGTERM after
+  confirmation, and restore the visual strip when the target exits.
+- Fixed the System packages widget position: in `bar.right` it now renders inline
+  at its status order, with no trailing widget gap, and its width grows only when
+  the count badge is present.
+- Settings moved Security into System and grouped the Bar component picker by
+  Navigation, Information, Controls and Hardware.
 - The Workspaces numeral uses a tabular chip with a vermilion accent, sharing
   `Typography` and bar scale.
 - ThinkPad gained an on-demand BIOS check against Lenovo's official catalog for

@@ -11,6 +11,12 @@ import "Singletons"
 PillSurface {
     id: root
 
+    signal requestSurface(string name)
+
+    function stopGameMode() {
+        Flags.gameMode = false;
+    }
+
     mTop: 13
     mLeft: 14
     mRight: 14
@@ -321,8 +327,8 @@ PillSurface {
                 glyph: "gamepad"
                 on: Flags.gameMode
                 tipTitle: "Game mode"
-                tipDesc: "Strip effects, quiet the desktop"
-                onToggled: Flags.gameMode = !Flags.gameMode
+                tipDesc: "Choose a target and tune the desktop"
+                onToggled: Flags.gameMode ? root.stopGameMode() : root.requestSurface("gamemode")
             }
         }
     }

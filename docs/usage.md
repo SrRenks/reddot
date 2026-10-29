@@ -43,10 +43,15 @@ Search ranks the navigation manifest. Examples:
 
 ```text
 wifi         → Wi-Fi
-volume       → Mixer
-fingerprint  → Security
-fan          → ThinkPad
-gui          → Bar layout
+volume       → Audio mixer
+fingerprint  → Security & idle
+fan          → ThinkPad hardware
+gui          → Bar & widgets
+mic          → Audio mixer / Pill notices
+pacman       → System packages
+widgets      → Bar & widgets
+charger      → Power & battery / Pill notices
+bios         → ThinkPad hardware
 ```
 
 ## Bar
@@ -91,6 +96,19 @@ state changes that are not key presses:
 
 The key-notice section above those rows controls only keyboard-layout notices.
 Both pipelines survive a restart through `flags.json`.
+
+## Game mode
+
+Open **Power & battery → Game mode**, or click the gamepad chip in the Mixer.
+Choose the game window, toggle **Close other apps**, and mark the applications to
+keep. Starting the mode strips Hyprland decorations and animations, enables DND
+and keep-awake, pauses the visualizer, and keeps the selected target tree and
+allowlist alive.
+
+The cleanup list only contains mapped Hyprland windows. The game, its ancestors,
+allowlisted apps, Steam/Gamescope and system/session services are protected.
+Closing other apps is opt-in; the action uses SIGTERM after the explicit start
+confirmation. The mode exits when the target window disappears.
 
 The Workspaces component has a `workspaceDisplay` setting in its `config`:
 

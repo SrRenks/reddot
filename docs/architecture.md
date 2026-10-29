@@ -58,6 +58,11 @@ the hosts it accepts. `bar` is a container with a persisted instance mounted at
 an argv-based provider, parses one JSON object from stdout and renders icon or
 widget output. Settings uses one selected-item editor and a compact selector
 instead of allocating a full control block for every definition.
+`System packages` in widget mode is rendered inline in `BarStatusRow`, at its
+normal status order and before recorder/settings/power. The download glyph is
+always visible; the numeric badge only appears when the count is nonzero or the
+check failed, so the item has a single-icon width at zero and grows with the
+badge. It is not mounted in the trailing status-widget row.
 
 The hot trio no longer preloads; surfaces build on first open. The host-only
 performance gate uses 180 MB PSS idle, 230 MB post and 55 MB lock limits.
@@ -75,6 +80,11 @@ This is a cache safety net, not a per-page reload.
 microphone and low peripherals). It emits through the same monochrome pill OSD
 as `KeyNotice`, but has its own flags and is independent from keybind notices.
 
+`GameModeSurface.qml` is the target picker for game mode. `GameMode.qml` owns the
+window list, target class, allowlist and cleanup process; the cleanup script
+validates mapped windows, ownership, cgroups and protected classes before sending
+SIGTERM. The game process tree and its ancestors are protected.
+
 ## Shell
 
 The pill is a single morphing surface family. `configs/quickshell/pill/shell.qml`
@@ -86,6 +96,12 @@ search tags.
 The lock is a separate Quickshell instance under `configs/quickshell/lock/`. It
 uses `WlSessionLock`; each output gets a lock surface, with authentication on the
 primary and clock/date on the secondaries.
+
+Search metadata lives in `lib/navigation.js`: titles, aliases, tags and a separate
+keyword list per page/status. Keyword matches skip fuzzy subsequence matching, so
+short queries like `mic` or `bios` do not pull in unrelated sections. Settings
+groups live in the same manifest; the Bar component picker groups its static rows
+by the catalog category.
 
 ## Installer and updater
 

@@ -32,11 +32,13 @@ Item {
     implicitWidth: componentId === "clock" ? clockView.implicitWidth
         : (componentId === "workspaces" ? workspacesHost.implicitWidth
         : (componentId === "command" ? commandView.implicitWidth
-        : (root.mode === "widget" ? fallbackWidget.implicitWidth : (fallback.visible ? fallback.width : 0))))
+        : (componentId === "updates" ? updatesView.implicitWidth
+        : (root.mode === "widget" ? fallbackWidget.implicitWidth : (fallback.visible ? fallback.width : 0)))))
     implicitHeight: componentId === "clock" ? clockView.implicitHeight
         : (componentId === "workspaces" ? workspacesHost.implicitHeight
         : (componentId === "command" ? commandView.implicitHeight
-        : (root.mode === "widget" ? fallbackWidget.implicitHeight : (fallback.visible ? fallback.height : 0))))
+        : (componentId === "updates" ? updatesView.implicitHeight
+        : (root.mode === "widget" ? fallbackWidget.implicitHeight : (fallback.visible ? fallback.height : 0)))))
     width: implicitWidth
     height: implicitHeight
 
@@ -71,6 +73,14 @@ Item {
         onRequestSurface: (name) => root.requestSurface(name)
     }
 
+    BarUpdatesWidget {
+        id: updatesView
+        visible: root.componentId === "updates" && root.mode === "widget"
+        s: root.s
+        active: root.active
+        onRequestSurface: (name) => root.requestSurface(name)
+    }
+
     GlyphIcon {
         id: fallback
         visible: root.componentId !== "clock" && root.componentId !== "workspaces"
@@ -85,7 +95,8 @@ Item {
     Row {
         id: fallbackWidget
         visible: root.componentId !== "clock" && root.componentId !== "workspaces"
-            && root.componentId !== "command" && root.mode === "widget"
+            && root.componentId !== "command" && root.componentId !== "updates"
+            && root.mode === "widget"
         spacing: 4 * root.s
         anchors.verticalCenter: parent.verticalCenter
 

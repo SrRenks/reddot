@@ -115,7 +115,7 @@ Singleton {
             id: "updates", name: "System packages", icon: "download",
             description: "Pending package updates across native, AUR and Flatpak",
             target: "packages",
-            category: "information", modes: ["icon", "widget"], defaultMode: "icon",
+            category: "information", modes: ["widget", "icon"], defaultMode: "widget",
             defaultHost: "bar.right", defaultOrder: 10, status: true,
             allowedHosts: ["bar.left", "bar.center", "bar.right", "settings.catalog"]
         },

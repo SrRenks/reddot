@@ -75,6 +75,7 @@ Item {
     readonly property bool shellOpen: surface === "shell"
     readonly property bool windowsOpen: surface === "windows"
     readonly property bool powerhubOpen: surface === "powerhub"
+    readonly property bool gamemodeOpen: surface === "gamemode"
     readonly property bool shortcutsOpen: surface === "shortcuts"
     readonly property bool maintenanceOpen: surface === "maintenance"
     readonly property bool clockOpen: surface === "clock"
@@ -219,6 +220,7 @@ Item {
     readonly property real shellW: 392 * s
     readonly property real windowsW: 392 * s
     readonly property real powerhubW: 392 * s
+    readonly property real gamemodeW: 430 * s
     readonly property real shortcutsW: 392 * s
     readonly property real maintenanceW: 392 * s
     readonly property real clockW: 392 * s
@@ -299,6 +301,7 @@ Item {
         packages:   { size: () => Qt.size(packagesW, surfaceItem(ldPackages).implicitHeight + 29 * s), ame: () => surfaceItem(ldPackages) },
         windows:   { size: () => Qt.size(windowsW, surfaceItem(ldWindows).implicitHeight + 29 * s), ame: () => surfaceItem(ldWindows) },
         powerhub:  { size: () => Qt.size(powerhubW, surfaceItem(ldPowerhub).implicitHeight + 29 * s), ame: () => surfaceItem(ldPowerhub) },
+        gamemode:  { size: () => Qt.size(gamemodeW, surfaceItem(ldGameMode).implicitHeight + 29 * s), ame: () => surfaceItem(ldGameMode) },
         shortcuts: { size: () => Qt.size(shortcutsW, surfaceItem(ldShortcuts).implicitHeight + 29 * s), ame: () => surfaceItem(ldShortcuts) },
         maintenance: { size: () => Qt.size(maintenanceW, surfaceItem(ldMaintenance).implicitHeight + 29 * s), ame: () => surfaceItem(ldMaintenance) },
         keybinds:  { size: () => Qt.size(keybindsW, surfaceItem(ldKeybinds).implicitHeight + 29 * s), ame: () => surfaceItem(ldKeybinds) },
@@ -558,7 +561,7 @@ Item {
         sysmon: ldSysmon, appearance: ldAppearance, bar: ldBar, updates: ldUpdates, display: ldDisplay,
         input: ldInput, look: ldLook, presets: ldPresets, startup: ldStartup,
         idlelock: ldIdlelock, animation: ldAnimation, fontpicker: ldFontpicker,
-        shell: ldShell, windows: ldWindows, powerhub: ldPowerhub,
+        shell: ldShell, windows: ldWindows, powerhub: ldPowerhub, gamemode: ldGameMode,
         shortcuts: ldShortcuts, maintenance: ldMaintenance,
         clock: ldClock, pillsettings: ldPillSettings, packages: ldPackages
     })
@@ -1508,9 +1511,20 @@ Item {
                 visible: statusWidgetRepeater.count > 0
                 layoutDirection: hoverRow.layoutDirection
 
+                readonly property var widgetInstances: {
+                    var all = BarLayout.instancesForMode("bar.right", "widget");
+                    var out = [];
+                    for (var i = 0; i < all.length; i++) {
+                        var id = all[i].component || all[i].id;
+                        if (id !== "updates")
+                            out.push(all[i]);
+                    }
+                    return out;
+                }
+
                 Repeater {
                     id: statusWidgetRepeater
-                    model: BarLayout.instancesForMode("bar.right", "widget")
+                    model: statusWidgets.widgetInstances
 
                     BarComponentHost {
                         required property var modelData
@@ -1545,6 +1559,7 @@ Item {
             s: pill.s
             open: pill.mixerOpen
             morphCloseness: pill.morphCloseness
+            onRequestSurface: (name) => pill.requestSurface(name)
         }
     }
 
@@ -1948,9 +1963,9 @@ Item {
             hubTitle: "SHELL"
             hubIcon: "layers"
             entries: [
-                { name: "Bar layout", sub: "Alignment, order and visible items", icon: "layers", surface: "bar" },
-                { name: "Clock", sub: "Format, seconds and date", icon: "clock", surface: "clock" },
-                { name: "Pill", sub: "Geometry, opacity, panel blur and key notices", icon: "app-window", surface: "pillsettings" }
+                { name: "Bar & widgets", sub: "Alignment, zones, status and components", icon: "layers", surface: "bar" },
+                { name: "Clock & date", sub: "Time format and date", icon: "clock", surface: "clock" },
+                { name: "Pill & notices", sub: "Geometry, blur, key and system notices", icon: "app-window", surface: "pillsettings" }
             ]
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)
@@ -1994,8 +2009,8 @@ Item {
             hubTitle: "WINDOWS"
             hubIcon: "app-window"
             entries: [
-                { name: "Window & effects", sub: "Layout, gaps, borders, shadow, opacity, blur", icon: "app-window", surface: "look" },
-                { name: "Motion", sub: "Animation speed, curve and reduced motion", icon: "waves", surface: "animation" }
+                { name: "Window effects", sub: "Layout, gaps, borders, shadow, opacity, blur", icon: "app-window", surface: "look" },
+                { name: "Motion & animation", sub: "Animation speed, curves and reduced motion", icon: "waves", surface: "animation" }
             ]
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)
@@ -2013,12 +2028,25 @@ Item {
             hubTitle: "POWER"
             hubIcon: "bolt"
             entries: [
-                { name: "Profile & battery care", sub: "Performance mode and charge window", icon: "bolt", surface: "tlp" },
+                { name: "Battery care", sub: "Performance mode and charge window", icon: "bolt", surface: "tlp" },
                 { name: "Power presets", sub: "Saved profile and charge combinations", icon: "layers", surface: "presets" },
-                { name: "Session", sub: "Lock, logout, sleep, restart, shut down", icon: "logout", surface: "power" }
+                { name: "Session actions", sub: "Lock, logout, sleep, restart, shut down", icon: "logout", surface: "power" },
+                { name: "Game mode", sub: "Choose a game, keep a few apps", icon: "gamepad", surface: "gamemode" }
             ]
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)
+        }
+    }
+
+    Loader {
+        id: ldGameMode
+        active: false
+        anchors.fill: parent
+        sourceComponent: GameModeSurface {
+            s: pill.s
+            open: pill.gamemodeOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
         }
     }
 
@@ -2033,8 +2061,8 @@ Item {
             hubTitle: "SHORTCUTS"
             hubIcon: "return"
             entries: [
-                { name: "Keybinds", sub: "Edit keys, actions and commands", icon: "keyboard", surface: "keybinds" },
-                { name: "Workspaces", sub: "Special workspaces and their shortcuts", icon: "layers", surface: "workspaces" }
+                { name: "Keybind editor", sub: "Edit keys, actions and commands", icon: "keyboard", surface: "keybinds" },
+                { name: "Special workspaces", sub: "Workspace shortcuts and assignments", icon: "layers", surface: "workspaces" }
             ]
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)
@@ -2052,9 +2080,9 @@ Item {
             hubTitle: "MAINTENANCE"
             hubIcon: "download"
             entries: [
-                { name: "Startup", sub: "Commands run when the session starts", icon: "play", surface: "startup" },
-                { name: "Updates", sub: "Shell updates and release notes", icon: "download", surface: "updates" },
-                { name: "System packages", sub: "pacman, AUR and Flatpak update meter", icon: "download", surface: "packages" }
+                { name: "Startup commands", sub: "Commands run when the session starts", icon: "play", surface: "startup" },
+                { name: "Shell updates", sub: "Shell versions and release notes", icon: "download", surface: "updates" },
+                { name: "System packages", sub: "Pacman, AUR and Flatpak update meter", icon: "download", surface: "packages" }
             ]
             onRequestClose: pill.requestClose()
             onRequestSurface: (name) => pill.requestSurface(name)

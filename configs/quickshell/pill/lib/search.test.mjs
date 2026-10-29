@@ -29,5 +29,8 @@ ok(S.rank(pages, "zzz").length === 0, "no match returns no results");
 ok(S.normalize("  Barra  ") === "barra", "normalization trims and lowercases");
 ok(S.distance("organize", "orgnize") === 1, "distance detects one insertion");
 
+ok(S.rank([{ id: "mixer", title: "Audio mixer", aliases: [], tags: [], keywords: ["microphone"] }], "microphone", 8).length === 1, "keyword hits search");
+const packagePages = [{ id: "packages", title: "System packages", aliases: [], tags: ["system"], keywords: ["pacman"] }, { id: "media", title: "Media", aliases: [], tags: ["music"], keywords: [] }];
+ok(S.rank(packagePages, "pacman", 8).length === 1 && S.rank(packagePages, "pacman", 8)[0].id === "packages", "keyword search does not fuzzy-match unrelated entries");
 if (failed > 0) { console.log("\n" + failed + " test(s) FAILED"); process.exit(1); }
 console.log("\nAll tests PASSED");

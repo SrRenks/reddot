@@ -113,21 +113,11 @@ SettingsSurface {
         }
 
         SettingsRow {
-            id: securityRow
-            surface: root
-            captionOnFocus: true
-            icon: "lock"
-            name: "Security"
-            sub: "Fingerprint and idle lock"
-            Arrow {}
-        }
-
-        SettingsRow {
             id: shortcutsRow
             surface: root
             captionOnFocus: true
             icon: "return"
-            name: "Shortcuts"
+            name: "Shortcuts & workspaces"
             sub: "Keybinds and special workspaces"
             Arrow {}
         }
@@ -139,8 +129,8 @@ SettingsSurface {
             surface: root
             captionOnFocus: true
             icon: "bolt"
-            name: "Power"
-            sub: "Profile, battery care, session"
+            name: "Power & battery"
+            sub: "Profile, charge care and session actions"
             Arrow {}
         }
 
@@ -149,8 +139,8 @@ SettingsSurface {
             surface: root
             captionOnFocus: true
             icon: "waves"
-            name: "System"
-            sub: "Sensors, cooling, compute"
+            name: "System monitor"
+            sub: "Sensors, cooling and compute"
             Arrow {}
         }
 
@@ -160,7 +150,17 @@ SettingsSurface {
             captionOnFocus: true
             icon: "download"
             name: "Maintenance"
-            sub: "Startup commands and updates"
+            sub: "Startup, shell and package updates"
+            Arrow {}
+        }
+
+        SettingsRow {
+            id: securityRow
+            surface: root
+            captionOnFocus: true
+            icon: "lock"
+            name: "Security & idle"
+            sub: "Fingerprint, lock and suspend"
             Arrow {}
         }
     }

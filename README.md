@@ -6,64 +6,156 @@ A Hyprland desktop built around one morphing Quickshell pill.
 
 Personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), maintained on a ThinkPad E14 Gen 7.
 
-![reddot showcase](assets/showcase.gif)
+![reddot pill](assets/showcase/mixer.gif)
 
 </div>
 
 reddot replaces the usual bar, launcher, mixer and settings windows with one
 pill. It starts as a thin status strip and expands into the page you need:
-launcher, Search, Settings, system monitor, Wi‑Fi, Bluetooth, appearance,
-battery and power tools. There are 41 surfaces in total.
+launcher, Search, Settings, system monitor, Wi-Fi, Bluetooth, appearance,
+battery and power tools. There are 42 surfaces in total.
 
 The project is a personal setup, not a distribution. The supported installer
 matrix is Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed.
+
+## Showcase
+
+Clean-workspace captures. Personal window titles are redacted.
+
+<table align="center">
+<tr>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/launcher.gif" alt="reddot launcher" width="100%"><br>
+  <sub><b>Launcher</b><br>Apps, commands and inline calculations</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/search.gif" alt="reddot search" width="100%"><br>
+  <sub><b>Search</b><br>Titles, aliases and search keywords</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/bar.gif" alt="reddot bar editor" width="100%"><br>
+  <sub><b>Bar</b><br>Zones, status order and component widgets</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/gamemode.gif" alt="reddot game mode" width="100%"><br>
+  <sub><b>Game mode</b><br>Target window, keep list and scoped cleanup</sub>
+</td>
+</tr>
+</table>
+
+<table align="center">
+<tr>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/thinkpad.gif" alt="reddot ThinkPad controls" width="100%"><br>
+  <sub><b>ThinkPad hardware</b><br>Fan, LEDs, TrackPoint and BIOS</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/tlp.gif" alt="reddot power and battery" width="100%"><br>
+  <sub><b>Power &amp; battery</b><br>Profile, charge window and presets</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/packages.gif" alt="reddot system packages" width="100%"><br>
+  <sub><b>System packages</b><br>Native, AUR and Flatpak update deltas</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/sysmon.gif" alt="reddot system monitor" width="100%"><br>
+  <sub><b>System monitor</b><br>CPU, iGPU, memory, sensors and pressure</sub>
+</td>
+</tr>
+</table>
+
+<table align="center">
+<tr>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/mixer.gif" alt="reddot mixer" width="100%"><br>
+  <sub><b>Audio</b><br>Output, microphone, faders and routing</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/recorder.gif" alt="reddot recorder" width="100%"><br>
+  <sub><b>Recorder</b><br>Screen capture and source selection</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/notice.gif" alt="reddot system notices" width="100%"><br>
+  <sub><b>Notices</b><br>Battery, charger, mic and peripheral events</sub>
+</td>
+<td width="50%" align="center" valign="top">
+  <img src="assets/showcase/settings.gif" alt="reddot settings" width="100%"><br>
+  <sub><b>Settings</b><br>Grouped desktop, controls and system pages</sub>
+</td>
+</tr>
+</table>
 
 ## The pill
 
 Hover the top strip or use `Super+Shift+Space`. The pill grows in place, keeps
 the same geometry while it morphs, and returns to the strip when you leave.
 
-![Pill tour](assets/pill-tour.gif)
-
 - `Super+A` opens the launcher.
 - The wheel, scrollbar, `PageUp`/`PageDown`, `Home` and `End` work on long pages.
-- `Search` finds pages by title, alias and tag.
+- `Search` finds pages by title, alias, tag and keyword.
 - The back control returns to the parent page; `Escape` closes the surface.
 - `Super+Shift+Space` reopens the last surface.
 
 ## Search
 
-![Search](assets/search.gif)
-
-Search understands informal names and small typos:
+Search understands informal names, common service names and small typos:
 
 ```text
-wifi         → Wi‑Fi
-volume       → Mixer
-fingerprint  → Security
-fan          → ThinkPad
-gui          → Bar layout
+wifi         → Wi-Fi
+volume       → Audio mixer
+fingerprint  → Security & idle
+fan          → ThinkPad hardware
+gui          → Bar & widgets
+mic          → Audio mixer / Pill & notices
+pacman       → System packages
+bios         → ThinkPad hardware
+charger      → Power & battery / Pill & notices
+widgets      → Bar & widgets
 ```
+
+The manifest also drives tooltips and the page index, so a missing keyword is a
+metadata fix rather than a second search implementation.
 
 ## Bar
 
-![Bar layout](assets/bar.gif)
+The normal bar exposes the clock and status icons. Each icon opens its surface,
+and the Bar page mirrors the same order across restarts.
 
-The normal bar exposes the clock and status icons. The GIF shows the bar with
-the cursor clicking Wi‑Fi, battery and the package meter; each icon opens its
-surface. The Bar page mirrors the same order and keeps it across restarts.
+`System packages` is both a status item and a widget: the download glyph remains
+visible at zero, while the numeric badge appears only when there is something to
+show. Its width follows the badge instead of reserving a fixed slot.
+
+The component picker is grouped by Navigation, Information, Controls and
+Hardware. Status order and the enabled item list are persisted in
+`~/.local/state/reddot/bar.json`.
+
+## Game mode
+
+Open **Power & battery → Game mode**, or click the gamepad chip in the Mixer.
+Choose the game window, keep the apps you still need, and start the mode. It
+strips Hyprland decorations and animations, enables DND and keep-awake, pauses
+the visualizer, and keeps the selected target tree and allowlist alive.
+
+Closing other windows is opt-in and uses SIGTERM after confirmation. The cleanup
+helper only considers mapped Hyprland windows and protects the game tree,
+allowlisted apps, Steam/Gamescope and system/session services. The mode exits
+when the target window disappears.
 
 ## System and security
 
-- **System** shows CPU, iGPU, memory, temperature, fan RPM, network, disk, swap
-  and compute governor without a background daemon.
+- **System monitor** shows CPU, iGPU, memory, temperature, fan RPM, network,
+  disk, swap and compute governor without a background daemon.
 - **System packages** lists pending native, AUR and Flatpak updates with versions
   and marks critical stack updates such as Hyprland.
-
-![System packages](assets/packages.png)
 - **Power** covers TLP profiles, charge windows, presets and session actions.
-- **ThinkPad** exposes fan curve, TrackPoint and keyboard LEDs on supported
-  hardware.
+- **ThinkPad** exposes fan curve, TrackPoint, keyboard LEDs and BIOS status on
+  supported hardware.
 - **Lock** uses PAM. Password and fingerprint are independent. On multiple
   monitors the primary output authenticates; secondaries show the clock, date and
   a `LOCKED` marker.
@@ -149,6 +241,7 @@ The supported matrix, not a five-family claim, is the install contract.
 - [Coverage](docs/coverage.md)
 - [Roadmap](docs/roadmap.md)
 - [Changelog](CHANGELOG.md)
+- [Game mode study](docs/gamemode-study.md)
 
 ## Credits
 

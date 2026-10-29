@@ -26,8 +26,9 @@ Item {
     readonly property real statusGap: 12 * (pill ? pill.s : 1)
 
     function statusOnBar(id) {
+        var mode = BarLayout.mode(id);
         return BarLayout.enabled(id) && BarLayout.hostOf(id) === "bar.right"
-            && BarLayout.mode(id) === "icon";
+            && (mode === "icon" || (id === "updates" && mode === "widget"));
     }
 
     function statusWidth(id) {
@@ -612,10 +613,11 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         x: statusX("updates")
         readonly property bool hasUpdates: PackageUpdates.total > 0 || PackageUpdates.hasError
-        readonly property string countText: PackageUpdates.total > 99
-            ? "99+" : (String(PackageUpdates.total) + (PackageUpdates.hasError ? "!" : ""))
-        visible: statusOnBar("updates") && PackageUpdates.enabled && hasUpdates
-        width: visible ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 0
+        readonly property string countText: PackageUpdates.total === 0 && PackageUpdates.hasError
+            ? "!" : (PackageUpdates.total > 99
+            ? "99+" : (String(PackageUpdates.total) + (PackageUpdates.hasError ? "!" : "")))
+        visible: statusOnBar("updates") && PackageUpdates.enabled
+        width: visible ? (hasUpdates ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 13 * pill.s) : 0
         height: 17 * pill.s
 
         GlyphIcon {
@@ -633,6 +635,7 @@ Item {
         Rectangle {
             id: updatesBadge
             anchors.right: parent.right
+            visible: updatesIcon.hasUpdates
             anchors.verticalCenter: parent.verticalCenter
             width: updatesLabel.implicitWidth + 9 * pill.s
             height: 15 * pill.s

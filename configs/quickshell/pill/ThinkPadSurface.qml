@@ -105,8 +105,8 @@ PillSurface {
     }
 
     function setKbd(value) {
-        ThinkPad.markLed("tpacpi::kbd_backlight", value);
-        root.run(["led", "kbd", String(value)]);
+        root.run(["led", "kbd", String(value)],
+            () => ThinkPad.markLed("tpacpi::kbd_backlight", value));
     }
 
     function ledCanonical(name) {
@@ -118,13 +118,13 @@ PillSurface {
 
     function setLed(name, on) {
         var canonical = root.ledCanonical(name);
-        ThinkPad.markLed(canonical, on ? 1 : 0);
-        root.run(["led", name, on ? "1" : "0"]);
+        root.run(["led", name, on ? "1" : "0"],
+            () => ThinkPad.markLed(canonical, on ? 1 : 0));
     }
 
     function setLedRaw(name, value) {
-        ThinkPad.markLed(root.ledCanonical(name), value);
-        root.run(["led", name, String(value)]);
+        root.run(["led", name, String(value)],
+            () => ThinkPad.markLed(root.ledCanonical(name), value));
     }
 
     function setLedTrigger(name, trigger) {

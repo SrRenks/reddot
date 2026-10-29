@@ -64,6 +64,12 @@ running BIOS; when a newer package exists, **Download** opens Lenovo's official
 support page in the default browser. The check is on demand and only runs from
 the ThinkPad surface.
 
+ThinkPad LED writes go through the privileged helper and polkit. The UI only
+marks a LED as changed after the helper succeeds; if authentication is cancelled
+or the helper fails, the switch stays on the kernel's last known value and the
+failure is shown at the foot of the surface. Keyboard backlight, Caps/Num/Scroll
+and other LED rows therefore require an authorization prompt.
+
 ## System notices
 
 Settings → Shell → Pill → System notices controls the short pill notices for

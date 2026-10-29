@@ -44,6 +44,10 @@ semantic versioning when it cuts a release.
 - Added configurable system notices for battery low (5–15% threshold), charger
   plug/unplug, battery full, microphone mute, microphone plug/unplug, and low
   peripheral batteries. Key notices remain independent.
+- Fixed ThinkPad LED controls updating the UI before the privileged write
+  succeeded. Failed or cancelled polkit authentication now leaves the last
+  kernel state visible and reports the failure instead of pretending the LED
+  turned on.
 - Added watchdog-driven memory recycling: after two idle checks over 220 MB PSS
   with no open surface or top-strip pointer, the pill process is replaced to
   release the QML type cache. The cold restart takes about 1.75 s and keeps a

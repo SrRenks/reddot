@@ -61,7 +61,13 @@ run_root() {
 	fi
 	for su in sudo doas; do
 		have "$su" || continue
-		if [ -e /dev/tty ]; then "$su" "$@" </dev/tty; else "$su" "$@"; fi
+		# /dev/tty can exist without a controlling terminal (SSH/cloud-init).
+		# Test that it opens; otherwise sudo -n/plain works for NOPASSWD setups.
+		if ( : </dev/tty ) 2>/dev/null; then
+			"$su" "$@" </dev/tty
+		else
+			"$su" "$@"
+		fi
 		return
 	done
 	die "need root to install packages; run as root or install sudo or doas first"

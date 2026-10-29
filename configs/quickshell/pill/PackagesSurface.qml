@@ -46,7 +46,7 @@ SettingsSurface {
                     color: PackageUpdates.officialState === "error" ? Theme.flameCore
                         : Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                     font.features: { "tnum": 1 }
                 }
@@ -56,7 +56,7 @@ SettingsSurface {
                         && (PackageUpdates.aurAvailable || PackageUpdates.flatpakAvailable)
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                 }
                 Text {
                     text: "AUR " + PackageUpdates.aurCount
@@ -65,7 +65,7 @@ SettingsSurface {
                     color: PackageUpdates.aurState === "error" ? Theme.flameCore
                         : Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                     font.features: { "tnum": 1 }
                 }
@@ -74,7 +74,7 @@ SettingsSurface {
                     visible: PackageUpdates.aurAvailable && PackageUpdates.flatpakAvailable
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                 }
                 Text {
                     text: "Flatpak " + PackageUpdates.flatpakCount
@@ -83,7 +83,7 @@ SettingsSurface {
                     color: PackageUpdates.flatpakState === "error" ? Theme.flameCore
                         : Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                     font.features: { "tnum": 1 }
                 }
@@ -100,7 +100,7 @@ SettingsSurface {
                     : "None"
                 color: PackageUpdates.important ? Theme.verm : Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 8.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 width: Math.min(implicitWidth, 220 * root.s)
@@ -135,7 +135,7 @@ SettingsSurface {
                         text: modelData.line
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 8.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.features: { "tnum": 1 }
                         elide: Text.ElideRight
                     }
@@ -148,7 +148,7 @@ SettingsSurface {
                             : PackageUpdates.backendLabel
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 7.5 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.letterSpacing: 0.6 * root.s
                     }
                 }
@@ -185,7 +185,7 @@ SettingsSurface {
                 text: "▾"
                 color: Theme.vermLit
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
             }
         }
@@ -196,7 +196,7 @@ SettingsSurface {
             text: "No pending packages in the available sources."
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 9 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }
@@ -251,7 +251,7 @@ SettingsSurface {
                     text: PackageUpdates.checking ? "checking…" : "check"
                     color: Theme.vermLit
                     font.family: Theme.font
-                    font.pixelSize: 9.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.DemiBold
                 }
             }
@@ -269,7 +269,7 @@ SettingsSurface {
                     : "Waiting for the first check")
             color: PackageUpdates.errorText.length > 0 ? Theme.flameCore : Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }

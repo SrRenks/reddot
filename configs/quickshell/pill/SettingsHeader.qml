@@ -67,14 +67,14 @@ Item {
             color: head.glyphColor
             font.family: Theme.fontJp
             font.weight: Font.Medium
-            font.pixelSize: 16 * head.s
+            font.pixelSize: Typography.size("title", head.s)
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: head.title
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 10 * head.s
+            font.pixelSize: Typography.size("subtitle", head.s)
             font.weight: Font.DemiBold
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 1.6 * head.s

@@ -177,6 +177,9 @@
   "configs/quickshell/pill/Singletons/Theme.qml": [
     "Type Theme not declared as singleton in qmldir but using pragma Singleton [import]#1"
   ],
+  "configs/quickshell/pill/Singletons/Typography.qml": [
+    "Type Typography not declared as singleton in qmldir but using pragma Singleton [import]#1"
+  ],
   "configs/quickshell/pill/Singletons/UiBlur.qml": [
     "Type UiBlur not declared as singleton in qmldir but using pragma Singleton [import]#1"
   ],

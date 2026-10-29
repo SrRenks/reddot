@@ -13,6 +13,26 @@
 | Updates | Rust `reddot-update` engine |
 | Helpers | POSIX shell, systemd user units, polkit |
 
+## Type scale
+
+`Singletons/Typography.qml` is the single source of type sizes. Surfaces pass
+their local `s` into `Typography.size(role, s)`; `s` already includes monitor
+scale and UI scale. The roles are:
+
+```text
+micro     8.5   labels and uppercase eyebrows
+caption   9.5   secondary metadata
+body     11     copy and list lines
+bodyLarge 12.5  row titles and values
+subtitle 14     headers
+title    16     glyphs and prominent labels
+display  22     gauges
+hero     30     large numerals
+```
+
+At 125% the SYSTEM gauges keep their columns and the content scrolls vertically;
+small labels and values grow together instead of staying at fixed pixel sizes.
+
 ## Shell
 
 The pill is a single morphing surface family. `configs/quickshell/pill/shell.qml`

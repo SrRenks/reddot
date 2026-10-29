@@ -56,6 +56,12 @@ semantic versioning when it cuts a release.
 
 ### Changed
 
+- Added a semantic type scale (`micro`, `caption`, `body`, `bodyLarge`,
+  `subtitle`, `title`, `display`, `hero`) through the Typography singleton and
+  migrated shared settings chrome, System and Packages to it. SYSTEM labels and
+  values are larger and reflow vertically at 125%.
+
+
 - `reddot update`, `reddot uninstall`, the updater wrapper, the palette wrapper
   and the wallpaper search no longer invoke Python; the remaining `.py` files are
   parity tests only.

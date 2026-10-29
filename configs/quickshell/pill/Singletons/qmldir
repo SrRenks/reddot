@@ -29,3 +29,4 @@ singleton KeyNotice KeyNotice.qml
 singleton PackageUpdates PackageUpdates.qml
 singleton WindowBlur WindowBlur.qml
 singleton SurfaceChrome SurfaceChrome.qml
+singleton Typography 1.0 Typography.qml

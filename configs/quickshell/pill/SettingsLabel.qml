@@ -11,7 +11,7 @@ Text {
     bottomPadding: 6 * label.s
     color: Theme.faint
     font.family: Theme.font
-    font.pixelSize: 8.5 * label.s
+    font.pixelSize: Typography.size("caption", label.s)
     font.weight: Font.Bold
     font.capitalization: Font.AllUppercase
     font.letterSpacing: 1.2 * label.s

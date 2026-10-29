@@ -262,7 +262,7 @@ PillSurface {
             text: dial.label
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 7.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.Bold
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 0.8 * root.s
@@ -279,7 +279,7 @@ PillSurface {
                 text: dial.big
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 18 * root.s
+                font.pixelSize: Typography.size("display", root.s)
                 font.weight: Font.ExtraBold
                 font.letterSpacing: -0.5 * root.s
                 font.features: { "tnum": 1 }
@@ -290,7 +290,7 @@ PillSurface {
                 text: dial.unit
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
             }
         }
@@ -303,7 +303,7 @@ PillSurface {
             text: dial.sub
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 8 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             elide: Text.ElideRight
             width: parent.width - 18 * root.s
@@ -349,7 +349,7 @@ PillSurface {
             text: section.title
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 7.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.Bold
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 1 * root.s
@@ -362,7 +362,7 @@ PillSurface {
             text: section.meta
             color: Theme.dim
             font.family: Theme.font
-            font.pixelSize: 7.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.Medium
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 0.7 * root.s
@@ -394,7 +394,7 @@ PillSurface {
                 text: group.title
                 color: group.open ? Theme.cream : Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 8.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.DemiBold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.8 * root.s
@@ -407,7 +407,7 @@ PillSurface {
                 text: group.items.length + " READ"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 7 * root.s
+                font.pixelSize: Typography.size("micro", root.s)
                 font.weight: Font.Medium
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.6 * root.s
@@ -453,7 +453,7 @@ PillSurface {
                         text: sensorCell.modelData.label
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 7 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                         font.weight: Font.Medium
                         font.capitalization: Font.AllUppercase
                         elide: Text.ElideRight
@@ -469,7 +469,7 @@ PillSurface {
                             text: root.sensorValue(sensorCell.modelData)
                             color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.cream
                             font.family: Theme.font
-                            font.pixelSize: 10.5 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.DemiBold
                             font.features: { "tnum": 1 }
                         }
@@ -477,7 +477,7 @@ PillSurface {
                             text: root.sensorUnit(sensorCell.modelData)
                             color: Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 7.5 * root.s
+                            font.pixelSize: Typography.size("micro", root.s)
                             font.weight: Font.Medium
                         }
                         Text {
@@ -485,7 +485,7 @@ PillSurface {
                             text: root.sensorTrend(sensorCell.modelData) > 0 ? "▲" : "▼"
                             color: root.sensorTrend(sensorCell.modelData) > 0 ? Theme.vermLit : Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 7 * root.s
+                            font.pixelSize: Typography.size("micro", root.s)
                             font.weight: Font.Bold
                         }
                     }
@@ -516,7 +516,7 @@ PillSurface {
                         color: Theme.cream
                         font.family: Theme.fontJp
                         font.weight: Font.Medium
-                        font.pixelSize: 16 * root.s
+                        font.pixelSize: Typography.size("title", root.s)
                     }
                     Text {
                         id: sysLabel
@@ -524,7 +524,7 @@ PillSurface {
                         text: "SYSTEM"
                         color: Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                         font.capitalization: Font.AllUppercase
                         font.letterSpacing: 1.8 * root.s
@@ -537,7 +537,7 @@ PillSurface {
                     text: Sysmon.uptime
                     color: Theme.dim
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1 * root.s
@@ -648,7 +648,7 @@ PillSurface {
                                     : "VRAM · GB"
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 7.5 * root.s
+                                font.pixelSize: Typography.size("micro", root.s)
                                 font.weight: Font.Bold
                                 font.capitalization: Font.AllUppercase
                                 font.letterSpacing: 0.7 * root.s
@@ -663,7 +663,7 @@ PillSurface {
                                     text: "↓" + Sysmon.netDown.toFixed(1)
                                     color: Theme.cream
                                     font.family: Theme.font
-                                    font.pixelSize: 12 * root.s
+                                    font.pixelSize: Typography.size("bodyLarge", root.s)
                                     font.weight: Font.ExtraBold
                                     font.features: { "tnum": 1 }
                                 }
@@ -671,7 +671,7 @@ PillSurface {
                                     text: "↑" + Sysmon.netUp.toFixed(1)
                                     color: Theme.vermLit
                                     font.family: Theme.font
-                                    font.pixelSize: 12 * root.s
+                                    font.pixelSize: Typography.size("bodyLarge", root.s)
                                     font.weight: Font.ExtraBold
                                     font.features: { "tnum": 1 }
                                 }
@@ -685,7 +685,7 @@ PillSurface {
                                     : Sysmon.vramUsedGb.toFixed(1) + " / " + Sysmon.vramTotalGb.toFixed(0)
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 12 * root.s
+                                font.pixelSize: Typography.size("bodyLarge", root.s)
                                 font.weight: Font.ExtraBold
                                 font.features: { "tnum": 1 }
                             }
@@ -734,7 +734,7 @@ PillSurface {
                                 text: parent.modelData.label
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 7.5 * root.s
+                                font.pixelSize: Typography.size("micro", root.s)
                                 font.weight: Font.Medium
                                 font.capitalization: Font.AllUppercase
                                 elide: Text.ElideRight
@@ -746,7 +746,7 @@ PillSurface {
                                 text: parent.modelData.value
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 10 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.DemiBold
                                 font.features: { "tnum": 1 }
                                 elide: Text.ElideRight
@@ -766,7 +766,7 @@ PillSurface {
                         text: "Power settings →"
                         color: tlpArea.containsMouse ? Theme.cream : Theme.vermLit
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.DemiBold
                     }
 
@@ -784,7 +784,7 @@ PillSurface {
                     text: "Read-only here; TLP owns governor and profile."
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 8 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     wrapMode: Text.WordWrap
                 }
             }

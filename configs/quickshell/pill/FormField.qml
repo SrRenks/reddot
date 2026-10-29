@@ -34,7 +34,7 @@ Item {
         text: field.label
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 8.5 * field.s
+        font.pixelSize: Typography.size("caption", field.s)
         font.weight: Font.Medium
         font.capitalization: Font.AllUppercase
         font.letterSpacing: 1 * field.s
@@ -83,7 +83,7 @@ Item {
             text: field.listening ? field.hint : (field.value.length ? field.value : "tap to set a key")
             color: field.listening ? Theme.flameGlow : (field.value.length ? Theme.cream : Theme.faint)
             font.family: Theme.font
-            font.pixelSize: 11.5 * field.s
+            font.pixelSize: Typography.size("bodyLarge", field.s)
             font.weight: field.value.length ? Font.DemiBold : Font.Medium
             elide: Text.ElideRight
         }

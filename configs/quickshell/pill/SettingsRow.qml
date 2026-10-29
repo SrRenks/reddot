@@ -57,7 +57,7 @@ Item {
         text: srow.glyph
         color: Theme.iconDim
         font.family: Theme.fontJp
-        font.pixelSize: 15 * srow.s
+        font.pixelSize: Typography.size("title", srow.s)
     }
 
     GlyphIcon {
@@ -87,7 +87,7 @@ Item {
             text: srow.name
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 12.5 * srow.s
+            font.pixelSize: Typography.size("bodyLarge", srow.s)
             font.weight: Font.DemiBold
             elide: Text.ElideRight
             maximumLineCount: 1
@@ -98,7 +98,7 @@ Item {
             text: srow.sub
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 10.5 * srow.s
+            font.pixelSize: Typography.size("body", srow.s)
             wrapMode: Text.WordWrap
             lineHeight: 1.2
         }

@@ -59,7 +59,7 @@ Rectangle {
                     text: opt.modelData.label
                     color: opt.current ? Theme.cream : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * seg.s
+                    font.pixelSize: Typography.size("body", seg.s)
                     font.weight: Font.Bold
                     font.letterSpacing: 0.3 * seg.s
                 }

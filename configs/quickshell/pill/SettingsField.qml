@@ -68,7 +68,7 @@ Item {
             text: frow.label
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 12.5 * frow.s
+            font.pixelSize: Typography.size("bodyLarge", frow.s)
             font.weight: Font.Medium
         }
 
@@ -77,7 +77,7 @@ Item {
             text: frow.caption
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * frow.s
+            font.pixelSize: Typography.size("caption", frow.s)
             font.weight: Font.Medium
         }
     }

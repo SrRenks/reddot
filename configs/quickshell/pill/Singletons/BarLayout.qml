@@ -102,6 +102,10 @@ Singleton {
         return BarLayoutMath.mode(root.layout, id);
     }
 
+    function config(id) {
+        return BarLayoutMath.config(root.layout, id);
+    }
+
     function hostOf(id) {
         return BarLayoutMath.hostOf(root.layout, id);
     }
@@ -118,6 +122,11 @@ Singleton {
 
     function setMode(id, value) {
         root.layout = BarLayoutMath.setMode(root.layout, id, value);
+        root.persist();
+    }
+
+    function setConfig(id, key, value) {
+        root.layout = BarLayoutMath.setConfig(root.layout, id, key, value);
         root.persist();
     }
 

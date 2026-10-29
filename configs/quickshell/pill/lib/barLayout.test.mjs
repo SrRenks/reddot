@@ -11,7 +11,7 @@ function eq(actual, expected, msg) {
 function ok(cond, msg) { eq(!!cond, true, msg); }
 
 const defs = [
-    { id: "workspaces", defaultHost: "bar.left", allowedHosts: ["bar.left", "bar.right"], modes: ["widget", "icon"], defaultMode: "widget", defaultOrder: 0 },
+    { id: "workspaces", defaultHost: "bar.left", allowedHosts: ["bar.left", "bar.right"], modes: ["widget", "icon"], defaultMode: "widget", defaultConfig: { workspaceDisplay: "dots" }, defaultOrder: 0 },
     { id: "clock", defaultHost: "bar.center", allowedHosts: ["bar.center", "bar.right"], modes: ["widget", "icon"], defaultMode: "widget", defaultOrder: 0 },
     { id: "weather", defaultHost: "bar.right", allowedHosts: ["bar.right"], modes: ["icon", "widget"], defaultMode: "icon", defaultOrder: 0, status: true },
     { id: "network", defaultHost: "bar.right", allowedHosts: ["bar.right"], modes: ["icon", "widget"], defaultMode: "icon", defaultOrder: 1, status: true },
@@ -30,6 +30,7 @@ eq(bar.statusIds(defaults), ["weather", "network", "power"], "default status ord
 eq(bar.enabled(defaults, "weather"), true, "default is enabled");
 eq(bar.mode(defaults, "clock"), "widget", "default mode");
 eq(bar.hostOf(defaults, "clock"), "bar.center", "default host");
+eq(bar.config(defaults, "workspaces").workspaceDisplay, "dots", "workspace display defaults to dots");
 eq(bar.instancesFor(defaults, "bar.left").map((i) => i.id), ["workspaces"], "left host");
 
 const migrated = bar.migrateFlags({
@@ -59,6 +60,12 @@ eq(normalized.items.filter((i) => i.id === "weather").length, 1, "normalize dedu
 eq(bar.enabled(normalized, "weather"), false, "normalize keeps first weather");
 eq(bar.mode(normalized, "weather"), "widget", "normalize keeps first mode");
 eq(bar.instancesFor(normalized, "bar.center")[0].id, "clock", "invalid host falls back to default");
+
+const numbered = bar.setConfig(normalized, "workspaces", "workspaceDisplay", "number");
+eq(bar.config(numbered, "workspaces").workspaceDisplay, "number", "setConfig updates workspace display");
+eq(bar.config(normalized, "workspaces").workspaceDisplay, "dots", "setConfig does not mutate previous layout");
+const preserved = bar.setConfig(numbered, "workspaces", "extra", "value");
+eq(bar.config(preserved, "workspaces").workspaceDisplay, "number", "setConfig preserves existing keys");
 
 const enabled = bar.setEnabled(normalized, "network", true);
 eq(bar.enabled(enabled, "network"), true, "setEnabled on");
@@ -90,6 +97,8 @@ eq(bar.enabled(provider, "demo"), true, "provider instance enabled");
 eq(bar.find(provider, "demo").config.command, ["sh", "-c", "true"], "provider command config is preserved");
 ok(bar.validate({ items: [{ id: "demo", component: "command", host: "bar.right" }] }, providerDefs).ok === false, "provider without command is rejected");
 ok(bar.validate({ items: [{ id: "demo", component: "command", host: "bar.right", config: { command: ["true"], interval: 30 } }] }, providerDefs).ok, "valid provider accepted");
+ok(bar.validate({ items: [{ id: "workspaces", component: "workspaces", config: { workspaceDisplay: "number" } }] }, defs).ok, "workspace number display is accepted");
+ok(!bar.validate({ items: [{ id: "workspaces", component: "workspaces", config: { workspaceDisplay: "bogus" } }] }, defs).ok, "workspace display is validated");
 
 const invalid = bar.validate({ items: [{ id: "x", component: "unknown" }] }, defs);
 ok(!invalid.ok, "validate rejects unknown components");

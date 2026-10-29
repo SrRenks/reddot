@@ -18,6 +18,7 @@ const HOSTS = {
 };
 
 const MODES = { icon: true, widget: true };
+const WORKSPACE_DISPLAYS = { dots: true, number: true };
 
 function definitionMap(definitions) {
     const map = {};
@@ -37,7 +38,8 @@ function defaultItems(definitions) {
             host: def.defaultHost,
             mode: def.defaultMode,
             order: def.defaultOrder || 0,
-            enabled: def.defaultEnabled !== false
+            enabled: def.defaultEnabled !== false,
+            config: Object.assign({}, def.defaultConfig || {})
         });
     }
     return out;
@@ -66,7 +68,8 @@ function normalizeItem(item, def, fallbackOrder) {
         order: Number.isFinite(Number(item && item.order))
             ? Math.max(0, Math.round(Number(item.order))) : fallbackOrder,
         enabled: !(item && item.enabled === false),
-        config: item && item.config && typeof item.config === "object" ? item.config : {}
+        config: Object.assign({}, def.defaultConfig || {},
+            item && item.config && typeof item.config === "object" ? item.config : {})
     };
 }
 
@@ -186,6 +189,11 @@ function hostOf(layout, id) {
     return item ? item.host : "";
 }
 
+function config(layout, id) {
+    const item = find(layout, id);
+    return item && item.config ? item.config : {};
+}
+
 function update(layout, id, field, value) {
     const items = layout.items.map((item) => {
         if (item.id !== id)
@@ -203,6 +211,15 @@ function setEnabled(layout, id, value) {
 
 function setMode(layout, id, value) {
     return MODES[value] ? update(layout, id, "mode", value) : layout;
+}
+
+function setConfig(layout, id, key, value) {
+    const item = find(layout, id);
+    if (!item || typeof key !== "string" || key.length === 0)
+        return layout;
+    const cfg = Object.assign({}, item.config || {});
+    cfg[key] = value;
+    return update(layout, id, "config", cfg);
 }
 
 function setHost(layout, id, host) {
@@ -294,6 +311,11 @@ function validate(raw, definitions) {
             if (cfg.interval !== undefined && !(Number(cfg.interval) > 0))
                 errors.push("command provider interval must be positive: " + (item.id || "?"));
         }
+        if (item.component === "workspaces") {
+            var display = (item.config && item.config.workspaceDisplay) || "dots";
+            if (!WORKSPACE_DISPLAYS[display])
+                errors.push("workspaces display must be dots or number: " + (item.id || "?"));
+        }
     }
     return { ok: errors.length === 0, errors, layout: errors.length === 0 ? normalize(raw, definitions) : null };
 }
@@ -301,7 +323,7 @@ function validate(raw, definitions) {
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         VERSION, HOSTS, MODES, defaultItems, makeLayout, normalize, migrateFlags,
-        find, enabled, mode, hostOf, setEnabled, setMode, setHost, instancesFor,
+        find, enabled, mode, hostOf, config, setConfig, setEnabled, setMode, setHost, instancesFor,
         statusIds, setOrder, setStatusOrder, moveItem, reverseHost, validate,
         instancesForMode, ensureBar
     };

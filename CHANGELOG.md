@@ -31,6 +31,9 @@ semantic versioning when it cuts a release.
 - Moved the 14-item status cluster into `BarStatusRow.qml`, built only while
   the bar is expanded. Idle no longer constructs network, tray, media and system
   widgets that cannot be clicked until hover.
+- Added a persisted `workspaceDisplay` setting for the Workspaces bar component:
+  `dots` (clearer current strip) or `number` (active workspace numeral), editable
+  from the component editor and through `barConfig`.
 - QML warning baseline and gate, tracking each warning occurrence per file.
 - Hyprland API and legacy-syntax check.
 - Documentation index, getting-started guide, repository map, roadmap and

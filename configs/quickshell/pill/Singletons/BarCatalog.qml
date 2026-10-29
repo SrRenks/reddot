@@ -20,6 +20,7 @@ Singleton {
             description: "Workspace dots for the active monitor",
             target: "launcher",
             category: "navigation", modes: ["widget", "icon"], defaultMode: "widget",
+            defaultConfig: { workspaceDisplay: "dots" },
             defaultHost: "bar.left", defaultOrder: 0,
             allowedHosts: ["bar.left", "bar.center"]
         },

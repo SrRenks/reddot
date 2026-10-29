@@ -56,5 +56,13 @@ SettingsRow {
             value: BarLayout.hostOf(root.componentId)
             onPicked: (v) => BarLayout.setHost(root.componentId, v)
         }
+
+        SettingsSeg {
+            visible: root.componentId === "workspaces"
+            s: root.s
+            options: [{ label: "Dots", value: "dots" }, { label: "Number", value: "number" }]
+            value: BarLayout.config(root.componentId).workspaceDisplay || "dots"
+            onPicked: (v) => BarLayout.setConfig(root.componentId, "workspaceDisplay", v)
+        }
     }
 }

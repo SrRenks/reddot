@@ -55,6 +55,8 @@ Item {
         s: root.s
         screenName: root.screenName
         mode: root.mode
+        workspaceDisplay: root.instance && root.instance.config
+            && root.instance.config.workspaceDisplay === "number" ? "number" : "dots"
         active: root.active
         onActivated: root.requestSurface("launcher")
         onHoverIndex: (index) => root.workspacesHover(index)

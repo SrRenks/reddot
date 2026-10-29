@@ -58,6 +58,15 @@ package meter opens the matching surface; the status cluster can be reordered,
 hidden and moved between zones. Settings → Shell → Bar mirrors the same order and
 survives a restart.
 
+The Workspaces component has a `workspaceDisplay` setting in its `config`:
+
+```json
+"config": { "workspaceDisplay": "dots" }
+```
+
+`dots` is the default strip; `number` shows the active workspace as a numeral.
+Both are editable from Settings → Shell → Bar by selecting Workspaces.
+
 ## Command providers
 
 A `command` component runs a local executable with an argv array and reads one

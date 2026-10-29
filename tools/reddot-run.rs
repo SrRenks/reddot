@@ -58,7 +58,7 @@ fn debian_backports() -> Option<String> {
     let text = fs::read_to_string("/etc/os-release").ok()?;
     let id = text.lines().find(|l| l.starts_with("ID=")).map(|l| l[3..].trim_matches(['"', '\''].as_ref())).unwrap_or("");
     if id != "debian" { return None; }
-    let code = text.lines().find(|l| l.starts_with("VERSION_CODENAME=")).map(|l| l[15..].trim_matches(['"', '\''].as_ref())).unwrap_or("");
+    let code = text.lines().find_map(|l| l.strip_prefix("VERSION_CODENAME=")).unwrap_or("").trim_matches(['"', '\''].as_ref());
     if code.is_empty() { return None; }
     let needle = format!("{code}-backports");
     apt_has_backports(&needle).then(|| needle)

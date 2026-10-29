@@ -49,8 +49,9 @@ def _in_build(name, cmd):
 # is missing, then source ~/.cargo/env only when it exists. Distro cargo has no
 # ~/.cargo/env, so the guard keeps that case from aborting the build.
 _CARGO_PREP = (
-    "command -v cargo >/dev/null 2>&1 || "
-    "(curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y); "
+    "if ! command -v cargo >/dev/null 2>&1 || "
+    "[ \"$(cargo --version 2>/dev/null | awk '{split($2,v,\".\"); print v[1]*100+v[2]}')\" -lt 188 ]; then "
+    "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; fi; "
     'if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi'
 )
 

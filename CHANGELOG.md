@@ -68,6 +68,8 @@ semantic versioning when it cuts a release.
 
 - Mouse-close no longer arms the keyboard hover guard, so the pill can be
   reopened from the top strip immediately after an outside click.
+- A monitor connected after the awww daemon starts now gets the current wallpaper
+  instead of the black default; `monitor.added`/`monitor.removed` reapply it.
 - Strict string comparisons in the wallpaper, launcher and app lists.
 - Dynamic host contract in the notification toast, keeping the QML boundary explicit.
 - Nested Tooltip access to the component scale.

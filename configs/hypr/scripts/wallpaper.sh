@@ -266,7 +266,10 @@ if [ "$cmd" = "init" ]; then
         if map_has_video && ! pgrep -x mpvpaper >/dev/null 2>&1; then
             sync_videos
         fi
-        exit 0
+        # A monitor connected after the daemon started has no map entry and
+        # keeps awww's black default. Re-apply every output; restore_all fills
+        # the missing one from the current state or the wallpaper bag.
+        restore_all
     fi
     restore_all
 elif [ "$cmd" = "set" ]; then

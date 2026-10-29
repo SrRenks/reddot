@@ -12,3 +12,10 @@ hl.on("hyprland.start", function()
     -- warm the page cache so a user's first fastfetch run doesn't stall on cold pacman db reads
     hl.exec_cmd("fastfetch")
 end)
+
+hl.on("monitor.added", function()
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh init")
+end)
+hl.on("monitor.removed", function()
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh init")
+end)

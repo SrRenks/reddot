@@ -28,6 +28,9 @@ semantic versioning when it cuts a release.
 - Paused the Ame canvas/timer whenever its form is off, eliminating the 6-8%
   CPU loop after closing a surface. Replaced the live Bar preview with a static
   card so opening Bar no longer leaves a redraw loop.
+- Moved the 14-item status cluster into `BarStatusRow.qml`, built only while
+  the bar is expanded. Idle no longer constructs network, tray, media and system
+  widgets that cannot be clicked until hover.
 - QML warning baseline and gate, tracking each warning occurrence per file.
 - Hyprland API and legacy-syntax check.
 - Documentation index, getting-started guide, repository map, roadmap and

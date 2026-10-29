@@ -158,3 +158,18 @@ CPU            <= 0,5%
 
 - [Qt QML Disk Cache](https://doc.qt.io/archives/qt-6.4/qmldiskcache.html)
 - [Qt Quick Deployment](https://doc.qt.io/qt-6.8/qtquick-deployment.html)
+
+## Atualização após implementar o cluster lazy
+
+A fileira de status agora é criada por `BarStatusRow.qml` somente quando a barra
+está expandida. Medi again com dois monitores conectados (eDP-1 + HDMI-A-1):
+
+```text
+idle, status não carregado   158,7 MB PSS   0,4% CPU
+hover, status carregado      187,5 MB PSS
+todas as 41 surfaces         328,0 MB PSS
+```
+
+A diferença de ~29 MB entre idle e hover mostra o ganho do carregamento lazy.
+O stress de páginas continua sendo cache de tipos QML; ele não é resolvido por
+esse carregamento e segue como o próximo alvo arquitetural.

@@ -83,9 +83,9 @@ if ((barCatalog.match(/status:\s*true/g) || []).length !== known.length)
 for (const id of known) {
     if (!barCatalog.includes(`id: "${id}"`))
         failures.push(`BarCatalog.qml: ${id} is missing`);
-    const pill = read(pillDir + "Pill.qml");
-    if (!pill.includes(`case "${id}":`))
-        failures.push(`Pill.qml: status width is missing for ${id}`);
+    const statusRow = read(pillDir + "BarStatusRow.qml");
+    if (!statusRow.includes(`case "${id}":`))
+        failures.push(`BarStatusRow.qml: status width is missing for ${id}`);
 }
 if (!/migrateFlags/.test(barLayout) || !/bar\.json/.test(barLayout))
     failures.push("BarLayout.qml: missing migration or persisted layout path");

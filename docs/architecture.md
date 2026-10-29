@@ -62,6 +62,10 @@ instead of allocating a full control block for every definition.
 The hot trio no longer preloads; surfaces build on first open. The host-only
 performance gate uses 180 MB PSS idle, 230 MB post and 55 MB lock limits.
 
+The right-side status cluster lives in `BarStatusRow.qml` and is instantiated by
+a Loader only while the bar is expanded. Its width and Ame anchors are exposed
+by the component; idle keeps only the rest capsule and the shell services.
+
 ## Shell
 
 The pill is a single morphing surface family. `configs/quickshell/pill/shell.qml`

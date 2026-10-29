@@ -58,6 +58,12 @@ package meter opens the matching surface; the status cluster can be reordered,
 hidden and moved between zones. Settings → Shell → Bar mirrors the same order and
 survives a restart.
 
+The ThinkPad page can check the official Lenovo catalog for a newer BIOS for the
+detected machine type. **Check** compares the catalog package version with the
+running BIOS; when a newer package exists, **Download** opens Lenovo's official
+support page in the default browser. The check is on demand and only runs from
+the ThinkPad surface.
+
 The Workspaces component has a `workspaceDisplay` setting in its `config`:
 
 ```json

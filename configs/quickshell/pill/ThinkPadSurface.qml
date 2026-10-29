@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Io
 import "Singletons"
+import "lib/biosUpdate.js" as BiosUpdate
 
 /**
  * 思 THINKPAD. Lighting and Pointing; fan telemetry and the thinkfan curve
@@ -22,8 +23,20 @@ PillSurface {
     readonly property string helper: ThinkPad.helper
     readonly property bool showData: ThinkPad.present && ThinkPad.available
     readonly property bool hasPointing: ThinkPad.tpList.length > 0 || ThinkPad.doubletap >= 0
+    property string biosState: "idle"
+    property string biosLatest: ""
+    property string biosError: ""
+    readonly property bool biosUpdate: biosState === "update"
+    readonly property string biosStatus: {
+        if (biosState === "checking") return "Checking the official Lenovo catalog…";
+        if (biosState === "update") return "BIOS " + biosLatest + " available · current " + ThinkPad.bios;
+        if (biosState === "current") return "BIOS " + biosLatest + " · up to date";
+        if (biosState === "error") return biosError.length > 0 ? biosError : "BIOS check failed";
+        return "Check the official Lenovo catalog for this model";
+    }
     readonly property var machineRows: [
         { label: "Model", value: ThinkPad.model },
+        { label: "Machine type", value: ThinkPad.machineType },
         { label: "BIOS", value: ThinkPad.bios },
         { label: "Lap mode", value: ThinkPad.lapMode < 0 ? "" : (ThinkPad.lapMode === 1 ? "lap" : "desk") },
         { label: "USB-C security", value: ThinkPad.usbCSecurity }
@@ -42,6 +55,32 @@ PillSurface {
     }
 
     function activateRow(row) {}
+
+    function failBios(message) {
+        root.biosState = "error";
+        root.biosError = message;
+    }
+
+    function checkBios() {
+        if (biosCatalog.running || biosDescriptor.running)
+            return;
+        if (ThinkPad.machineType.length < 4) {
+            root.failBios("Machine type unavailable");
+            return;
+        }
+        root.biosState = "checking";
+        root.biosLatest = "";
+        root.biosError = "";
+        biosCatalog.command = ["curl", "-L", "--max-time", "20", "-sS",
+            BiosUpdate.catalogUrl(ThinkPad.machineType)];
+        biosCatalog.running = true;
+    }
+
+    function openBiosPage() {
+        var page = BiosUpdate.supportPage(ThinkPad.machineType);
+        if (page.length > 0)
+            Qt.openUrlExternally(page);
+    }
 
     function run(args, done) {
         if (actionProc.running)
@@ -114,10 +153,62 @@ PillSurface {
 
     onOpenChanged: {
         ThinkPad.liveWatch = open;
-        if (open)
+        if (open) {
             ThinkPad.refresh();
+            if (biosState === "idle")
+                Qt.callLater(root.checkBios);
+        }
     }
     Component.onDestruction: ThinkPad.liveWatch = false;
+
+    Process {
+        id: biosCatalog
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var url = BiosUpdate.catalogBiosUrl(this.text);
+                if (url.length === 0) {
+                    root.failBios("No BIOS package in the Lenovo catalog");
+                    return;
+                }
+                biosDescriptor.command = ["curl", "-L", "--max-time", "20", "-sS", url];
+                biosDescriptor.running = true;
+            }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: if (this.text.trim().length > 0)
+                root.biosError = this.text.trim()
+        }
+        onExited: (code) => {
+            if (code !== 0 && root.biosState === "checking" && root.biosError.length === 0)
+                root.failBios("Lenovo catalog request failed (" + code + ")");
+        }
+    }
+
+    Process {
+        id: biosDescriptor
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var info = BiosUpdate.parseDescriptor(this.text);
+                if (info.version.length === 0) {
+                    root.failBios("BIOS descriptor has no version");
+                    return;
+                }
+                root.biosLatest = info.version;
+                if (BiosUpdate.isNewer(ThinkPad.bios, info.version))
+                    root.biosState = "update";
+                else
+                    root.biosState = "current";
+            }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: if (this.text.trim().length > 0)
+                root.biosError = this.text.trim()
+        }
+        onExited: (code) => {
+            if (code !== 0 && root.biosState === "checking" && root.biosError.length === 0)
+                root.failBios("Lenovo BIOS descriptor failed (" + code + ")");
+        }
+    }
 
     Process {
         id: actionProc
@@ -180,6 +271,53 @@ PillSurface {
             loading: ThinkPad.loading
             error: ThinkPad.error
         }
+
+            ThinkPadGroup {
+                s: root.s
+                title: "BIOS"
+                accent: true
+                initialOpen: true
+                visible: ThinkPad.present
+
+                SettingsField {
+                    surface: root
+                    label: "BIOS updates"
+                    icon: "download"
+                    caption: root.biosStatus
+
+                    Row {
+                        spacing: 6 * root.s
+
+                        ChipButton {
+                            s: root.s
+                            text: root.biosState === "checking" ? "Checking…" : "Check"
+                            onClicked: root.checkBios()
+                        }
+
+                        ChipButton {
+                            s: root.s
+                            visible: root.biosUpdate
+                            text: "Download"
+                            onClicked: root.openBiosPage()
+                        }
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    leftPadding: 10 * root.s
+                    rightPadding: 10 * root.s
+                    topPadding: 1 * root.s
+                    bottomPadding: 6 * root.s
+                    text: root.biosStatus
+                    color: root.biosUpdate ? Theme.vermLit
+                        : (root.biosState === "error" ? Theme.flameCore : Theme.faint)
+                    font.family: Theme.font
+                    font.pixelSize: Typography.size("micro", root.s)
+                    font.weight: Font.Medium
+                    wrapMode: Text.WordWrap
+                }
+            }
 
         Column {
             width: parent.width

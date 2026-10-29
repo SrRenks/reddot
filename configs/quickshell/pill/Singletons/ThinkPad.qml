@@ -35,6 +35,8 @@ Singleton {
     property string error: ""
     property string model: ""
     property string bios: ""
+    /** Four-character Lenovo machine type used by the official catalog. */
+    property string machineType: ""
     property int fanRpm: -1
     property string fanLevel: ""
     property string fanStatus: ""
@@ -172,6 +174,15 @@ Singleton {
                 next[bits[0]] = v;
         }
         root.liveLeds = next;
+    }
+
+    function extractMachineType(raw) {
+        var text = String(raw || "").trim().toUpperCase();
+        var direct = text.match(/^([0-9A-Z]{4})/);
+        if (direct)
+            return direct[1];
+        var sku = text.match(/(?:^|MT_)([0-9A-Z]{4})(?:_|\b)/);
+        return sku ? sku[1] : "";
     }
 
     function refresh() {
@@ -376,6 +387,23 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: root.parseLive(this.text)
         }
+    }
+
+    FileView {
+        id: dmiProduct
+        path: "/sys/class/dmi/id/product_name"
+        blockLoading: true
+        printErrors: false
+        onLoaded: root.machineType = root.extractMachineType(text()) || root.machineType
+    }
+
+    FileView {
+        id: dmiSku
+        path: "/sys/class/dmi/id/product_sku"
+        blockLoading: true
+        printErrors: false
+        onLoaded: if (!root.machineType)
+            root.machineType = root.extractMachineType(text())
     }
 
     Component.onCompleted: probe.running = true

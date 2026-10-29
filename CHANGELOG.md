@@ -34,6 +34,13 @@ semantic versioning when it cuts a release.
 - Added a persisted `workspaceDisplay` setting for the Workspaces bar component:
   `dots` (clearer current strip) or `number` (active workspace numeral), editable
   from the component editor and through `barConfig`.
+- Updates now render as a compact, dynamic-width count badge and disappear when
+  the package count is zero (unless the check itself failed).
+- The Workspaces numeral uses a tabular chip with a vermilion accent, sharing
+  `Typography` and bar scale.
+- ThinkPad gained an on-demand BIOS check against Lenovo's official catalog for
+  the detected machine type, with an official download page button when a newer
+  version exists.
 - Added watchdog-driven memory recycling: after two idle checks over 220 MB PSS
   with no open surface or top-strip pointer, the pill process is replaced to
   release the QML type cache. The cold restart takes about 1.75 s and keeps a

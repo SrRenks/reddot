@@ -52,24 +52,39 @@ Item {
         id: numberChip
         anchors.centerIn: parent
         visible: root.numberMode
-        width: numberText.implicitWidth + 12 * root.s
-        height: 18 * root.s
+        width: numberRow.implicitWidth + 14 * root.s
+        height: 19 * root.s
         radius: height / 2
         color: Theme.frameBg
         border.width: 1
         border.color: Qt.alpha(Theme.vermLit, 0.42)
     }
 
-    Text {
-        id: numberText
+    Row {
+        id: numberRow
         anchors.centerIn: parent
         visible: root.numberMode
-        text: root.activeNumber
-        color: Theme.cream
-        font.family: Theme.font
-        font.pixelSize: Typography.size("bodyLarge", root.s)
-        font.weight: Font.DemiBold
-        font.features: { "tnum": 1 }
+        spacing: 5 * root.s
+
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: 4 * root.s
+            height: 4 * root.s
+            radius: width / 2
+            color: Theme.vermLit
+        }
+
+        Text {
+            id: numberText
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.activeNumber
+            color: Theme.cream
+            font.family: Theme.font
+            font.pixelSize: Typography.size("bodyLarge", root.s)
+            font.weight: Font.DemiBold
+            font.letterSpacing: 0.25 * root.s
+            font.features: { "tnum": 1 }
+        }
     }
 
     GlyphIcon {

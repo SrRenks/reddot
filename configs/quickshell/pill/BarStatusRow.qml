@@ -611,9 +611,11 @@ Item {
         id: updatesIcon
         anchors.verticalCenter: parent.verticalCenter
         x: statusX("updates")
-        visible: statusOnBar("updates") && PackageUpdates.enabled
-            && (PackageUpdates.total > 0 || PackageUpdates.hasError)
-        width: visible ? updatesLabel.implicitWidth + 17 * pill.s : 0
+        readonly property bool hasUpdates: PackageUpdates.total > 0 || PackageUpdates.hasError
+        readonly property string countText: PackageUpdates.total > 99
+            ? "99+" : (String(PackageUpdates.total) + (PackageUpdates.hasError ? "!" : ""))
+        visible: statusOnBar("updates") && PackageUpdates.enabled && hasUpdates
+        width: visible ? 13 * pill.s + 5 * pill.s + updatesBadge.width : 0
         height: 17 * pill.s
 
         GlyphIcon {
@@ -628,18 +630,35 @@ Item {
             stroke: 1.8
         }
 
-        Text {
-            id: updatesLabel
+        Rectangle {
+            id: updatesBadge
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            text: PackageUpdates.total + (PackageUpdates.hasError ? "!" : "")
-            color: PackageUpdates.important ? Theme.verm
-                : (PackageUpdates.hasError || PackageUpdates.stale ? Theme.flameCore
-                : (updatesArea.containsMouse ? Theme.cream : Theme.subtle))
-            font.family: Theme.font
-            font.pixelSize: Typography.size("caption", pill.s)
-            font.weight: Font.Bold
-            font.features: { "tnum": 1 }
+            width: updatesLabel.implicitWidth + 9 * pill.s
+            height: 15 * pill.s
+            radius: height / 2
+            color: PackageUpdates.important
+                ? Qt.alpha(Theme.verm, updatesArea.containsMouse ? 0.22 : 0.16)
+                : (PackageUpdates.hasError || PackageUpdates.stale
+                    ? Qt.alpha(Theme.flameCore, 0.14) : Theme.frameBg)
+            border.width: 1
+            border.color: PackageUpdates.important ? Qt.alpha(Theme.vermLit, 0.42)
+                : (PackageUpdates.hasError || PackageUpdates.stale
+                    ? Qt.alpha(Theme.flameCore, 0.38) : Theme.hairSoft)
+
+            Text {
+                id: updatesLabel
+                anchors.centerIn: parent
+                text: updatesIcon.countText
+                color: PackageUpdates.important ? Theme.vermLit
+                    : (PackageUpdates.hasError || PackageUpdates.stale ? Theme.flameCore
+                    : (updatesArea.containsMouse ? Theme.cream : Theme.subtle))
+                font.family: Theme.font
+                font.pixelSize: Typography.size("micro", pill.s)
+                font.weight: Font.Bold
+                font.letterSpacing: 0.2 * pill.s
+                font.features: { "tnum": 1 }
+            }
         }
 
         MouseArea {

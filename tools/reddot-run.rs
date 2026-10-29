@@ -77,7 +77,6 @@ fn batch(family: &str, names: &[String]) -> Vec<String> {
         _ => vec!["zypper".into(), "--non-interactive".into(), "install".into()],
     };
     a.extend(names.iter().cloned());
-    if family == "fedora" { a.push("--skip-broken".into()); }
     a
 }
 fn suse_target() -> String {

@@ -66,6 +66,9 @@ semantic versioning when it cuts a release.
 
 ### Fixed
 
+- The Fedora runner no longer passes `--skip-broken`; a missing required
+  Hyprland package now fails the install instead of printing success.
+
 - Mouse-close no longer arms the keyboard hover guard, so the pill can be
   reopened from the top strip immediately after an outside click.
 - A monitor connected after the awww daemon starts now gets the current wallpaper

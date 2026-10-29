@@ -2,278 +2,153 @@
 
 # reddot
 
-A Hyprland desktop shell built around one morphing Quickshell pill.
+A Hyprland desktop built around one morphing Quickshell pill.
 
 Personal fork of [Ricelin](https://github.com/Gakuseei/Ricelin), maintained on a ThinkPad E14 Gen 7.
 
-![reddot desktop](assets/hero.png)
+![reddot](assets/hero.png)
 
 </div>
 
-reddot turns the top of the screen into a single pill that expands into the panel you need. It carries the bar, launcher, mixer, calendar, lock screen, power controls and the system pages, then collapses back to a small status strip.
+reddot replaces the usual bar, launcher, mixer and settings windows with one
+pill. It starts as a thin status strip and expands into the page you need:
+launcher, Search, Settings, system monitor, Wi‑Fi, Bluetooth, appearance,
+battery and power tools. There are 41 surfaces in total.
 
-The project is a working personal setup, not a distribution. The installer handles the supported package families, and the documentation records what has been tested on real hardware.
+The project is a personal setup, not a distribution. The supported installer
+matrix is Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed.
 
-## Highlights
+## The pill
 
-### One pill, many surfaces
-
-The pill has 41 surfaces: settings, launcher, clipboard, wallpaper picker, media, mixer, calendar, notifications, network, Bluetooth, battery, power, security, system monitor, recorder and the ThinkPad tools.
-
-Use the wheel, the scrollbar or `PageUp`/`PageDown` on long pages. `Home` and `End` jump to the edges. `Super+Shift+Space` reopens the last surface.
-
-![Pill hover](assets/pill-hover.gif)
+Hover the top strip or use `Super+Shift+Space`. The pill grows in place, keeps
+the same geometry while it morphs, and returns to the strip when you leave.
 
 ![Pill tour](assets/pill-tour.gif)
 
-### Search that knows the interface
+- `Super+A` opens the launcher.
+- The wheel, scrollbar, `PageUp`/`PageDown`, `Home` and `End` work on long pages.
+- `Search` finds pages by title, alias and tag.
+- The back control returns to the parent page; `Escape` closes the surface.
+- `Super+Shift+Space` reopens the last surface.
 
-`Settings → Search` ranks pages by title, alias and tag. It accepts typos and informal names:
-
-```text
-gui          → Bar layout
-organize     → Bar layout
-fingerprint  → Security
-fan           → ThinkPad
-touchpad      → Input
-```
-
-The Search surface uses the same navigation manifest as the Settings index and the status bar, so labels and destinations have one source of truth.
+## Search
 
 ![Search](assets/search.gif)
 
-### A bar you can rearrange
+Search understands informal names and small typos:
 
-The status cluster supports drag reordering, visibility toggles and keyboard movement. The Bar page follows the same rules, and the layout survives a restart.
+```text
+wifi         → Wi‑Fi
+volume       → Mixer
+fingerprint  → Security
+fan          → ThinkPad
+gui          → Bar layout
+```
+
+## Bar
 
 ![Bar layout](assets/bar.gif)
 
-### Security and the lock screen
+The status cluster can be reordered, hidden and moved between zones. The Bar
+page uses the same order and keeps it across restarts.
 
-The lock screen authenticates with PAM. Password and fingerprint are independent contexts: a rejected password does not consume the fingerprint prompt, and a failed fingerprint returns to the password state without an automatic loop.
+## System and security
 
-Fingerprint is optional and configurable in `Settings → Security`. Availability is detected from `fprintd` and the enrolled-print list.
-
-### Power and hardware
-
-The Power page covers TLP profiles, charge thresholds, pause/resume and the session actions. The battery card uses UPower history for 24-hour discharge bars and averages.
-
-On ThinkPad hardware, the optional helper exposes fan RPM, thermal sensors, the fan curve, TrackPoint settings and keyboard LEDs. The System surface reads native hwmon and power-supply data through a small Rust scanner.
-
-### Package updates for more than Arch
-
-The package meter reads the native update source for the running system:
-
-| System | Source |
-|---|---|
-| Arch | `pacman` and optional AUR via `yay` or `paru` |
-| Fedora and RHEL family | `dnf` RPM updates |
-| openSUSE | `zypper` RPM updates |
-| Debian and Ubuntu | `apt` |
-| Any system | optional Flatpak updates |
-
-The page shows only the sources present on the machine, so Fedora does not reserve a row for AUR and a machine without Flatpak does not show an empty Flatpak chip. Kernel, initramfs, bootloader, firmware and core desktop packages are marked as important.
-
-The check is read-only. On Arch it uses `checkupdates` when available, which refreshes a temporary sync database without root, and falls back to the cached `pacman -Qu`. It never runs `pacman -Syu`; applying updates stays an explicit user action. dnf, zypper and apt read their own cached metadata. A package manager holding its database lock during an upgrade cannot leave the page in `checking` because each probe has a 25 second ceiling.
-
-### Appearance and effects
-
-matugen derives a palette from the current wallpaper and feeds it to the pill, terminal, borders, fastfetch and GTK apps. Window blur, transparency and panel blur are separate controls. `Super+Shift+F` toggles window blur and opacity; panel blur stays independent.
-
-### Recording and capture
-
-`Super+Shift+R` opens the recorder. `Print` or `Super+F9` starts rishot, and `Shift+Print` captures the current monitor. rishot lives in its own project.
+- **System** shows CPU, iGPU, memory, temperature, fan RPM, network, disk, swap
+  and compute governor without a background daemon.
+- **Power** covers TLP profiles, charge windows, presets and session actions.
+- **ThinkPad** exposes fan curve, TrackPoint and keyboard LEDs on supported
+  hardware.
+- **Lock** uses PAM. Password and fingerprint are independent. On multiple
+  monitors the primary output authenticates; secondaries show the clock, date and
+  a `LOCKED` marker.
+- **Appearance** derives a palette from the wallpaper with matugen and the Rust
+  palette engine.
 
 ## Install
 
-The bootstrap detects the package family, installs git and rustc, clones reddot and runs the Rust installer.
+The bootstrap installs `git` and `rustc`, clones the checkout and runs the Rust
+installer. It does not use Python.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/SrRenks/reddot/e14g7/install.sh | bash
 ```
 
-Read `install.sh` before piping it. The installer makes backups of replaced configuration.
+Read `install.sh` before piping it. The installer backs up replaced files.
 
-Non-interactive options:
+Useful flags:
 
 ```text
 --quickstart   core defaults, no questions
 --full         include the daily applications
+--custom       choose optional applications
 --sddm         install the torii SDDM theme
 --no-deps      deploy configuration only
---dry-run      run the flow without changing anything
---skip-extras  skip TLP, ThinkPad and user-tool installation
+--dry-run      print the plan without changing anything
+--reinstall    rerun an installed setup
+--uninstall    remove managed configs and restore backups
 ```
 
-Supported package families: Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed. openSUSE Leap 15.6 and Gentoo are rejected: the former has no OBS target for the Hyprland set, and the latter is source-only and not part of the verified binary matrix. The documented target is Hyprland on Wayland.
+Leap 15.6 and Gentoo are rejected: Leap has no OBS target for the Hyprland set,
+and Gentoo is source-only and outside the verified binary matrix.
 
 ## Keybinds
-
-The active map lives in `configs/hypr/modules/binds.lua` and is documented in [docs/KEYBINDS.md](docs/KEYBINDS.md).
 
 | Keys | Action |
 |---|---|
 | `Super+Return` | Terminal |
 | `Super+A` | Launcher |
-| `Super+V` | Clipboard history |
+| `Super+V` | Clipboard |
 | `Super+W` | Wallpaper picker |
-| `Super+Shift+W` | Apply a new wallpaper |
-| `Super+E` | File manager |
 | `Super+L` | Lock |
 | `Super+F` | Fullscreen |
-| `Super+Shift+Space` | Open or close the pill, restoring the last surface |
-| `Super+1..0` | Focus workspace |
-| `Super+Shift+1..0` | Move window to workspace |
-| `Super+Shift+B` | Power surface |
-| `Super+Shift+T` | ThinkPad surface |
-| `Super+Shift+F` | Window blur and transparency |
 | `Super+Shift+R` | Recorder |
-| `Super+Shift+C` | Color picker |
-| `Super+Shift+E` | EasyEffects bypass |
-| `Super+G` | Game mode |
-| `Super+S`, `Super+Shift+S` | Stash, send window to stash |
-| `Super+T` | Toggle floating |
-| `Super+M`, `Super+Shift+M` | Minimize, minimized stash |
-| `Super+Space` | Keyboard layout |
 | `Print`, `Super+F9` | rishot |
-| `Shift+Print`, `Super+Shift+Print` | Capture current monitor |
+| `Shift+Print` | Current monitor |
 
-The Keybinds page can edit the active file. Dynamic workspace binds from `spaces.lua` are documented but are not listed in the editor.
+The full map is in [docs/usage.md](docs/usage.md).
 
 ## Stack
 
 | Layer | Technology |
 |---|---|
-| Compositor | Hyprland, configured in Lua |
-| Shell | Quickshell and hand-written QML |
+| Compositor | Hyprland, Lua configuration |
+| Shell | Quickshell and QML |
 | Terminal | Ghostty |
-| Shell environment | fish |
-| Font | JetBrains Mono Nerd |
-| Palette | matugen and the Rust wallcolors engine |
-| Installer | Rust (built from the crate-free sources) |
-| Update engine | Rust, built by the extras step |
-| Sensor snapshot | Rust, built only when needed |
-| Configuration and helpers | POSIX shell and systemd user units |
+| Login shell | fish |
+| Palette | matugen and Rust |
+| Installer and updater | Rust, compiled with `rustc` |
+| Helpers | POSIX shell, systemd and polkit |
 
-The bootstrap installs git and rustc, builds the crate-free Rust installer and refuses to fall back to Python. The update, palette, deploy, installer and search wrappers execute Rust or POSIX shell directly. The old Python parity harness is archived outside the checkout; the active repository contains no `.py` files. The update engine, palette engine and sensor scanner are small Rust binaries compiled by `tools/install-extras.sh`.
+The active repository has no `.py` files. The old Python parity harness is
+archived outside the checkout.
 
-## Project quality
-
-The repository has a read-only checkout gate and a headless CI gate:
+## Checks
 
 ```sh
 tools/check.sh
 tools/check-static.sh
+tools/smoke-surfaces.sh   # needs a running pill
 ```
 
-They cover QML lint with a reviewed warning baseline, surface and navigation contracts, pure JavaScript tests, helper tests, installer matrix and deploy sandbox checks, Lua syntax, Hyprland API rules and documentation links. Runtime checks that require a compositor or a real lock session stay supervised and are recorded in [docs/coverage.md](docs/coverage.md).
-
-The live system was tested with real PAM unlock, password and fingerprint, two lock outputs, Bar drag and wheel, Search, host PSS measurements and a real package probe.
-
-## Performance and trade-offs
-
-Memory was measured on the live Arch session, not in CI. The host is the ThinkPad E14 Gen 7 at 1920x1200 with Quickshell 0.3.2. Values are in kB and come from `/proc/<pid>/smaps_rollup`; PSS includes shared pages in proportion to the process, while RSS is the larger resident figure.
-
-| State | PSS | RSS |
-|---|---:|---:|
-| Pill closed, cold sample | 249853 | 340568 |
-| Shell open | 250158 | 341524 |
-| System open | 255633 | 349540 |
-| Packages open | 254749 | 348656 |
-| All 40 surfaces, pre-Search diagnostic sweep | 348915 | 450376 |
-| Closed, 64 s after the sweep | 290775 | 384784 |
-| Lock process, resident | 51764 | 108884 |
-
-The all-surface row is not a steady state. Cold surfaces unload after 30 seconds and the allocator releases memory gradually. The current budget is deliberately above the measured medians so a cold-start sample does not make the check noisy:
-
-| State | PSS budget |
-|---|---:|
-| Fresh pill idle | 270000 |
-| Closed 60 s after a surface sweep | 310000 |
-| Resident lock | 60000 |
-
-The host-only checker is `tools/test-perf-budget.sh`. It fails when the sandbox hides `/proc` instead of reporting a false pass. The detailed procedure and measurements are in [docs/performance.md](docs/performance.md).
-
-### Default RAM footprint
-
-For a default session without the browser, private anonymous memory from `smaps_rollup` is the useful number. It excludes shared Qt pages, so the processes can be added without charging the same library more than once.
-
-| Setup | Private anonymous | PSS, for reference |
-|---|---:|---:|
-| Hyprland + pill | 281 MiB | 380 MiB |
-| Hyprland + pill + resident lock + polkit agent | 388 MiB | 523 MiB |
-
-Measured on this ThinkPad E14 Gen 7:
-
-```text
-Hyprland         87.9 MiB private
-qs -c pill      193.5 MiB private
-qs -c lock       73.3 MiB private
-hyprpolkitagent  33.0 MiB private
-```
-
-The browser is deliberately excluded. Zen alone is larger than the complete shell, so including the browser would measure the tab workload, not reddot.
-
-On a 16 GiB machine, 281 MiB is about 1.7% and the full 388 MiB about 2.4%. On 8 GiB, those become about 3.4% and 4.7%. This is acceptable for a feature-dense Qt shell and sits at the low end of the 250 to 400 MiB QuickShell band. It is not excellent: Waybar plus separate tray, launcher and locker can do 60 to 120 MiB, but loses the single morphing pill.
-
-The practical limit for this design is close. The largest remaining saving is the resident lock: starting it on demand could save about 74 MiB private memory, but it adds a 200 to 400 ms start on the security path and a failed spawn must never expose the session. I chose the warm lock. Dropping KDE Connect saves roughly 40 MiB if phone integration is not needed. A second monitor would add another Pill scene graph, so a per-monitor policy matters more there than micro-tuning.
-
-Do not expect large wins from timer cleanups or surface unloading: cold surfaces already unload after 30 seconds, and jemalloc decay is already enabled. Below this point the honest options are removing features or changing the shell architecture.
-
-### Notes on the decisions
-
-I keep the lock process resident. It costs roughly 50 MB PSS, but a lock that is warm starts immediately and does not depend on spawning a Qt process during the critical path. I chose that trade for a personal machine where unlock latency and fail-closed behavior matter more than the last few megabytes.
-
-I moved the updater to Rust first, then the palette, installer, deploy, TUI and post-install layers. The supported binary matrix is Arch, Debian 13+, Fedora 44+ and openSUSE Tumbleweed. The Python parity harness is archived outside the checkout; [ADR 0034](docs/decisions/0034-supported-matrix.md) records the matrix and [ADR 0035](docs/decisions/0035-python-harness-archive.md) records the archive.
-
-I keep one scroll implementation and one navigation vocabulary. The pill, Settings, Search and the status order all use the same surface catalog and metadata, even when that leaves the Settings pages appearing to do similar work. Duplicated behavior was causing drift, and the shared model makes the contracts testable.
-
-I made Search page-first on purpose. Opening a section is stable and predictable; focusing a specific row needs a stable row key and a focus contract across every page. That is the next layer, not something to fake with an index.
-
-Fingerprint remains optional. Any enrolled finger can authenticate through `pam_fprintd`; that is the module's behavior, not a per-finger policy in the shell. Password and fingerprint are separate PAM contexts, so a failed password does not consume the fingerprint prompt.
-
-The numbers above are diagnostic for this machine. They are not a promise for another GPU, wallpaper pipeline, monitor layout or Qt build.
-
-## Project layout
-
-| Path | Contents |
-|---|---|
-| `configs/hypr/` | Hyprland Lua modules, scripts and helpers |
-| `configs/quickshell/pill/` | Pill surfaces, navigation, status and settings |
-| `configs/quickshell/lock/` | Lock surfaces and PAM authentication |
-| `configs/fish/`, `configs/ghostty/` | Shell and terminal configuration |
-| `installer/` | Guided installer and package manifest |
-| `tools/` | Validation gates, tests and host utilities |
-| `docs/` | Architecture, operations, coverage and roadmaps |
-| `assets/` | Screenshots and README recordings |
+Real VM results and current gaps are in [docs/coverage.md](docs/coverage.md).
+The supported matrix, not a five-family claim, is the install contract.
 
 ## Documentation
 
-Start at [docs/index.md](docs/index.md). The most useful entry points:
-
+- [Documentation index](docs/index.md)
 - [Getting started](docs/getting-started.md)
+- [Usage](docs/usage.md)
 - [Architecture](docs/architecture.md)
-- [Conventions](docs/conventions.md)
-- [Keybinds](docs/KEYBINDS.md)
-- [ThinkPad controls](docs/THINKPAD.md)
-- [Power and energy](docs/POWER.md)
-- [Performance](docs/performance.md)
-- [Validation checklist](docs/validation-checklist.md)
-- [Coverage and remaining gaps](docs/coverage.md)
-- [Architecture decisions](docs/decisions/index.md)
-- [Rust update engine](docs/decisions/0003-rust-update-engine.md)
-- [Rust palette engine](docs/decisions/0004-rust-palette-engine.md)
+- [Operations](docs/operations.md)
+- [Coverage](docs/coverage.md)
+- [Roadmap](docs/roadmap.md)
+- [Changelog](CHANGELOG.md)
 
-The project roadmap and open validation work live in [docs/roadmap.md](docs/roadmap.md).
+## Credits
 
-## Acknowledgements
+Fork of [Ricelin](https://github.com/Gakuseei/Ricelin) by
+[Gakuseei](https://github.com/Gakuseei). See [docs/CREDITS.md](docs/CREDITS.md)
+for third-party work and asset credits.
 
-reddot is an independent fork of [Ricelin](https://github.com/Gakuseei/Ricelin), created by [Gakuseei](https://github.com/Gakuseei). The pill concept, the interaction model and the original implementation are his work. Upstream code is MIT licensed, and the upstream credits continue to apply to everything inherited from it.
-
-The sound page began as a proposal by [@Seza007](https://github.com/Seza007) in the upstream Ricelin issue tracker. AutoEQ profiles come from [AutoEq](https://github.com/jaakkopasanen/AutoEq). [rishot](https://github.com/Gakuseei/rishot) provides the screenshot and annotation workflow.
-
-Wallpapers and the SDDM background are third-party assets and are documented in [WALLPAPERS.md](WALLPAPERS.md) and [configs/sddm/themes/torii/CREDITS.md](configs/sddm/themes/torii/CREDITS.md).
-
-## License
-
-MIT. Upstream code © 2026 Gakuseei. reddot-specific changes © 2026 Ricardo Castro (SrRenks). See [LICENSE](LICENSE).
+MIT. Upstream © 2026 Gakuseei. reddot changes © 2026 Ricardo Castro (SrRenks).

@@ -1,61 +1,29 @@
 # Validation checklist
 
-Run these checks before declaring a change complete. The full gate is
-`tools/check.sh`; the commands below explain what each part covers.
+Run from the checkout unless noted.
 
-## Default gate
+## Static and logic
 
-- [ ] `sh tools/check.sh`
 - [ ] `sh tools/check-static.sh`
-- [ ] `qml-warning-baseline` has no new warnings.
-- [ ] `Hyprland --verify-config` reports `config ok`.
-- [ ] `hyprctl configerrors` is empty.
-- [ ] `git diff --check` is clean.
-
-## QML and surfaces
-
-- [ ] `node tools/check-ui-contract.mjs`
-- [ ] `sh tools/check-qml-runtime.sh` carrega PillSurface, SettingsSeg e ScrubValue.
-- [ ] all 41 surfaces are present in the catalog and every request resolves;
-- [ ] the single wheel path is intact (`shell.qml` backdrop only);
-- [ ] scrollbar and keyboard navigation still work in a live session;
-- [ ] `tools/smoke-surfaces.sh` opens all 41 surfaces.
-
-## Hyprland
-
+- [ ] `sh tools/check.sh` (deployed tree; needs a session)
 - [ ] `sh tools/check-hypr-api.sh`
-- [ ] no `windowrulev2`, textual `bind =` or textual `layerrule =` in Lua;
-- [ ] the pill layer rule still names `namespace = "pill"`;
-- [ ] `luac -p configs/hypr/modules/*.lua`.
-
-## Installer and system
-
-- [ ] `sh tools/check-static.sh` passes;
-- [ ] `sh tools/test-reddot-install-matrix.sh` passes;
-- [ ] udev, polkit, session target and TLP checks pass.
-- [ ] `sh tools/check-systemd-contract.sh` passes.
-- [ ] `sh tools/check-lock-static.sh` and `sh tools/check-privileged.sh` pass.
-
-## Documentation
-
 - [ ] `node tools/check-doc-links.mjs`
-- [ ] `docs/index.md` links to every committed guide;
-- [ ] no placeholder text or broken relative links;
-- [ ] behavior changes are reflected in the README or the relevant guide.
 
-## Behavior
+## Installer
 
-- [ ] settings open, close and return through the correct parent;
-- [ ] last surface survives a backdrop close;
-- [ ] drag reorder persists and cancel restores the previous order;
-- [ ] PageUp/PageDown and the scrollbar reach the end of long pages;
-- [ ] 1.25 UI scale does not clip the package page or the status list.
-- [ ] the manual lock checklist has been run in a disposable session;
-- [ ] the manual multi-monitor checklist has been run when a second output exists.
+- [ ] `sh tools/test-reddot-install-rust.sh`
+- [ ] `sh tools/test-reddot-install-matrix.sh`
+- [ ] `sh tools/reddot-run` tests included in `check-static.sh`
 
-## Review
+## Runtime
 
-- [ ] diff reviewed line by line;
-- [ ] no debug logs, dead code or unrelated refactor;
-- [ ] no new dependency without approval;
-- [ ] commit is atomic and stages explicit paths only.
+- [ ] `sh tools/smoke-surfaces.sh` (running pill)
+- [ ] `reddot status`
+- [ ] `reddot update` shows no unapplied conflicts
+- [ ] lock on every physical output, then unlock normally
+
+## Cleanup
+
+- [ ] no tracked `.py` files: `git ls-files '*.py'`
+- [ ] `git status` clean after the run
+- [ ] assets and docs links resolve

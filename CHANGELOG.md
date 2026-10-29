@@ -98,3 +98,6 @@ semantic versioning when it cuts a release.
 
 - Fedora's `swww` now uses the `hermitfeather/hyprland` COPR, whose Fedora 44
   build exists; the old `agonie/swww` repo stopped at Fedora 43.
+
+- Fedora installs the `awww` package; the `swww` name is provided by the
+  bridge and dnf treats it as a no-op on the Terra package set.

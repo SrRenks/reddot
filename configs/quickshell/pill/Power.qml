@@ -286,7 +286,7 @@ PillSurface {
         text: act ? (act.confirm ? act.label + " — hold" : act.label) : ""
         color: act && act.confirm ? Theme.vermLit : Theme.subtle
         font.family: Theme.font
-        font.pixelSize: 11 * root.s
+        font.pixelSize: Typography.size("body", root.s)
         font.weight: Font.Medium
         font.letterSpacing: 0.4 * root.s
         opacity: text.length > 0 ? 1 : 0

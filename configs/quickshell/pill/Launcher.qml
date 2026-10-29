@@ -244,7 +244,7 @@ PillSurface {
                     text: "= " + root.calc.display
                     color: Theme.bright
                     font.family: Theme.font
-                    font.pixelSize: 15 * root.s
+                    font.pixelSize: Typography.size("title", root.s)
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
@@ -253,7 +253,7 @@ PillSurface {
                     text: root.query
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     elide: Text.ElideRight
                 }
             }
@@ -265,7 +265,7 @@ PillSurface {
                 text: root.calcCopied ? "copied" : "↵ copy"
                 color: root.calcCopied ? Theme.dim : Theme.vermLit
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: Typography.size("body", root.s)
             }
         }
     }
@@ -276,7 +276,7 @@ PillSurface {
         text: root.query.length ? "No matches" : "No apps found"
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 10.5 * root.s
+        font.pixelSize: Typography.size("body", root.s)
     }
 
     ListView {
@@ -386,7 +386,7 @@ PillSurface {
                 TextMetrics {
                     id: retMetrics
                     font.family: Theme.font
-                    font.pixelSize: 12 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     text: "↵"
                 }
                 Text {
@@ -396,7 +396,7 @@ PillSurface {
                     text: retMetrics.text
                     color: Theme.vermLit
                     font.family: Theme.font
-                    font.pixelSize: 12 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     visible: appRow.selected && !appRow.editing
                     width: visible ? retMetrics.advanceWidth + 6 * root.s : 0
                     horizontalAlignment: Text.AlignRight
@@ -458,7 +458,7 @@ PillSurface {
                             text: appRow.entry ? appRow.entry.name : ""
                             color: Theme.cream
                             font.family: Theme.font
-                            font.pixelSize: 13 * root.s
+                            font.pixelSize: Typography.size("bodyLarge", root.s)
                             font.weight: appRow.selected ? Font.DemiBold : Font.Normal
                             elide: Text.ElideRight
                         }
@@ -469,7 +469,7 @@ PillSurface {
                             text: appRow.entry ? appRow.entry.name : ""
                             color: Theme.bright
                             font.family: Theme.font
-                            font.pixelSize: 13 * root.s
+                            font.pixelSize: Typography.size("bodyLarge", root.s)
                             selectByMouse: true
                             clip: true
                             onVisibleChanged: if (visible) {
@@ -494,7 +494,7 @@ PillSurface {
                         text: appRow.secondary
                         color: appRow.selected ? Theme.dim : Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         elide: Text.ElideRight
                     }
                 }
@@ -531,7 +531,7 @@ PillSurface {
             text: "Drag an AppImage onto the pill"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 10.5 * root.s
+            font.pixelSize: Typography.size("body", root.s)
         }
     }
 }

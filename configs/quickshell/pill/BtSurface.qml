@@ -235,7 +235,7 @@ PillSurface {
                 text: root.discovering ? "Scanning…" : "Scan"
                 color: root.discovering ? Theme.vermLit : Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.DemiBold
 
                 MouseArea {
@@ -286,7 +286,7 @@ PillSurface {
             text: parent.label
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 8.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.DemiBold
             font.letterSpacing: 1.4 * root.s
         }
@@ -312,7 +312,7 @@ PillSurface {
             text: confirm.connected ? "Connected" : "Paired"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9.5 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             elide: Text.ElideRight
         }
@@ -358,7 +358,7 @@ PillSurface {
             text: root.discovering ? "Scanning…" : "No devices found"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 10.5 * root.s
+            font.pixelSize: Typography.size("body", root.s)
         }
 
         Flickable {
@@ -460,7 +460,7 @@ PillSurface {
                                         text: root.rowName(conItem.modelData)
                                         color: Theme.cream
                                         font.family: Theme.font
-                                        font.pixelSize: 12 * root.s
+                                        font.pixelSize: Typography.size("bodyLarge", root.s)
                                         font.weight: Font.DemiBold
                                         elide: Text.ElideRight
                                     }
@@ -482,7 +482,7 @@ PillSurface {
                                             text: "USB"
                                             color: Theme.faint
                                             font.family: Theme.font
-                                            font.pixelSize: 7.5 * root.s
+                                            font.pixelSize: Typography.size("micro", root.s)
                                             font.weight: Font.DemiBold
                                             font.letterSpacing: 1 * root.s
                                         }
@@ -527,7 +527,7 @@ PillSurface {
                                         text: conItem.battery + "%"
                                         color: conItem.low ? Theme.vermLit : (conItem.charging ? Theme.flameGlow : Theme.subtle)
                                         font.family: Theme.font
-                                        font.pixelSize: 11 * root.s
+                                        font.pixelSize: Typography.size("body", root.s)
                                         font.weight: Font.DemiBold
                                         font.features: { "tnum": 1 }
                                     }
@@ -551,7 +551,7 @@ PillSurface {
                                     text: "No battery reading"
                                     color: Theme.faint
                                     font.family: Theme.font
-                                    font.pixelSize: 9 * root.s
+                                    font.pixelSize: Typography.size("caption", root.s)
                                     font.weight: Font.Medium
                                 }
                             }
@@ -635,7 +635,7 @@ PillSurface {
                                     text: devItem.modelData ? (devItem.modelData.deviceName || devItem.modelData.name || "Unknown") : "Unknown"
                                     color: Theme.subtle
                                     font.family: Theme.font
-                                    font.pixelSize: 11.5 * root.s
+                                    font.pixelSize: Typography.size("body", root.s)
                                     font.weight: Font.Medium
                                     elide: Text.ElideRight
                                 }
@@ -646,7 +646,7 @@ PillSurface {
                                     text: root.metaFor(devItem.modelData)
                                     color: Theme.faint
                                     font.family: Theme.font
-                                    font.pixelSize: 9.5 * root.s
+                                    font.pixelSize: Typography.size("caption", root.s)
                                     font.weight: Font.Medium
                                     elide: Text.ElideRight
                                 }
@@ -693,7 +693,7 @@ PillSurface {
                                         text: "Pair"
                                         color: pairArea.containsMouse ? Theme.cream : Theme.dim
                                         font.family: Theme.font
-                                        font.pixelSize: 9.5 * root.s
+                                        font.pixelSize: Typography.size("caption", root.s)
                                         font.weight: Font.DemiBold
                                     }
 
@@ -719,7 +719,7 @@ PillSurface {
                             text: "Pairing failed"
                             color: Theme.vermLit
                             font.family: Theme.font
-                            font.pixelSize: 9.5 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             leftPadding: 42 * root.s
                         }
                     }

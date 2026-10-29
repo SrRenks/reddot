@@ -68,7 +68,7 @@ Column {
                         text: bar.modelData.level
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 7.5 * curve.s
+                        font.pixelSize: Typography.size("micro", curve.s)
                         font.weight: Font.Bold
                     }
                 }
@@ -89,7 +89,7 @@ Column {
             text: "Temperature band per fan level, in °C. Low and high are the hysteresis edges for that level."
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * curve.s
+            font.pixelSize: Typography.size("caption", curve.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }
@@ -123,7 +123,7 @@ Column {
                     text: "–"
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 9 * curve.s
+                    font.pixelSize: Typography.size("caption", curve.s)
                 }
 
                 ScrubValue {

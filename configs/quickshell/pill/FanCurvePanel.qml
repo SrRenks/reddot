@@ -109,7 +109,7 @@ Column {
                 text: panel.notice
                 color: panel.notice === "saved" ? Theme.faint : Theme.flameCore
                 font.family: Theme.font
-                font.pixelSize: 9 * panel.s
+                font.pixelSize: Typography.size("caption", panel.s)
                 font.weight: Font.Medium
                 elide: Text.ElideRight
             }

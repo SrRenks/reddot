@@ -91,7 +91,7 @@ SettingsSurface {
                 text: "The grip reorders the item; tapping its label hides or shows it. Mirrored order moves the status cluster before the clock."
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 8.5 * root.s
+                font.pixelSize: Typography.size("micro", root.s)
                 wrapMode: Text.WordWrap
             }
         }

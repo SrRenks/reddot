@@ -59,7 +59,7 @@ Flickable {
                     text: chip.modelData
                     color: chip.current ? Theme.cream : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 9 * strip.s
+                    font.pixelSize: Typography.size("caption", strip.s)
                     font.weight: chip.current ? Font.DemiBold : Font.Medium
                 }
 

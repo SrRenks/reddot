@@ -117,7 +117,7 @@ SettingsSurface {
                         text: entryRow.modelData.name
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 12 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.weight: Font.Medium
                         elide: Text.ElideRight
                     }
@@ -128,7 +128,7 @@ SettingsSurface {
                         text: entryRow.modelData.sub
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 8.5 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                         font.weight: Font.Medium
                         elide: Text.ElideRight
                     }

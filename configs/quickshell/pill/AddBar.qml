@@ -55,7 +55,7 @@ Item {
             text: "+"
             color: Theme.vermLit
             font.family: Theme.font
-            font.pixelSize: 14 * bar.s
+            font.pixelSize: Typography.size("subtitle", bar.s)
             font.weight: Font.Bold
         }
         Text {
@@ -63,7 +63,7 @@ Item {
             text: bar.text
             color: Theme.vermLit
             font.family: Theme.font
-            font.pixelSize: 11 * bar.s
+            font.pixelSize: Typography.size("body", bar.s)
             font.weight: Font.DemiBold
             font.letterSpacing: 0.5 * bar.s
         }

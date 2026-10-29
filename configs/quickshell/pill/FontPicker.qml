@@ -200,7 +200,7 @@ SettingsSurface {
                         text: frow.modelData.label
                         color: frow.selected ? Theme.vermLit : Theme.cream
                         font.family: frow.isReset ? Theme.font : frow.modelData.family
-                        font.pixelSize: 14 * root.s
+                        font.pixelSize: Typography.size("subtitle", root.s)
                         font.weight: frow.selected ? Font.DemiBold : Font.Medium
                         elide: Text.ElideRight
                     }

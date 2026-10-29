@@ -24,7 +24,7 @@ Item {
             text: "No ThinkPad hardware detected"
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 11 * tpState.s
+            font.pixelSize: Typography.size("body", tpState.s)
         }
     }
 
@@ -43,7 +43,7 @@ Item {
                 : "ThinkPad detected, helper not available"
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 10 * tpState.s
+            font.pixelSize: Typography.size("body", tpState.s)
         }
 
         Text {
@@ -56,7 +56,7 @@ Item {
                 : "Run sudo tools/install-extras.sh from the reddot checkout"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * tpState.s
+            font.pixelSize: Typography.size("caption", tpState.s)
             elide: Text.ElideRight
         }
     }

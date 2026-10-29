@@ -237,7 +237,7 @@ PillSurface {
             padding: 0
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 12.5 * root.s
+            font.pixelSize: Typography.size("bodyLarge", root.s)
             font.weight: Font.DemiBold
             selectByMouse: true
             selectionColor: Theme.verm
@@ -392,7 +392,7 @@ PillSurface {
                                 text: root.builtinName(wrow.modelData)
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 12.5 * root.s
+                                font.pixelSize: Typography.size("bodyLarge", root.s)
                                 font.weight: Font.DemiBold
                                 elide: Text.ElideRight
 
@@ -412,7 +412,7 @@ PillSurface {
                                 text: wrow.modelData.note
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 10.5 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 elide: Text.ElideRight
                             }
                         }
@@ -448,7 +448,7 @@ PillSurface {
                                 text: wrow.modelData.key
                                 color: Theme.subtle
                                 font.family: Theme.font
-                                font.pixelSize: 11 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.Bold
                                 font.letterSpacing: 0.3 * root.s
                             }
@@ -583,7 +583,7 @@ PillSurface {
                                 text: crow.modelData.name
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 12.5 * root.s
+                                font.pixelSize: Typography.size("bodyLarge", root.s)
                                 font.weight: Font.DemiBold
                                 elide: Text.ElideRight
 
@@ -603,7 +603,7 @@ PillSurface {
                                 text: crow.modelData.desc
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 10.5 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 elide: Text.ElideRight
                             }
                             /** Live capture hint while the key chip listens; the clash message after. */
@@ -613,7 +613,7 @@ PillSurface {
                                 text: root.conflict.length > 0 ? root.conflict : "press a letter…  esc cancels"
                                 color: root.conflict.length > 0 ? Theme.vermLit : Theme.flameGlow
                                 font.family: Theme.font
-                                font.pixelSize: 10.5 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 elide: Text.ElideRight
                             }
                         }
@@ -681,7 +681,7 @@ PillSurface {
                                 text: crow.rebinding ? "…" : "Super + " + crow.modelData.key
                                 color: crow.rebinding ? Theme.flameGlow : Theme.subtle
                                 font.family: Theme.font
-                                font.pixelSize: 11 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.Bold
                                 font.letterSpacing: 0.3 * root.s
                             }
@@ -807,7 +807,7 @@ PillSurface {
                 text: root.conflict
                 color: Theme.vermLit
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -832,7 +832,7 @@ PillSurface {
                         text: "Cancel"
                         color: Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                         font.letterSpacing: 0.3 * root.s
                     }
@@ -860,7 +860,7 @@ PillSurface {
                         text: "Create"
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 0.4 * root.s
                     }

@@ -346,7 +346,7 @@ Item {
                 elide: Text.ElideRight
                 color: row.shown ? Theme.cream : Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10.5 * list.s
+                font.pixelSize: Typography.size("body", list.s)
                 font.weight: Font.Medium
             }
 
@@ -372,7 +372,7 @@ Item {
         text: "Drag the grip · ↑↓ reorder · Space toggles visibility"
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 8.5 * list.s
+        font.pixelSize: Typography.size("micro", list.s)
         font.weight: Font.Medium
         elide: Text.ElideRight
     }

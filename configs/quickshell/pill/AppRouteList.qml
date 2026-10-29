@@ -45,7 +45,7 @@ Column {
             text: body.emptyText
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 11 * body.s
+            font.pixelSize: Typography.size("body", body.s)
             font.weight: Font.Medium
         }
     }
@@ -105,7 +105,7 @@ Column {
                     text: erow.title.length > 0 ? erow.title.charAt(0).toUpperCase() : "?"
                     color: Theme.dim
                     font.family: Theme.font
-                    font.pixelSize: 13 * body.s
+                    font.pixelSize: Typography.size("bodyLarge", body.s)
                     font.weight: Font.DemiBold
                 }
 
@@ -136,7 +136,7 @@ Column {
                     text: erow.title
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 12.5 * body.s
+                    font.pixelSize: Typography.size("bodyLarge", body.s)
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
@@ -146,7 +146,7 @@ Column {
                     text: erow.modelData
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 10 * body.s
+                    font.pixelSize: Typography.size("body", body.s)
                     font.weight: Font.Normal
                     elide: Text.ElideRight
                 }

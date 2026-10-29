@@ -112,7 +112,7 @@ Item {
         text: root.counterText
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 10.5 * root.s
+        font.pixelSize: Typography.size("body", root.s)
         font.features: { "tnum": 1 }
     }
 

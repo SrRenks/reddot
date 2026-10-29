@@ -97,7 +97,7 @@ Item {
         text: root.readout
         color: root.focused ? Theme.cream : Theme.subtle
         font.family: Theme.font
-        font.pixelSize: 10 * root.s
+        font.pixelSize: Typography.size("body", root.s)
         font.weight: Font.DemiBold
         font.features: { "tnum": 1 }
     }

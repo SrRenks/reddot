@@ -305,14 +305,14 @@ SettingsSurface {
                             text: "Accent hue"
                             color: Theme.cream
                             font.family: Theme.font
-                            font.pixelSize: 12 * root.s
+                            font.pixelSize: Typography.size("bodyLarge", root.s)
                             font.weight: Font.DemiBold
                         }
                         Text {
                             text: root.currentHex + " · " + (Flags.manualDark ? "dark" : "light")
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 10.5 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.features: { "tnum": 1 }
                             elide: Text.ElideRight
                             width: parent.width
@@ -342,7 +342,7 @@ SettingsSurface {
                         text: "#"
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 14 * root.s
+                        font.pixelSize: Typography.size("subtitle", root.s)
                         font.weight: Font.DemiBold
                     }
 
@@ -357,7 +357,7 @@ SettingsSurface {
                         padding: 0
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 13 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.features: { "tnum": 1 }
                         placeholderText: root.currentHex
                         placeholderTextColor: Theme.faint

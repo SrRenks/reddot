@@ -173,7 +173,7 @@ SettingsSurface {
             text: "Commands Hyprland runs when the session starts. Core services are locked; changes apply on the next start."
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }
@@ -218,7 +218,7 @@ SettingsSurface {
                         text: row.modelData.name
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 11.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                         width: parent.width
@@ -228,7 +228,7 @@ SettingsSurface {
                         text: row.modelData.command
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 8.5 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                         font.weight: Font.Medium
                         elide: Text.ElideRight
                         width: parent.width
@@ -246,7 +246,7 @@ SettingsSurface {
                         text: "core"
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 8 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                         font.weight: Font.Bold
                         font.capitalization: Font.AllUppercase
                         anchors.verticalCenter: parent.verticalCenter
@@ -329,7 +329,7 @@ SettingsSurface {
                 text: "$HOME and shell quoting are preserved."
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 8.5 * root.s
+                font.pixelSize: Typography.size("micro", root.s)
                 font.weight: Font.Medium
                 topPadding: 4 * root.s
             }
@@ -368,7 +368,7 @@ SettingsSurface {
                 text: root.notice
                 color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Medium
                 wrapMode: Text.WordWrap
             }

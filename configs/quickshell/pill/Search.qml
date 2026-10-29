@@ -123,7 +123,7 @@ PillSurface {
             verticalAlignment: TextInput.AlignVCenter
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 14 * root.s
+            font.pixelSize: Typography.size("subtitle", root.s)
             font.letterSpacing: 0.5 * root.s
             focus: true
             selectByMouse: true
@@ -151,7 +151,7 @@ PillSurface {
                 text: "Search pages, settings and controls…"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 13 * root.s
+                font.pixelSize: Typography.size("bodyLarge", root.s)
             }
         }
 
@@ -208,7 +208,7 @@ PillSurface {
                         text: result.modelData.title
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 12.5 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -219,7 +219,7 @@ PillSurface {
                         text: result.modelData.sub
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         elide: Text.ElideRight
                     }
                 }
@@ -252,7 +252,7 @@ PillSurface {
             text: "No matching section"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 10 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             verticalAlignment: Text.AlignVCenter
         }
 
@@ -263,7 +263,7 @@ PillSurface {
             text: "Type a section, alias or tag"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 10 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             verticalAlignment: Text.AlignVCenter
         }
 

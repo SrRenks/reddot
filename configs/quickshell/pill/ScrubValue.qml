@@ -180,7 +180,7 @@ Item {
             clip: true
             color: root.overMinus ? Theme.bright : Qt.alpha(Theme.onGlow, 0.6)
             font.family: Theme.font
-            font.pixelSize: 15 * root.s
+            font.pixelSize: Typography.size("title", root.s)
             font.weight: Font.Medium
             Behavior on width { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
             Behavior on opacity { NumberAnimation { duration: Motion.fast } }
@@ -203,7 +203,7 @@ Item {
                     text: root.fmt ? root.fmt(root.value) : root.value.toFixed(root.decimals)
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 13 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                 }
                 Text {
@@ -212,7 +212,7 @@ Item {
                     text: root.unit
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 9.5 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Medium
                 }
             }
@@ -227,7 +227,7 @@ Item {
             clip: true
             color: root.overPlus ? Theme.bright : Qt.alpha(Theme.onGlow, 0.6)
             font.family: Theme.font
-            font.pixelSize: 15 * root.s
+            font.pixelSize: Typography.size("title", root.s)
             font.weight: Font.Medium
             Behavior on width { NumberAnimation { duration: Motion.fast; easing.type: Easing.OutCubic } }
             Behavior on opacity { NumberAnimation { duration: Motion.fast } }

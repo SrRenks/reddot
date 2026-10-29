@@ -45,7 +45,7 @@ Item {
             text: head.title
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 9.5 * head.s
+            font.pixelSize: Typography.size("caption", head.s)
             font.weight: Font.DemiBold
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 1.4 * head.s

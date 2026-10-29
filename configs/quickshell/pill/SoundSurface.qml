@@ -128,7 +128,7 @@ PillSurface {
         signal clicked()
         color: tbArea.containsMouse ? Theme.cream : Theme.subtle
         font.family: Theme.font
-        font.pixelSize: 10.5 * root.s
+        font.pixelSize: Typography.size("body", root.s)
         font.weight: Font.DemiBold
         MouseArea {
             id: tbArea
@@ -143,7 +143,7 @@ PillSurface {
     component Caps: Text {
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 9.5 * root.s
+        font.pixelSize: Typography.size("caption", root.s)
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
         font.letterSpacing: 1.6 * root.s
@@ -173,7 +173,7 @@ PillSurface {
             text: chip.name + (chip.current && Sound.dirty ? " •" : "")
             color: chip.current ? Theme.cream : Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 10 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.Bold
             font.letterSpacing: 0.3 * root.s
         }
@@ -186,7 +186,7 @@ PillSurface {
             color: Theme.cream
             selectionColor: Theme.verm
             font.family: Theme.font
-            font.pixelSize: 10 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.Bold
             maximumLength: 18
             onVisibleChanged: if (visible) { forceActiveFocus(); selectAll(); }
@@ -267,7 +267,7 @@ PillSurface {
             text: root.fmtDb(band.db)
             color: band.lit ? Theme.cream : (band.db !== 0 ? Theme.subtle : Theme.faint)
             font.family: Theme.font
-            font.pixelSize: 8.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -342,7 +342,7 @@ PillSurface {
             text: root.labels[band.index]
             color: band.lit ? Theme.cream : Theme.faint
             font.family: Theme.font
-            font.pixelSize: 8.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.DemiBold
         }
     }
@@ -372,7 +372,7 @@ PillSurface {
                 elide: Text.ElideRight
                 color: appHover.hovered ? Theme.cream : Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
             }
             Text {
@@ -382,7 +382,7 @@ PillSurface {
                 elide: Text.ElideRight
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
             }
         }
 
@@ -445,7 +445,7 @@ PillSurface {
                 elide: Text.ElideRight
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.DemiBold
             }
 
@@ -483,7 +483,7 @@ PillSurface {
             text: shelf.label
             color: shelf.lit ? Theme.cream : Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 10 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.DemiBold
         }
 
@@ -493,7 +493,7 @@ PillSurface {
             text: shelf.readout
             color: shelf.lit ? Theme.cream : Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9.5 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -635,7 +635,7 @@ PillSurface {
                         text: "EQ"
                         color: Sound.eq ? Theme.cream : Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Bold
                     }
                     LinkToggle {
@@ -683,7 +683,7 @@ PillSurface {
                     text: boostChip.pct + "%"
                     color: boostChip.pct > 100 ? Theme.vermLit : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.Bold
                     font.features: { "tnum": 1 }
                 }
@@ -731,7 +731,7 @@ PillSurface {
                     elide: Text.ElideRight
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.DemiBold
                 }
 
@@ -803,7 +803,7 @@ PillSurface {
                         text: "Noise filter"
                         color: Sound.denoiseAvailable ? Theme.cream : Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                     }
                     Text {
@@ -813,7 +813,7 @@ PillSurface {
                         elide: Text.ElideRight
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 9.5 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                     }
                 }
 
@@ -877,7 +877,7 @@ PillSurface {
                                 text: "+"
                                 color: addHover.hovered ? Theme.cream : Theme.subtle
                                 font.family: Theme.font
-                                font.pixelSize: 12 * root.s
+                                font.pixelSize: Typography.size("bodyLarge", root.s)
                                 font.weight: Font.DemiBold
                             }
 
@@ -1024,7 +1024,7 @@ PillSurface {
                             text: "AutoEQ"
                             color: Sound.current.autoeq ? Theme.vermLit : Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 9.5 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             font.weight: Font.Bold
                         }
 
@@ -1038,7 +1038,7 @@ PillSurface {
                             elide: Text.ElideRight
                             color: Sound.current.autoeq ? Theme.cream : Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 10 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Sound.current.autoeq ? Font.DemiBold : Font.Normal
                         }
 
@@ -1083,7 +1083,7 @@ PillSurface {
                         text: "Night"
                         color: nightHover.hovered ? Theme.cream : Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
 
                         HoverHandler { id: nightHover }
@@ -1120,7 +1120,7 @@ PillSurface {
                 text: "Nothing is playing"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
             }
 
             ListView {
@@ -1202,7 +1202,7 @@ PillSurface {
                             elide: Text.ElideRight
                             color: aeqResHover.hovered ? Theme.cream : Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 10.5 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.Medium
                         }
 
@@ -1214,7 +1214,7 @@ PillSurface {
                             text: aeqRes.modelData.by
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 9.5 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                         }
 
                         MouseArea {
@@ -1243,7 +1243,7 @@ PillSurface {
                         color: Theme.cream
                         selectionColor: Theme.verm
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         onTextChanged: root.aeqQuery = text
                         Keys.onEscapePressed: root.aeqOpen = false
                         Keys.onReturnPressed: if (aeqPanel.results.length) { Sound.pickAeq(aeqPanel.results[0]); root.aeqOpen = false; }
@@ -1309,7 +1309,7 @@ PillSurface {
                         text: boostOpt.modelData === 100 ? "Off" : boostOpt.modelData + "%"
                         color: (Sound.current.boost || 100) === boostOpt.modelData ? Theme.cream : Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                     }
 

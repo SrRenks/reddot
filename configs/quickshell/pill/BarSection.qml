@@ -27,7 +27,7 @@ Item {
         text: root.text
         color: Theme.cream
         font.family: Theme.font
-        font.pixelSize: 8.5 * root.s
+        font.pixelSize: Typography.size("micro", root.s)
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
         font.letterSpacing: 1.2 * root.s

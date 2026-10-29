@@ -90,7 +90,7 @@ Column {
         text: editor.ledName.length > 0 ? editor.ledName : "LED"
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 8.5 * editor.s
+        font.pixelSize: Typography.size("micro", editor.s)
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
         font.letterSpacing: 1.2 * editor.s
@@ -114,7 +114,7 @@ Column {
             text: "Brightness"
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11.5 * editor.s
+            font.pixelSize: Typography.size("body", editor.s)
             font.weight: Font.Medium
         }
 
@@ -141,7 +141,7 @@ Column {
             text: "Trigger"
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11.5 * editor.s
+            font.pixelSize: Typography.size("body", editor.s)
             font.weight: Font.Medium
         }
 
@@ -151,7 +151,7 @@ Column {
             text: editor.currentTrigger
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * editor.s
+            font.pixelSize: Typography.size("caption", editor.s)
         }
     }
 
@@ -173,7 +173,7 @@ Column {
             text: "Blink timing (timer trigger)"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 8.5 * editor.s
+            font.pixelSize: Typography.size("micro", editor.s)
             font.weight: Font.Medium
         }
 
@@ -187,7 +187,7 @@ Column {
                 text: "On / off — ms"
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10 * editor.s
+                font.pixelSize: Typography.size("body", editor.s)
             }
 
             ScrubValue {
@@ -214,7 +214,7 @@ Column {
                 text: "Off / on — ms"
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10 * editor.s
+                font.pixelSize: Typography.size("body", editor.s)
             }
 
             ScrubValue {
@@ -238,7 +238,7 @@ Column {
         text: "No trigger metadata. Install the updated helper with sudo tools/install-extras.sh to expose trigger, pulse and blink controls."
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 8.5 * editor.s
+        font.pixelSize: Typography.size("micro", editor.s)
         wrapMode: Text.WordWrap
     }
 
@@ -250,7 +250,7 @@ Column {
             : "The kernel exposes no timer/heartbeat trigger for this LED. Brightness and the triggers above are still available."
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 8.5 * editor.s
+        font.pixelSize: Typography.size("micro", editor.s)
         wrapMode: Text.WordWrap
     }
 
@@ -260,7 +260,7 @@ Column {
         text: editor.notice
         color: Theme.flameCore
         font.family: Theme.font
-        font.pixelSize: 9 * editor.s
+        font.pixelSize: Typography.size("caption", editor.s)
         wrapMode: Text.WordWrap
     }
 }

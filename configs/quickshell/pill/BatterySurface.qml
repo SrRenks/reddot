@@ -63,7 +63,7 @@ PillSurface {
                 text: Battery.stateLabel
                 color: Battery.charging ? Theme.flameGlow : Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1.1 * root.s
@@ -81,7 +81,7 @@ PillSurface {
                 text: Battery.present ? Battery.pct + "%" : "—"
                 color: Battery.low ? Theme.vermLit : (Battery.charging ? Theme.flameGlow : Theme.cream)
                 font.family: Theme.font
-                font.pixelSize: 46 * root.s
+                font.pixelSize: Typography.size("hero", root.s)
                 font.weight: Font.Bold
                 font.letterSpacing: -1 * root.s
                 font.features: { "tnum": 1 }
@@ -99,7 +99,7 @@ PillSurface {
                 text: body
                 color: Battery.charging ? Theme.flameCore : Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
             }
         }
@@ -168,7 +168,7 @@ PillSurface {
                     + " W avg · peak " + PowerHistory.peak24h.toFixed(1) + " W"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Medium
             }
         }
@@ -192,7 +192,7 @@ PillSurface {
                     text: stat.label
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 10 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.Medium
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 0.8 * root.s
@@ -204,7 +204,7 @@ PillSurface {
                     text: stat.value
                     color: stat.warm ? Theme.flameGlow : Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 12.5 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                     font.features: { "tnum": 1 }
                 }
@@ -269,7 +269,7 @@ PillSurface {
                 text: "Battery care"
                 color: careArea.containsMouse ? Theme.cream : Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
             }
 
@@ -280,7 +280,7 @@ PillSurface {
                 text: "Power settings  ›"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Medium
                 font.letterSpacing: 0.8 * root.s
             }

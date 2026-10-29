@@ -261,7 +261,7 @@ PillSurface {
                         text: Weather.tempNow + "°"
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 26 * root.s
+                        font.pixelSize: Typography.size("hero", root.s)
                         font.weight: Font.DemiBold
                         font.features: { "tnum": 1 }
                     }
@@ -269,7 +269,7 @@ PillSurface {
                         text: Weather.labelFor(Weather.codeNow)
                         color: Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Medium
                     }
                 }
@@ -302,7 +302,7 @@ PillSurface {
                         text: Weather.city.length > 0 ? Weather.city : "set town"
                         color: cityArea.containsMouse ? Theme.subtle : Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Medium
                         font.capitalization: Font.AllUppercase
                         font.letterSpacing: 0.8 * root.s
@@ -332,7 +332,7 @@ PillSurface {
                         verticalAlignment: TextInput.AlignVCenter
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Medium
                         font.capitalization: Font.AllUppercase
                         font.letterSpacing: 0.8 * root.s
@@ -366,7 +366,7 @@ PillSurface {
                         text: Weather.humidity + "%"
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 9.5 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Medium
                         font.features: { "tnum": 1 }
                     }
@@ -396,7 +396,7 @@ PillSurface {
                             text: dayCol.modelData.day
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 9 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             font.weight: Font.DemiBold
                             font.capitalization: Font.AllUppercase
                             font.letterSpacing: 0.5 * root.s
@@ -414,7 +414,7 @@ PillSurface {
                             text: dayCol.modelData.temp + "°"
                             color: Theme.cream
                             font.family: Theme.font
-                            font.pixelSize: 11 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.Medium
                             font.features: { "tnum": 1 }
                         }
@@ -435,7 +435,7 @@ PillSurface {
                                 text: dayCol.modelData.rh + "%"
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 8.5 * root.s
+                                font.pixelSize: Typography.size("micro", root.s)
                                 font.weight: Font.Medium
                                 font.features: { "tnum": 1 }
                             }
@@ -486,7 +486,7 @@ PillSurface {
                     color: Theme.cream
                     font.family: Theme.fontJp
                     font.weight: Font.Medium
-                    font.pixelSize: 16 * root.s
+                    font.pixelSize: Typography.size("title", root.s)
                 }
                 Text {
                     id: monthLabel
@@ -495,7 +495,7 @@ PillSurface {
                         + " " + root.viewYear
                     color: Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.DemiBold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1.0 * root.s
@@ -573,7 +573,7 @@ PillSurface {
                         text: root.loc.standaloneDayName((wd.index + 1) % 7, Locale.NarrowFormat)
                         color: wd.weekend ? Theme.faint : Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Medium
                         font.letterSpacing: 0.5 * root.s
                     }
@@ -644,7 +644,7 @@ PillSurface {
                             : Theme.ghost
                         opacity: cell.inMonth && !cell.current && !cell.weekend && !cell.hasEvent ? 0.85 : 1.0
                         font.family: Theme.font
-                        font.pixelSize: 11 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: cell.current || cell.hasEvent ? Font.DemiBold : Font.Normal
                         font.features: { "tnum": 1 }
                     }
@@ -682,7 +682,7 @@ PillSurface {
             text: "click the end day"
             color: Theme.flameGlow
             font.family: Theme.font
-            font.pixelSize: 9 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.DemiBold
             font.letterSpacing: 0.4 * root.s
         }
@@ -805,7 +805,7 @@ PillSurface {
                 text: editor.heading
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 12 * root.s
+                font.pixelSize: Typography.size("bodyLarge", root.s)
                 font.weight: Font.DemiBold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.8 * root.s
@@ -842,7 +842,7 @@ PillSurface {
                             text: "Nothing yet"
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 11 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.Medium
                             font.italic: true
                         }
@@ -891,7 +891,7 @@ PillSurface {
                                         width: parent.width
                                         color: Theme.cream
                                         font.family: Theme.font
-                                        font.pixelSize: 11 * root.s
+                                        font.pixelSize: Typography.size("body", root.s)
                                         font.weight: Font.Medium
                                         wrapMode: Text.Wrap
                                         maximumLineCount: 4
@@ -902,7 +902,7 @@ PillSurface {
                                         width: parent.width
                                         color: Theme.flameGlow
                                         font.family: Theme.font
-                                        font.pixelSize: 9 * root.s
+                                        font.pixelSize: Typography.size("caption", root.s)
                                         font.weight: Font.DemiBold
                                         font.features: { "tnum": 1 }
                                         wrapMode: Text.Wrap
@@ -972,7 +972,7 @@ PillSurface {
                         verticalAlignment: TextInput.AlignVCenter
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 13 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         placeholderText: "what's on"
                         placeholderTextColor: Theme.faint
                         selectByMouse: true
@@ -1009,7 +1009,7 @@ PillSurface {
                         text: "+"
                         color: addBtn.armed ? Theme.vermLit : Theme.iconDim
                         font.family: Theme.font
-                        font.pixelSize: 18 * root.s
+                        font.pixelSize: Typography.size("display", root.s)
                         font.weight: Font.Medium
                     }
 
@@ -1051,7 +1051,7 @@ PillSurface {
                         verticalAlignment: TextInput.AlignVCenter
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 13 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.features: { "tnum": 1 }
                         placeholderText: "09:00"
                         placeholderTextColor: Theme.faint
@@ -1085,7 +1085,7 @@ PillSurface {
                         verticalAlignment: TextInput.AlignVCenter
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 13 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.features: { "tnum": 1 }
                         placeholderText: "until"
                         placeholderTextColor: Theme.faint
@@ -1164,7 +1164,7 @@ PillSurface {
                             text: editor.spanLabel
                             color: root.selEndDate.length > 0 ? Theme.cream : Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 11 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.Medium
                             font.features: { "tnum": 1 }
                         }
@@ -1189,7 +1189,7 @@ PillSurface {
                         text: root.pickingEnd ? "pick…" : (root.selEndDate.length > 0 ? "edit" : "+ days")
                         color: extendBtn.armed ? Theme.vermLit : Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 0.3 * root.s
                     }

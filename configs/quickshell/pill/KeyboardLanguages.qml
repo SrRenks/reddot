@@ -58,7 +58,7 @@ Item {
                 text: "ACTIVE"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 8 * root.s
+                font.pixelSize: Typography.size("micro", root.s)
                 font.weight: Font.Bold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1.1 * root.s
@@ -75,7 +75,7 @@ Item {
                     : (root.activeLabel.length > 0 ? root.activeLabel : "Unknown")
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -144,7 +144,7 @@ Item {
                     text: langRow.modelData.label
                     color: langRow.index === root.activeIndex ? Theme.cream : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: langRow.index === root.activeIndex ? Font.DemiBold : Font.Medium
                     elide: Text.ElideRight
                 }
@@ -157,7 +157,7 @@ Item {
                     text: langRow.modelData.short
                     color: langRow.index === root.activeIndex ? Theme.vermLit : Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 8 * root.s
+                    font.pixelSize: Typography.size("micro", root.s)
                     font.weight: Font.Bold
                     font.letterSpacing: 0.7 * root.s
                 }
@@ -205,7 +205,7 @@ Item {
             text: "ADD LANGUAGE"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 7.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.Bold
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 1.1 * root.s
@@ -233,7 +233,7 @@ Item {
                         text: "+ " + parent.modelData.short
                         color: addArea.containsMouse ? Theme.cream : Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 8.5 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                         font.weight: Font.DemiBold
                         font.letterSpacing: 0.4 * root.s
                     }
@@ -255,7 +255,7 @@ Item {
             text: "Super+Space cycles; click a row to activate it directly."
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 8.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }

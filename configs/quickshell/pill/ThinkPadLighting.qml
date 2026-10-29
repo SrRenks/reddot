@@ -152,7 +152,7 @@ ThinkPadGroup {
             text: "LED state follows the kernel/hardware while this surface is open. Lock LEDs indicate the key state; writing the LED does not toggle Caps/Num/Scroll. Firmware or the NIC can reclaim an indicator."
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 8.5 * lighting.s
+            font.pixelSize: Typography.size("micro", lighting.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }

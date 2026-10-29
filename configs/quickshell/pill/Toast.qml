@@ -192,7 +192,7 @@ Item {
         text: "✕"
         color: dismissArea.containsMouse ? Theme.cream : Theme.dim
         font.family: Theme.font
-        font.pixelSize: 11 * root.s
+        font.pixelSize: Typography.size("body", root.s)
 
         Behavior on color {
             ColorAnimation { duration: Motion.fast }
@@ -222,7 +222,7 @@ Item {
             text: (root.notif.appName && root.notif.appName.length) ? root.notif.appName : "System"
             color: Theme.dim
             font.family: Theme.font
-            font.pixelSize: 8.5 * root.s
+            font.pixelSize: Typography.size("micro", root.s)
             font.weight: Font.DemiBold
             font.capitalization: Font.AllUppercase
             font.letterSpacing: 1.4 * root.s
@@ -262,7 +262,7 @@ Item {
                 text: root.notif.summary
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 11.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 maximumLineCount: 1
                 elide: Text.ElideRight
@@ -276,7 +276,7 @@ Item {
             text: root.notif.body
             color: Theme.dim
             font.family: Theme.font
-            font.pixelSize: 10.5 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             wrapMode: Text.Wrap
             maximumLineCount: 2
             elide: Text.ElideRight
@@ -309,7 +309,7 @@ Item {
                         text: actPill.modelData.text
                         color: actPill.index === 0 ? Theme.vermLit : Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 9.5 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.DemiBold
                     }
 

@@ -31,7 +31,7 @@ Rectangle {
         text: chip.text
         color: chip.danger ? Theme.vermLit : Theme.cream
         font.family: Theme.font
-        font.pixelSize: 10 * chip.s
+        font.pixelSize: Typography.size("body", chip.s)
         font.weight: Font.DemiBold
         font.letterSpacing: 0.3 * chip.s
     }

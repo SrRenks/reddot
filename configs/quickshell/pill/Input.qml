@@ -638,7 +638,7 @@ SettingsSurface {
                         text: root.activeLanguageShort
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -793,7 +793,7 @@ SettingsSurface {
                 text: root.tpNotice
                 color: root.tpNotice === "saved" ? Theme.faint : Theme.flameCore
                 font.family: Theme.font
-                font.pixelSize: 8.5 * root.s
+                font.pixelSize: Typography.size("micro", root.s)
                 font.weight: Font.Medium
                 elide: Text.ElideRight
             }
@@ -939,7 +939,7 @@ SettingsSurface {
                 text: root.note
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 wrapMode: Text.WordWrap
                 lineHeight: 1.25

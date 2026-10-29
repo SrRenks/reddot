@@ -232,7 +232,7 @@ PillSurface {
                         text: opt.modelData.label
                         color: opt.current ? Theme.cream : Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 0.3 * root.s
                     }
@@ -275,7 +275,7 @@ PillSurface {
             text: orow.name
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 12 * root.s
+            font.pixelSize: Typography.size("bodyLarge", root.s)
             font.weight: Font.DemiBold
         }
 
@@ -324,7 +324,7 @@ PillSurface {
             text: arow.name
             color: arow.on ? Theme.cream : Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 11.5 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.DemiBold
             elide: Text.ElideRight
         }
@@ -388,14 +388,14 @@ PillSurface {
                     color: Theme.cream
                     font.family: Theme.fontJp
                     font.weight: Font.Medium
-                    font.pixelSize: 16 * root.s
+                    font.pixelSize: Typography.size("title", root.s)
                 }
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "RECORD"
                     color: Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.DemiBold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1.8 * root.s
@@ -428,7 +428,7 @@ PillSurface {
                         : (root.counting ? "GET READY" : "IDLE")
                     color: ScreenRec.recording ? Theme.vermLit : Theme.dim
                     font.family: Theme.font
-                    font.pixelSize: 10 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1.2 * root.s
@@ -517,7 +517,7 @@ PillSurface {
                         text: root.stageTitle
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 13 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -537,7 +537,7 @@ PillSurface {
                             text: root.stageSpec
                             color: Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 10.5 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.features: { "tnum": 1 }
                             elide: Text.ElideRight
                         }
@@ -563,7 +563,7 @@ PillSurface {
                         text: "REC"
                         color: Theme.vermLit
                         font.family: Theme.font
-                        font.pixelSize: 8.5 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                         font.weight: Font.ExtraBold
                         font.letterSpacing: 1.2 * root.s
                     }
@@ -756,7 +756,7 @@ PillSurface {
                     text: root.countdown
                     color: Theme.flameGlow
                     font.family: Theme.font
-                    font.pixelSize: 24 * root.s
+                    font.pixelSize: Typography.size("display", root.s)
                     font.weight: Font.ExtraBold
                     font.features: { "tnum": 1 }
                 }
@@ -769,7 +769,7 @@ PillSurface {
                         : (root.counting ? "Starting…" : "Start recording")
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 13 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.Bold
                     font.letterSpacing: 0.5 * root.s
                 }
@@ -781,7 +781,7 @@ PillSurface {
                     text: root.counting ? "tap to cancel" : "tap"
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 10 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.DemiBold
                 }
 
@@ -845,7 +845,7 @@ PillSurface {
                                     text: srcTile.modelData.label
                                     color: srcArea.containsMouse ? Theme.cream : Theme.subtle
                                     font.family: Theme.font
-                                    font.pixelSize: 11 * root.s
+                                    font.pixelSize: Typography.size("body", root.s)
                                     font.weight: Font.Bold
                                 }
                             }
@@ -907,7 +907,7 @@ PillSurface {
                                 text: monTile.modelData.name
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 11.5 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.Bold
                             }
                             Text {
@@ -915,7 +915,7 @@ PillSurface {
                                 text: monTile.modelData.w + " × " + monTile.modelData.h
                                 color: Theme.subtle
                                 font.family: Theme.font
-                                font.pixelSize: 9.5 * root.s
+                                font.pixelSize: Typography.size("caption", root.s)
                                 font.features: { "tnum": 1 }
                             }
                         }
@@ -1040,7 +1040,7 @@ PillSurface {
                 text: "SAVE TO"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1.2 * root.s
@@ -1060,7 +1060,7 @@ PillSurface {
                     text: "CHANGE"
                     color: changeArea.containsMouse ? Theme.flameGlow : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1 * root.s
@@ -1081,7 +1081,7 @@ PillSurface {
                     text: "OPEN"
                     color: openArea.containsMouse ? Theme.flameGlow : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1 * root.s
@@ -1107,7 +1107,7 @@ PillSurface {
                 text: pathRow.shownDir
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 elide: Text.ElideMiddle
                 maximumLineCount: 1
@@ -1140,7 +1140,7 @@ PillSurface {
                     text: "録"
                     color: Theme.subtle
                     font.family: Theme.fontJp
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                 }
                 Text {
                     height: 16 * root.s
@@ -1148,7 +1148,7 @@ PillSurface {
                     text: "RECENT · " + ScreenRec.recentCount
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1.2 * root.s
@@ -1171,7 +1171,7 @@ PillSurface {
                     text: "払"
                     color: clearArea.containsMouse ? Theme.flameGlow : Theme.vermDeep
                     font.family: Theme.fontJp
-                    font.pixelSize: 11 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                 }
                 Text {
                     id: clearTxt
@@ -1180,7 +1180,7 @@ PillSurface {
                     text: "CLEAR"
                     color: clearArea.containsMouse ? Theme.flameGlow : Theme.vermDeep
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Bold
                     font.capitalization: Font.AllUppercase
                     font.letterSpacing: 1 * root.s
@@ -1210,7 +1210,7 @@ PillSurface {
                 text: "No recordings yet"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
             }
 
             ListView {
@@ -1332,7 +1332,7 @@ PillSurface {
                             text: frame.stamp
                             color: Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 9 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             font.weight: Font.DemiBold
                             font.features: { "tnum": 1 }
                             elide: Text.ElideRight
@@ -1346,7 +1346,7 @@ PillSurface {
                             text: frame.modelData.sizeLabel
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 8.5 * root.s
+                            font.pixelSize: Typography.size("micro", root.s)
                             font.weight: Font.DemiBold
                             font.features: { "tnum": 1 }
                         }

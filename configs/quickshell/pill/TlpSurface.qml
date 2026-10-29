@@ -245,7 +245,7 @@ PillSurface {
                     : "off"
                 color: root.enabled || root.hasCharge ? Theme.flameGlow : Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1.1 * root.s
@@ -266,7 +266,7 @@ PillSurface {
                     text: root.supported ? root.startPct + "–" + root.stopPct : "—"
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 40 * root.s
+                    font.pixelSize: Typography.size("hero", root.s)
                     font.weight: Font.Bold
                     font.letterSpacing: -0.5 * root.s
                     font.features: { "tnum": 1 }
@@ -278,7 +278,7 @@ PillSurface {
                     text: "%"
                     color: Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 13 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                 }
             }
@@ -290,7 +290,7 @@ PillSurface {
                 text: root.supported ? "charge window" : "no charge control"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
             }
         }
@@ -301,7 +301,7 @@ PillSurface {
             text: root.statsLine
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9.5 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             elide: Text.ElideRight
         }
@@ -316,7 +316,7 @@ PillSurface {
                 text: "Battery"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.8 * root.s
@@ -342,7 +342,7 @@ PillSurface {
                 text: "Start"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.8 * root.s
@@ -371,7 +371,7 @@ PillSurface {
                 text: "Stop"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.8 * root.s
@@ -406,7 +406,7 @@ PillSurface {
                 text: "Profile"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 0.8 * root.s
@@ -488,7 +488,7 @@ PillSurface {
                                 : root.toolLabel + " installed · service inactive")))
                 color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 wrapMode: Text.NoWrap

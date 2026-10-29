@@ -125,7 +125,7 @@ PillSurface {
             anchors.centerIn: parent
             text: skip.kanjiText
             font.family: Theme.fontJp
-            font.pixelSize: 13 * root.s
+            font.pixelSize: Typography.size("bodyLarge", root.s)
             color: skipArea.containsMouse ? Theme.cream : Theme.dim
             Behavior on color { ColorAnimation { duration: Motion.fast } }
         }
@@ -261,7 +261,7 @@ PillSurface {
         text: "Sound ›"
         color: soundLinkArea.containsMouse ? Theme.cream : Theme.dim
         font.family: Theme.font
-        font.pixelSize: 9.5 * root.s
+        font.pixelSize: Typography.size("caption", root.s)
         font.weight: Font.DemiBold
 
         MouseArea {
@@ -333,7 +333,7 @@ PillSurface {
                 text: root.serviceLabel
                 color: Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
             }
 
             Rectangle {
@@ -371,14 +371,14 @@ PillSurface {
                         text: root.serviceLabel
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "▾"
                         color: Theme.vermLit
-                        font.pixelSize: 8 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                     }
                 }
 
@@ -400,7 +400,7 @@ PillSurface {
                 elide: Text.ElideRight
                 color: Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.features: { "tnum": 1 }
             }
         }
@@ -462,14 +462,14 @@ PillSurface {
                                     text: Players.labelOf(bub.modelData)
                                     color: bub.isActive ? Theme.bright : Theme.dim
                                     font.family: Theme.font
-                                    font.pixelSize: 11 * root.s
+                                    font.pixelSize: Typography.size("body", root.s)
                                     font.weight: Font.DemiBold
                                 }
                                 Text {
                                     text: Players.nowPlayingFor(bub.modelData)
                                     color: bub.isActive ? Theme.subtle : Theme.faint
                                     font.family: Theme.font
-                                    font.pixelSize: 8.5 * root.s
+                                    font.pixelSize: Typography.size("micro", root.s)
                                     elide: Text.ElideRight
                                     width: Math.min(implicitWidth, 150 * root.s)
                                 }
@@ -537,7 +537,7 @@ PillSurface {
                 text: root.playing ? "奏" : "休"
                 color: Theme.bright
                 font.family: Theme.fontJp
-                font.pixelSize: 16 * root.s
+                font.pixelSize: Typography.size("title", root.s)
                 font.weight: Font.DemiBold
             }
 

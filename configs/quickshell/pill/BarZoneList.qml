@@ -57,7 +57,7 @@ Column {
                 text: row.modelData.label
                 color: row.shown ? Theme.cream : Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10.5 * list.s
+                font.pixelSize: Typography.size("body", list.s)
                 font.weight: Font.Medium
             }
 

@@ -142,7 +142,7 @@ PillSurface {
                 text: "掃"
                 color: wipeBtn.tone
                 font.family: Theme.fontJp
-                font.pixelSize: 12 * root.s
+                font.pixelSize: Typography.size("bodyLarge", root.s)
                 Behavior on color { ColorAnimation { duration: Motion.fast } }
             }
 
@@ -203,7 +203,7 @@ PillSurface {
         text: root.query.length ? "No matches" : (Cliphist.loaded ? "History empty" : "")
         color: Theme.faint
         font.family: Theme.font
-        font.pixelSize: 10.5 * root.s
+        font.pixelSize: Typography.size("body", root.s)
     }
 
     ListView {
@@ -300,7 +300,7 @@ PillSurface {
                         ? (row.selected ? Theme.dim : Theme.faint)
                         : (row.selected ? Theme.cream : Theme.subtle)
                     font.family: Theme.font
-                    font.pixelSize: 11.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: row.selected ? Font.DemiBold : Font.Medium
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -316,7 +316,7 @@ PillSurface {
                     width: text.length ? implicitWidth : 0
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.features: { "tnum": 1 }
                 }
 
@@ -335,7 +335,7 @@ PillSurface {
                         text: "↵"
                         color: Theme.vermLit
                         font.family: Theme.font
-                        font.pixelSize: 12 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                     }
 
@@ -346,7 +346,7 @@ PillSurface {
                         opacity: rowHover.hovered ? 1 : 0
                         text: "✕"
                         color: dismissArea.containsMouse ? Theme.cream : Theme.dim
-                        font.pixelSize: 10 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         Behavior on opacity { NumberAnimation { duration: Motion.fast } }
 
                         MouseArea {

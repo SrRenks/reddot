@@ -229,7 +229,7 @@ SettingsSurface {
                 : "Reading current power state…"
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             elide: Text.ElideRight
         }
@@ -272,7 +272,7 @@ SettingsSurface {
                         text: presetRow.modelData.name
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 11.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                     }
 
@@ -280,7 +280,7 @@ SettingsSurface {
                         text: root.summary(presetRow.modelData)
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Medium
                     }
                 }
@@ -381,7 +381,7 @@ SettingsSurface {
                         text: "–"
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                     }
 
                     ScrubValue {
@@ -429,7 +429,7 @@ SettingsSurface {
             text: root.notice
             color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             elide: Text.ElideRight
             topPadding: 8 * root.s

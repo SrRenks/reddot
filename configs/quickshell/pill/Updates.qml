@@ -407,7 +407,7 @@ SettingsSurface {
                     text: root.headline
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 14.5 * root.s
+                    font.pixelSize: Typography.size("subtitle", root.s)
                     font.weight: Font.Bold
                 }
 
@@ -417,7 +417,7 @@ SettingsSurface {
                     text: root.subline
                     color: Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.Medium
                     wrapMode: Text.WordWrap
                     lineHeight: 1.2
@@ -431,7 +431,7 @@ SettingsSurface {
                         : root.version.replace(" ", " · ")
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.Medium
                     font.features: { "tnum": 1 }
                 }
@@ -457,7 +457,7 @@ SettingsSurface {
                 text: "WHAT'S NEW"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1.4 * root.s
@@ -469,7 +469,7 @@ SettingsSurface {
                 text: "No highlights noted"
                 color: Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 font.italic: true
             }
@@ -504,7 +504,7 @@ SettingsSurface {
                         text: parent.modelData
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 11.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Medium
                         wrapMode: Text.WordWrap
                         lineHeight: 1.2
@@ -539,7 +539,7 @@ SettingsSurface {
                 text: "Your edits clash with " + root.conflicts.length + " file" + (root.conflicts.length === 1 ? "" : "s")
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 wrapMode: Text.WordWrap
             }
@@ -562,7 +562,7 @@ SettingsSurface {
                         text: root.labelFor(confRow.rel)
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 11.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                     }
 
@@ -596,7 +596,7 @@ SettingsSurface {
                                 text: seg.label
                                 color: seg.on ? Theme.bright : Theme.dim
                                 font.family: Theme.font
-                                font.pixelSize: 10 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: seg.on ? Font.DemiBold : Font.Medium
                             }
                         }
@@ -650,7 +650,7 @@ SettingsSurface {
                 text: "Needs " + root.missingDeps.length + " package" + (root.missingDeps.length === 1 ? "" : "s")
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 wrapMode: Text.WordWrap
             }
@@ -678,7 +678,7 @@ SettingsSurface {
                             text: root.prettyDep(depRow.depId)
                             color: Theme.cream
                             font.family: Theme.font
-                            font.pixelSize: 11.5 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.DemiBold
                         }
 
@@ -688,7 +688,7 @@ SettingsSurface {
                             text: depRow.modelData.desc
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 10 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.Medium
                             wrapMode: Text.WordWrap
                             lineHeight: 1.15
@@ -729,7 +729,7 @@ SettingsSurface {
                 text: "Couldn't install " + root.depFailures.length + " package" + (root.depFailures.length === 1 ? "" : "s")
                 color: Theme.verm
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 wrapMode: Text.WordWrap
             }
@@ -760,7 +760,7 @@ SettingsSurface {
                             text: root.prettyDep(failRow.modelData.id)
                             color: Theme.cream
                             font.family: Theme.font
-                            font.pixelSize: 11.5 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.DemiBold
                         }
 
@@ -769,7 +769,7 @@ SettingsSurface {
                             text: failRow.modelData.error
                             color: Theme.faint
                             font.family: Theme.font
-                            font.pixelSize: 10 * root.s
+                            font.pixelSize: Typography.size("body", root.s)
                             font.weight: Font.Medium
                             wrapMode: Text.WordWrap
                             lineHeight: 1.15
@@ -830,7 +830,7 @@ SettingsSurface {
                     text: root.applying ? "Updating…" : "Update now"
                     color: Theme.bright
                     font.family: Theme.font
-                    font.pixelSize: 12 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                 }
             }
@@ -867,7 +867,7 @@ SettingsSurface {
                         : "Check for updates"
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 12 * root.s
+                    font.pixelSize: Typography.size("bodyLarge", root.s)
                     font.weight: Font.DemiBold
                 }
             }
@@ -878,7 +878,7 @@ SettingsSurface {
                 text: "Updated · restarting the shell"
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10.5 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 wrapMode: Text.WordWrap
                 lineHeight: 1.2

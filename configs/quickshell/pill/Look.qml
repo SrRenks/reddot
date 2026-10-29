@@ -667,7 +667,7 @@ SettingsSurface {
                 text: root.note
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 wrapMode: Text.WordWrap
                 lineHeight: 1.25

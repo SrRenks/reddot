@@ -270,7 +270,7 @@ Item {
             text: Math.round(root.volume * 100) + "%"
             color: root.muted ? Theme.dim : Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -387,7 +387,7 @@ Item {
                 text: root.subjectHas ? root.subjectTitle : "Nothing playing"
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 14 * root.s
+                font.pixelSize: Typography.size("subtitle", root.s)
                 font.weight: Font.DemiBold
                 maximumLineCount: 1
                 elide: Text.ElideRight
@@ -398,7 +398,7 @@ Item {
                 text: root.subjectArtist
                 color: Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 maximumLineCount: 1
                 elide: Text.ElideRight
                 visible: text.length > 0
@@ -446,7 +446,7 @@ Item {
                 text: root.noticeLabel
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 7.5 * root.s
+                font.pixelSize: Typography.size("micro", root.s)
                 font.weight: Font.Bold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1 * root.s
@@ -458,7 +458,7 @@ Item {
                 text: root.noticeValue
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 11 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -492,7 +492,7 @@ Item {
             text: Math.round(root.brightness * 100) + "%"
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -546,7 +546,7 @@ Item {
             text: Battery.pct + "%"
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -649,7 +649,7 @@ Item {
             text: root.recordStarted ? "Recording started" : "Recording stopped"
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11.5 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.DemiBold
             elide: Text.ElideRight
             maximumLineCount: 1

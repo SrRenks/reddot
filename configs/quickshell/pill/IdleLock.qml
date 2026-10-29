@@ -156,7 +156,7 @@ SettingsSurface {
                 text: irow.name
                 color: Theme.cream
                 font.family: Theme.font
-                font.pixelSize: 12.5 * irow.s
+                font.pixelSize: Typography.size("bodyLarge", irow.s)
                 font.weight: Font.DemiBold
             }
             Text {
@@ -165,7 +165,7 @@ SettingsSurface {
                 text: irow.caption
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 10.5 * irow.s
+                font.pixelSize: Typography.size("body", irow.s)
             }
             Item { width: 1; height: 7 * irow.s }
             Item {
@@ -269,7 +269,7 @@ SettingsSurface {
             text: "Keep-awake (in the mixer) pauses all of this while it is on."
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 9.5 * root.s
+            font.pixelSize: Typography.size("caption", root.s)
             font.weight: Font.Medium
             wrapMode: Text.WordWrap
         }

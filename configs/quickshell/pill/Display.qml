@@ -502,7 +502,7 @@ SettingsSurface {
             text: crow.glyphText
             color: crow.focused ? Theme.cream : Theme.subtle
             font.family: Theme.fontJp
-            font.pixelSize: 13 * root.s
+            font.pixelSize: Typography.size("bodyLarge", root.s)
         }
 
         Item {
@@ -582,7 +582,7 @@ SettingsSurface {
                                 text: tile.modelData.name
                                 color: tile.sel ? Theme.cream : Theme.subtle
                                 font.family: Theme.font
-                                font.pixelSize: 10 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.DemiBold
                             }
                             Text {
@@ -590,7 +590,7 @@ SettingsSurface {
                                 text: tile.modelData.hz + "Hz"
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 8.5 * root.s
+                                font.pixelSize: Typography.size("micro", root.s)
                                 font.weight: Font.Medium
                                 font.features: { "tnum": 1 }
                             }
@@ -605,7 +605,7 @@ SettingsSurface {
                             text: "★"
                             color: Theme.vermLit
                             font.family: Theme.fontJp
-                            font.pixelSize: 9.5 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                         }
 
                         /**
@@ -753,7 +753,7 @@ SettingsSurface {
                         text: root.selMon ? root.selMon.name + (root.selIsMain ? "  ·  Main" : "") : ""
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 12.5 * root.s
+                        font.pixelSize: Typography.size("bodyLarge", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 0.3 * root.s
                     }
@@ -811,7 +811,7 @@ SettingsSurface {
                                 text: "Scale"
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 10.5 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.Medium
                             }
 
@@ -840,7 +840,7 @@ SettingsSurface {
                                 text: "Set as main"
                                 color: Theme.cream
                                 font.family: Theme.font
-                                font.pixelSize: 11 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.DemiBold
                             }
 
@@ -879,7 +879,7 @@ SettingsSurface {
                                 text: "Apply"
                                 color: card.applyReady ? Theme.cream : Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 10.5 * root.s
+                                font.pixelSize: Typography.size("body", root.s)
                                 font.weight: Font.DemiBold
                                 font.letterSpacing: 0.3 * root.s
                             }
@@ -915,7 +915,7 @@ SettingsSurface {
                                     text: "Keep (" + root.countdown + ")"
                                     color: Theme.cream
                                     font.family: Theme.font
-                                    font.pixelSize: 10.5 * root.s
+                                    font.pixelSize: Typography.size("body", root.s)
                                     font.weight: Font.Bold
                                     font.letterSpacing: 0.3 * root.s
                                 }
@@ -934,7 +934,7 @@ SettingsSurface {
                                 text: "reverts automatically if not kept"
                                 color: Theme.faint
                                 font.family: Theme.font
-                                font.pixelSize: 9.5 * root.s
+                                font.pixelSize: Typography.size("caption", root.s)
                                 font.weight: Font.Medium
                             }
                         }
@@ -948,7 +948,7 @@ SettingsSurface {
                 text: root.note
                 color: Theme.subtle
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.Medium
                 wrapMode: Text.WordWrap
                 lineHeight: 1.25

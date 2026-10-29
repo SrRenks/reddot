@@ -209,7 +209,7 @@ Item {
                 color: !mrow.entryData.enabled ? Theme.dim
                     : (mrowArea.containsMouse ? Theme.cream : Theme.creamMenu)
                 font.family: Theme.font
-                font.pixelSize: 13 * tray.s
+                font.pixelSize: Typography.size("bodyLarge", tray.s)
                 font.weight: mrowArea.containsMouse ? Font.DemiBold : Font.Normal
                 elide: Text.ElideRight
             }

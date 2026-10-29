@@ -256,7 +256,7 @@ Column {
                     text: appRow.entry ? appRow.entry.name : ""
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 12.5 * picker.s
+                    font.pixelSize: Typography.size("bodyLarge", picker.s)
                     font.weight: appRow.selected ? Font.DemiBold : Font.Normal
                     elide: Text.ElideRight
                 }

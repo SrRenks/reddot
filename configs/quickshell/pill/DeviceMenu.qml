@@ -83,7 +83,7 @@ Item {
                     elide: Text.ElideRight
                     color: devRow.current ? Theme.cream : Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * menu.s
+                    font.pixelSize: Typography.size("body", menu.s)
                     font.weight: devRow.current ? Font.Bold : Font.Medium
                 }
 

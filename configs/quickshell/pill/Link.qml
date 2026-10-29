@@ -186,7 +186,7 @@ PillSurface {
             text: nrow.n.body.length > 0 ? nrow.n.body : nrow.n.summary
             color: nrow.critical ? Theme.cream : Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 10.5 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: nrow.critical ? Font.DemiBold : Font.Medium
             elide: Text.ElideRight
             maximumLineCount: 1
@@ -206,7 +206,7 @@ PillSurface {
                 text: "×" + nrow.entry.count
                 color: nrow.critical ? Theme.vermLit : Theme.vermDim
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
             }
 
@@ -223,7 +223,7 @@ PillSurface {
                     text: Notifs.ageLabel(nrow.n)
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                 }
 
@@ -295,7 +295,7 @@ PillSurface {
                         text: Notifs.unread + " NEW"
                         color: Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 9.5 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 1.4 * root.s
                     }
@@ -317,7 +317,7 @@ PillSurface {
                             text: "払"
                             color: clearArea.containsMouse ? Theme.vermLit : Theme.vermDim
                             font.family: Theme.fontJp
-                            font.pixelSize: 9 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             font.weight: Font.Bold
                         }
                         GlyphIcon {
@@ -334,7 +334,7 @@ PillSurface {
                             text: "CLEAR"
                             color: clearArea.containsMouse ? Theme.vermLit : Theme.vermDim
                             font.family: Theme.font
-                            font.pixelSize: 9 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             font.weight: Font.Bold
                             font.letterSpacing: 1.4 * root.s
                         }
@@ -458,7 +458,7 @@ PillSurface {
                                     text: group.modelData.app
                                     color: Theme.subtle
                                     font.family: Theme.font
-                                    font.pixelSize: 9 * root.s
+                                    font.pixelSize: Typography.size("caption", root.s)
                                     font.weight: Font.Bold
                                     font.capitalization: Font.AllUppercase
                                     font.letterSpacing: 1.2 * root.s
@@ -474,7 +474,7 @@ PillSurface {
                                     text: "· " + group.modelData.count
                                     color: Theme.faint
                                     font.family: Theme.font
-                                    font.pixelSize: 9 * root.s
+                                    font.pixelSize: Typography.size("caption", root.s)
                                 }
 
                                 Text {
@@ -488,7 +488,7 @@ PillSurface {
                                         : group.modelData.preview.summary
                                     color: Theme.dim
                                     font.family: Theme.font
-                                    font.pixelSize: 10 * root.s
+                                    font.pixelSize: Typography.size("body", root.s)
                                     elide: Text.ElideRight
                                     maximumLineCount: 1
                                     textFormat: Text.PlainText
@@ -572,14 +572,14 @@ PillSurface {
                 opacity: 0.55
                 font.family: Theme.fontJp
                 font.weight: Font.Medium
-                font.pixelSize: 32 * root.s
+                font.pixelSize: Typography.size("hero", root.s)
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Flags.showGlyphs ? "SILENCE" : "No notifications to display"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.Bold
                 font.letterSpacing: Flags.showGlyphs ? 2.2 * root.s : 0.8 * root.s
             }

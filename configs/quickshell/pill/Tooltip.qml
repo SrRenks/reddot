@@ -93,7 +93,7 @@ Item {
             text: root.title
             color: Theme.cream
             font.family: Theme.font
-            font.pixelSize: 11 * root.s
+            font.pixelSize: Typography.size("body", root.s)
             font.weight: Font.Bold
         }
         Text {
@@ -103,7 +103,7 @@ Item {
             text: root.desc
             color: Theme.subtle
             font.family: Theme.font
-            font.pixelSize: 10 * root.s
+            font.pixelSize: Typography.size("body", root.s)
         }
     }
 

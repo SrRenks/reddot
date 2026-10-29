@@ -412,7 +412,7 @@ PillSurface {
                         text: root.comboPretty(brow.modelData.combo)
                         color: brow.focused ? Theme.cream : Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 11 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 0.3 * root.s
                     }
@@ -433,7 +433,7 @@ PillSurface {
                         text: brow.modelData.label
                         color: brow.focused ? Theme.subtle : Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 11 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Medium
                         elide: Text.ElideRight
                     }
@@ -446,7 +446,7 @@ PillSurface {
                         text: brow.modelData.cmd
                         color: Theme.dim
                         font.family: Theme.font
-                        font.pixelSize: 9 * root.s
+                        font.pixelSize: Typography.size("caption", root.s)
                         font.weight: Font.Normal
                         elide: Text.ElideLeft
                     }
@@ -487,7 +487,7 @@ PillSurface {
                         text: "+"
                         color: Theme.vermLit
                         font.family: Theme.font
-                        font.pixelSize: 14 * root.s
+                        font.pixelSize: Typography.size("subtitle", root.s)
                         font.weight: Font.Bold
                     }
                     Text {
@@ -495,7 +495,7 @@ PillSurface {
                         text: "add keybind"
                         color: Theme.vermLit
                         font.family: Theme.font
-                        font.pixelSize: 11 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                         font.letterSpacing: 0.5 * root.s
                     }
@@ -571,7 +571,7 @@ PillSurface {
                 text: root.conflict
                 color: Theme.vermLit
                 font.family: Theme.font
-                font.pixelSize: 10 * root.s
+                font.pixelSize: Typography.size("body", root.s)
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -598,7 +598,7 @@ PillSurface {
                         text: "Delete"
                         color: Theme.vermLit
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.DemiBold
                         font.letterSpacing: 0.3 * root.s
                     }
@@ -627,7 +627,7 @@ PillSurface {
                         text: "Save"
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 10.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Bold
                         font.letterSpacing: 0.4 * root.s
                     }
@@ -662,7 +662,7 @@ PillSurface {
                 text: root.formOpen ? "save · delete · esc back" : "tap edit · + add · esc close"
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9.5 * root.s
+                font.pixelSize: Typography.size("caption", root.s)
                 font.weight: Font.DemiBold
                 font.capitalization: Font.AllUppercase
                 font.letterSpacing: 1 * root.s

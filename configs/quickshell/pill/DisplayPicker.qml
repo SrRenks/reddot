@@ -53,7 +53,7 @@ Item {
             text: pick.label
             color: Theme.faint
             font.family: Theme.font
-            font.pixelSize: 10.5 * pick.s
+            font.pixelSize: Typography.size("body", pick.s)
             font.weight: Font.Medium
         }
 

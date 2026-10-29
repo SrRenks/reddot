@@ -165,7 +165,7 @@ PillSurface {
                     : ""
                 color: Theme.faint
                 font.family: Theme.font
-                font.pixelSize: 9
+                font.pixelSize: Typography.size("caption", 1)
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 width: Math.min(implicitWidth, parent.width * 0.55)
@@ -224,7 +224,7 @@ PillSurface {
                             text: infoRow.modelData.value
                             color: Theme.subtle
                             font.family: Theme.font
-                            font.pixelSize: 9.5 * root.s
+                            font.pixelSize: Typography.size("caption", root.s)
                             elide: Text.ElideRight
                             width: Math.min(implicitWidth, 210 * root.s)
                         }
@@ -242,7 +242,7 @@ PillSurface {
                         text: "Keyboard LED language"
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 11.5 * root.s
+                        font.pixelSize: Typography.size("body", root.s)
                         font.weight: Font.Medium
                     }
 
@@ -253,7 +253,7 @@ PillSurface {
                         text: "Write-only on this kernel; the active code cannot be read back."
                         color: Theme.faint
                         font.family: Theme.font
-                        font.pixelSize: 8 * root.s
+                        font.pixelSize: Typography.size("micro", root.s)
                     }
 
                     ThinkPadChips {
@@ -285,7 +285,7 @@ PillSurface {
                     text: "Power settings"
                     color: Theme.subtle
                     font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
+                    font.pixelSize: Typography.size("body", root.s)
                     font.weight: Font.DemiBold
                 }
 
@@ -295,7 +295,7 @@ PillSurface {
                     text: "›"
                     color: Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 14 * root.s
+                    font.pixelSize: Typography.size("subtitle", root.s)
                 }
 
                 MouseArea {
@@ -321,7 +321,7 @@ PillSurface {
                         : "Changes ask for authentication; mute LEDs follow the hardware until you override them."
                     color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
                     font.family: Theme.font
-                    font.pixelSize: 9 * root.s
+                    font.pixelSize: Typography.size("caption", root.s)
                     font.weight: Font.Medium
                     elide: Text.ElideRight
                 }

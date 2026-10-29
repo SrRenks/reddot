@@ -33,7 +33,7 @@
     { "id": "swww", "group": "core", "required": true, "desc": "The wallpaper daemon", "aur": false,
       "names": { "arch": "swww", "debian": null, "fedora": "swww", "suse": "swww", "gentoo": "gui-apps/awww" },
       "note": "one arch name covers the whole family: on CachyOS pacman -S swww resolves to awww, which declares Provides: swww and Replaces: swww, while vanilla Arch installs native swww. The rice scripts call the awww binary, so a runtime symlink bridges awww->swww (or the reverse) after install; there is no swww crate on crates.io, so the cargo fallback builds from the LGFae/swww source",
-      "repo": { "gentoo": "overlay:guru", "fedora": "copr:agonie/swww" }, "fallback": "cargo" },
+      "repo": { "gentoo": "overlay:guru", "fedora": "copr:hermitfeather/hyprland" }, "fallback": "cargo" },
 
     { "id": "mpvpaper", "group": "core", "required": false, "desc": "Plays video files as animated wallpapers", "aur": true,
       "names": { "arch": "mpvpaper", "debian": null, "fedora": "mpvpaper", "suse": "mpvpaper", "gentoo": "gui-apps/mpvpaper" },

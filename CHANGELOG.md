@@ -95,3 +95,6 @@ semantic versioning when it cuts a release.
 
 - Fedora's Hyprland packages now use `lionheartp/Hyprland`, which has complete
   Fedora 43/44 builds; Fedora 44 is the validation target.
+
+- Fedora's `swww` now uses the `hermitfeather/hyprland` COPR, whose Fedora 44
+  build exists; the old `agonie/swww` repo stopped at Fedora 43.

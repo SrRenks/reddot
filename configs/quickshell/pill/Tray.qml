@@ -20,6 +20,10 @@ Item {
 
     property real s: 1
     property var barWindow
+    /** True while the floating menu window is mapped. */
+    readonly property bool menuOpen: menu.open
+    /** Ignore the click that opened the menu; it can be replayed to the overlay. */
+    property bool menuClickReady: false
 
     visible: SystemTray.items.values.length > 0
     implicitWidth: visible ? row.implicitWidth : 0
@@ -240,6 +244,13 @@ Item {
         }
     }
 
+    Timer {
+        id: menuArm
+        interval: 220
+        repeat: false
+        onTriggered: tray.menuClickReady = true
+    }
+
     PanelWindow {
         id: menu
 
@@ -247,7 +258,12 @@ Item {
         property real anchorX: 0
 
         onOpenChanged: {
-            if (!open) {
+            if (open) {
+                tray.menuClickReady = false;
+                menuArm.restart();
+            } else {
+                menuArm.stop();
+                tray.menuClickReady = false;
                 card.expandedIdx = -1;
                 opener.menu = null;
             }
@@ -266,7 +282,8 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: menu.open = false
+            acceptedButtons: Qt.AllButtons
+            onClicked: if (tray.menuClickReady) menu.open = false
         }
 
         FocusScope {

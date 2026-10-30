@@ -5,6 +5,33 @@ semantic versioning when it cuts a release.
 
 ## Unreleased
 
+### Changed
+
+- Resting power now uses `balanced` with `powersave` and
+  `balance_power` on both AC and battery. `performance` is an explicit,
+  temporary helper override and is refused on battery; `power-saver` remains
+  the emergency mode. The installed TLP drop-in carries the measured policy
+  and the helper reports `EFFECTIVE`, `EPP` and `GOV` from sysfs so the surface
+  shows an override instead of the stale TLP profile.
+- The ThinkPad surface now refreshes the effective profile when the power
+  source changes, keeping the segmented control aligned with TLP after a
+  plug/unplug event.
+
+### Fixed
+
+- Tray context menus no longer close with the bar hover. The status row stays
+  alive while the tray menu is open, and the menu ignores the opening right
+  click so its backdrop cannot dismiss it before the first frame.
+
+- The check and extras installer warn when `/etc/tlp.conf` redefines keys owned
+  by the reddot TLP drop-ins. TLP gives `tlp.conf` precedence over
+  `/etc/tlp.d/*.conf`, so those keys can silently undo the power policy.
+
+- Arch package checks now refresh a temporary pacman database through
+  `fakeroot` when `checkupdates` is not installed. The automatic 15-minute
+  check no longer waits for a manual `pacman -Syu` to populate the local sync
+  database before it can report pending packages.
+
 ### Added
 
 - Bar component catalog (`BarCatalog.qml`) and persisted instance layout

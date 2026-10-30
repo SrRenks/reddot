@@ -9,19 +9,23 @@
 #
 #   status                        KEY=VALUE + one BATTERY= line per pack
 #   set <bat> <start> <stop>      live + persistent charge window
-#   profile <performance|balanced|power-saver>
+#   profile <performance|balanced|power-saver>  explicit sysfs override
 #   pause|resume <bat>            charge_behaviour inhibit-charge / auto
 #   chargeonce|fullcharge <bat>   TLP battery-care one-shots
 #
 # Overrides (tests and ports):
-#   REDDOT_TLP_SYSFS   default /sys/class/power_supply
-#   REDDOT_TLP_CONF    default /etc/tlp.d/99-reddot.conf
-#   REDDOT_TLP_TEST=1  skip the root check (test harness only)
+#   REDDOT_TLP_SYSFS          default /sys/class/power_supply
+#   REDDOT_TLP_CONF           default /etc/tlp.d/99-reddot.conf
+#   REDDOT_TLP_PLATFORM_PROFILE default /sys/firmware/acpi/platform_profile
+#   REDDOT_TLP_CPUFREQ        default /sys/devices/system/cpu
+#   REDDOT_TLP_TEST=1         skip the root check (test harness only)
 
 set -eu
 
 SYS="${REDDOT_TLP_SYSFS:-/sys/class/power_supply}"
 CONF="${REDDOT_TLP_CONF:-/etc/tlp.d/99-reddot.conf}"
+PLATFORM_PROFILE="${REDDOT_TLP_PLATFORM_PROFILE:-/sys/firmware/acpi/platform_profile}"
+CPUFREQ="${REDDOT_TLP_CPUFREQ:-/sys/devices/system/cpu}"
 TEST="${REDDOT_TLP_TEST:-0}"
 
 have() {
@@ -111,6 +115,22 @@ power_of() {
     echo unknown
 }
 
+# Map the user-facing profile to the three sysfs controls. This is not
+# `tlp <mode>`: tlp selects the _ON_AC/_ON_BAT/_ON_SAV branch, while this is
+# an explicit override written directly by the helper.
+profile_triple() {
+    case "$1" in
+        performance) echo "performance powersave performance" ;;
+        balanced)    echo "balanced powersave balance_power" ;;
+        power-saver) echo "low-power powersave power" ;;
+        *) return 1 ;;
+    esac
+}
+
+sysfs_read() {
+    [ -r "$1" ] && tr -d '\n' < "$1" 2>/dev/null || true
+}
+
 behaviour_of() {
     # "auto inhibit-charge force-discharge" with the active one bracketed.
     raw=$(cat "$1/charge_behaviour" 2>/dev/null | tr -d '[]')
@@ -138,6 +158,10 @@ cmd_status() {
 
     printf 'TOOL=%s\nENABLED=%s\nPOWER=%s\nPROFILE=%s\n' \
         "$tool" "$enabled" "$(power_of)" "$(profile_of)"
+    printf 'EFFECTIVE=%s\nEPP=%s\nGOV=%s\n' \
+        "$(sysfs_read "$PLATFORM_PROFILE")" \
+        "$(sysfs_read "$CPUFREQ/cpu0/cpufreq/energy_performance_preference")" \
+        "$(sysfs_read "$CPUFREQ/cpu0/cpufreq/scaling_governor")"
 
     for bat in $(batteries); do
         dir="$SYS/$bat"
@@ -215,18 +239,41 @@ cmd_set() {
 }
 
 cmd_profile() {
-    case "${1:-}" in
+    want=${1:-}
+    case "$want" in
         performance|balanced|power-saver) ;;
-        *) die "unknown profile: ${1:-}" ;;
+        *) die "unknown profile: $want" ;;
     esac
     need_root
-    if have tlp; then
-        tlp "$1"
-    elif have powerprofilesctl; then
-        powerprofilesctl set "$1"
-    else
-        die "neither TLP nor power-profiles-daemon is installed"
+
+    # On battery the EC does not limit sustained power, and performance costs
+    # 36.8 W and 93 C on one thread. This helper is the only barrier.
+    if [ "$want" = "performance" ] && [ "$(power_of)" = "BAT" ]; then
+        die "performance refused on battery (36.8 W / 93 C measured); use balanced"
     fi
+
+    if have powerprofilesctl; then
+        powerprofilesctl set "$want"
+        return 0
+    fi
+
+    triple=$(profile_triple "$want") || die "no sysfs mapping for $want"
+    prof=${triple%% *}
+    rest=${triple#* }
+    gov=${rest%% *}
+    epp=${triple##* }
+
+    printf '%s\n' "$prof" > "$PLATFORM_PROFILE" 2>/dev/null \
+        || die "cannot write $PLATFORM_PROFILE"
+
+    for f in "$CPUFREQ"/cpu*/cpufreq/scaling_governor; do
+        printf '%s\n' "$gov" > "$f" 2>/dev/null || true
+    done
+    # EPP is only accepted when the governor is not performance; write the
+    # governor first, then EPP. A rejected write is not fatal.
+    for f in "$CPUFREQ"/cpu*/cpufreq/energy_performance_preference; do
+        printf '%s\n' "$epp" > "$f" 2>/dev/null || true
+    done
 }
 
 cmd_apply() {

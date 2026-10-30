@@ -71,6 +71,16 @@ PillSurface {
     property string tool: "none"
     property string power: ""
     property string profile: "balanced"
+    property string effective: ""
+    property string epp: ""
+    property string gov: ""
+    readonly property string liveProfile: effective.length > 0 ? effective : profile
+    readonly property string segValue: {
+        if (liveProfile === "performance") return "performance";
+        if (liveProfile === "low-power") return "power-saver";
+        return "balanced";
+    }
+    readonly property bool overridden: effective.length > 0 && effective !== profile
     property bool enabled: false
     property bool busy: false
     property string notice: ""
@@ -109,6 +119,9 @@ PillSurface {
         var nextEnabled = false;
         var nextPower = "";
         var nextProfile = "";
+        var nextEffective = "";
+        var nextEpp = "";
+        var nextGov = "";
         var lines = raw.split("\n");
         var sawProtocol = false;
 
@@ -127,6 +140,12 @@ PillSurface {
                 nextPower = v;
             } else if (k === "PROFILE") {
                 nextProfile = v;
+            } else if (k === "EFFECTIVE") {
+                nextEffective = v;
+            } else if (k === "EPP") {
+                nextEpp = v;
+            } else if (k === "GOV") {
+                nextGov = v;
             } else if (k === "BATTERY") {
                 var f = v.split("|");
                 list.push({
@@ -147,6 +166,9 @@ PillSurface {
         root.power = nextPower;
         if (nextProfile.length > 0)
             root.profile = nextProfile;
+        root.effective = nextEffective;
+        root.epp = nextEpp;
+        root.gov = nextGov;
         root.batteries = list;
         root.selectBattery(root.indexOfBattery(keep));
         if (!sawProtocol)
@@ -188,6 +210,14 @@ PillSurface {
         root.run([verb, root.bat.name]);
     }
     onOpenChanged: if (open) root.refresh()
+
+    // TLP's udev rule re-applies the source policy on plug/unplug. Refresh so
+    // the segment follows that change instead of keeping the old override.
+    Connections {
+        target: Battery
+        function onChargingChanged() { if (root.open && !root.busy) root.refresh(); }
+        function onDischargingChanged() { if (root.open && !root.busy) root.refresh(); }
+    }
 
     Process {
         id: statusProc
@@ -417,7 +447,7 @@ PillSurface {
                 anchors.verticalCenter: parent.verticalCenter
                 s: root.s
                 options: root.profileOptions
-                value: root.profile
+                value: root.segValue
                 enabled: root.tool !== "none" && !root.busy
                 onPicked: (v) => root.run(["profile", v])
             }
@@ -484,7 +514,8 @@ PillSurface {
                         : (root.tool === "none"
                             ? (root.hasCharge ? "sysfs only · not persisted" : "no battery")
                             : (root.enabled
-                                ? root.toolLabel + " active · " + root.profile
+                                ? root.toolLabel + " active · " + root.liveProfile
+                                    + (root.overridden ? " · override" : "")
                                 : root.toolLabel + " installed · service inactive")))
                 color: root.notice.length > 0 ? Theme.flameCore : Theme.faint
                 font.family: Theme.font

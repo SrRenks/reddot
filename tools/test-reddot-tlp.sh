@@ -73,6 +73,10 @@ make_battery() {
 }
 
 mkdir -p "$tmp/sys/BAT0" "$tmp/sys/BAT1" "$tmp/sys/AC" "$tmp/bin" "$tmp/tlp.d"
+mkdir -p "$tmp/cpufreq/cpu0/cpufreq"
+printf 'balanced\n' > "$tmp/platform_profile"
+printf 'balance_power\n' > "$tmp/cpufreq/cpu0/cpufreq/energy_performance_preference"
+printf 'powersave\n' > "$tmp/cpufreq/cpu0/cpufreq/scaling_governor"
 make_battery "$tmp/sys/BAT0" 40 80 0
 make_battery "$tmp/sys/BAT1" 0 100 1
 printf '1\n' > "$tmp/sys/AC/online"
@@ -95,6 +99,8 @@ run() {
     PATH="$tmp/bin:$PATH" \
     REDDOT_TLP_SYSFS="$tmp/sys" \
     REDDOT_TLP_CONF="$tmp/tlp.d/99-reddot.conf" \
+    REDDOT_TLP_PLATFORM_PROFILE="$tmp/platform_profile" \
+    REDDOT_TLP_CPUFREQ="$tmp/cpufreq" \
     REDDOT_TLP_TEST=1 \
     sh "$helper" "$@"
 }
@@ -105,6 +111,9 @@ assert_contains "$out" '^TOOL=tlp$' "status detects TLP"
 assert_contains "$out" '^ENABLED=1$' "status reports the service active"
 assert_contains "$out" '^POWER=AC$' "status reads AC from sysfs"
 assert_contains "$out" '^PROFILE=performance$' "status strips the /AC suffix"
+assert_contains "$out" '^EFFECTIVE=balanced$' "status reports the sysfs profile"
+assert_contains "$out" '^EPP=balance_power$' "status reports EPP"
+assert_contains "$out" '^GOV=powersave$' "status reports the governor"
 assert_contains "$out" '^BATTERY=BAT0|40|80|43|auto|1|1$' "BAT0 charge window and behaviour"
 assert_contains "$out" '^BATTERY=BAT1|0|100|43|auto|1|1$' "BAT1 legacy *_threshold names"
 
@@ -129,7 +138,23 @@ assert_contains "$conf" 'START_CHARGE_THRESH_BAT1=95' "apply writes BAT1 start"
 assert_contains "$conf" 'STOP_CHARGE_THRESH_BAT1=100' "apply writes BAT1 stop"
 assert_contains "$(cat "$tmp/tlp.log")" 'setcharge 95 100 BAT0' "apply sets BAT0"
 assert_contains "$(cat "$tmp/tlp.log")" 'setcharge 95 100 BAT1' "apply sets BAT1"
-assert_contains "$(cat "$tmp/tlp.log")" '^balanced$' "apply switches the TLP profile"
+assert_contains "$(cat "$tmp/platform_profile")" '^balanced$' "apply writes the sysfs platform profile"
+assert_contains "$(cat "$tmp/cpufreq/cpu0/cpufreq/scaling_governor")" '^powersave$' "apply writes the governor"
+assert_contains "$(cat "$tmp/cpufreq/cpu0/cpufreq/energy_performance_preference")" '^balance_power$' "apply writes balance_power EPP"
+
+# --- profile override (sysfs, not tlp <mode>) ------------------------------
+run profile balanced
+assert_contains "$(cat "$tmp/platform_profile")" '^balanced$' "profile balanced writes the platform profile"
+assert_contains "$(cat "$tmp/cpufreq/cpu0/cpufreq/scaling_governor")" '^powersave$' "profile balanced writes the governor"
+assert_contains "$(cat "$tmp/cpufreq/cpu0/cpufreq/energy_performance_preference")" '^balance_power$' "profile balanced writes the EPP"
+
+run profile performance
+assert_contains "$(cat "$tmp/platform_profile")" '^performance$' "profile performance writes the platform profile"
+assert_contains "$(cat "$tmp/cpufreq/cpu0/cpufreq/energy_performance_preference")" '^performance$' "profile performance writes its EPP"
+
+printf '0\n' > "$tmp/sys/AC/online"
+assert_exit 2 "performance refused on battery" run profile performance
+printf '1\n' > "$tmp/sys/AC/online"
 
 # --- validation -----------------------------------------------------------
 assert_exit 2 "rejects start >= stop" run set BAT0 90 80

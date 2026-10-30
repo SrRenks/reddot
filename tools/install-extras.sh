@@ -92,6 +92,7 @@ rm -f /etc/polkit-1/rules.d/49-reddot-thinkpad.rules
 rm -f /etc/sudoers.d/90-reddot-tlp
 
 if command -v tlp >/dev/null 2>&1; then
+    sh "$here/check-tlp-conf.sh" || true
     install -Dm644 "$here/tlp-acbat.conf" /etc/tlp.d/99-reddot-acbat.conf
     tlp start >/dev/null 2>&1 || echo "warning: tlp start failed; run sudo tlp start" >&2
     echo "  /etc/tlp.d/99-reddot-acbat.conf"

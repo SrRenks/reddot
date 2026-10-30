@@ -38,13 +38,31 @@ printf '@@BACKEND:%s@@\n' "$family"
 printf '@@OFFICIAL@@\n'
 case "$family" in
     arch)
-        # checkupdates refreshes a temporary sync database without root. When it
-        # is absent, pacman -Qu still answers from the cached databases.
+        # checkupdates refreshes a temporary sync database without root. When
+        # it is absent, use the same mechanism directly with fakeroot. A plain
+        # pacman -Qu is not enough: it only sees the last database sync, so an
+        # automatic check would keep reporting zero until a manual -Syu.
         if command -v checkupdates >/dev/null 2>&1; then
             out=$(limit checkupdates 2>/dev/null); rc=$?
             [ -n "$out" ] && printf '%s\n' "$out"
             if [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]; then printf '@@OK:official@@\n'; else printf '@@ERR:official@@\n'; fi
+        elif command -v fakeroot >/dev/null 2>&1; then
+            db="${TMPDIR:-/tmp}/reddot-check-db-${UID}"
+            rm -rf "$db"
+            mkdir -p "$db"
+            ln -s /var/lib/pacman/local "$db/local" 2>/dev/null || true
+            if limit fakeroot -- pacman -Sy --disable-sandbox-filesystem \
+                    --dbpath "$db" --logfile /dev/null >/dev/null 2>&1; then
+                out=$(limit pacman -Qu --dbpath "$db" 2>/dev/null); rc=$?
+                [ -n "$out" ] && printf '%s\n' "$out"
+                if [ "$rc" -le 1 ]; then printf '@@OK:official@@\n'; else printf '@@ERR:official@@\n'; fi
+                rm -rf "$db"
+            else
+                rm -rf "$db"
+                printf '@@ERR:official@@\n'
+            fi
         else
+            # Last resort: cached database, with no network refresh.
             out=$(limit pacman -Qu 2>/dev/null); rc=$?
             [ -n "$out" ] && printf '%s\n' "$out"
             if [ "$rc" -le 1 ]; then printf '@@OK:official@@\n'; else printf '@@ERR:official@@\n'; fi

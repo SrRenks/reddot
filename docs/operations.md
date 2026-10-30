@@ -29,6 +29,18 @@ reddot restart pill
 
 See `tools/reddot-tlp` and `tools/reddot-thinkpad` for the privileged surfaces.
 
+
+### TLP precedence
+
+`/etc/tlp.conf` takes precedence over `/etc/tlp.d/*.conf` in TLP 1.10. If it
+contains `PLATFORM_PROFILE_*`, `CPU_SCALING_GOVERNOR_*`,
+`CPU_ENERGY_PERF_POLICY_*` or charge-threshold keys, those values silently
+override the reddot drop-ins. Keep only global TLP settings in `tlp.conf` and
+put the CPU, ACPI and charge-window policy in the drop-ins.
+
+`tools/check.sh` and `tools/install-extras.sh` warn when `tlp.conf` redefines a
+managed key.
+
 ## Startup and appearance
 
 - Startup commands are managed in Settings → Maintenance → Startup.

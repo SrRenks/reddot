@@ -111,6 +111,8 @@ Item {
     readonly property bool btOn: btAdapter ? btAdapter.enabled === true : false
     readonly property bool surfaceOpen: surface.length > 0
     property bool hoverLatch: false
+    /** Keep the status row alive while its tray menu is a separate overlay window. */
+    property bool trayMenuOpen: false
     /** Set after a keyboard close; prevents the still-hovered pointer from re-latching. */
     property bool suppressHover: false
 
@@ -1493,13 +1495,14 @@ Item {
             Loader {
                 id: statusLoader
                 anchors.verticalCenter: parent.verticalCenter
-                active: hover.live
+                active: hover.live || pill.trayMenuOpen
                 width: item ? item.totalWidth : 0
                 height: item ? item.height : 22 * pill.s
                 sourceComponent: Component {
                     BarStatusRow {
                         pill: pill
                         live: hover.live
+                        onTrayMenuOpenChanged: pill.trayMenuOpen = trayMenuOpen
                     }
                 }
             }

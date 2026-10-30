@@ -38,11 +38,25 @@ check_output 'suse marks zypper backend' suse '@@BACKEND:suse@@'
 fake checkupdates 'printf "check-pkg 1.0 -> 1.1\n"; exit 0'
 check_output 'arch uses checkupdates' arch '^check-pkg 1.0'
 
-# Arch without checkupdates falls back to the cached pacman database.
+# Arch without checkupdates still refreshes a temporary database through
+# fakeroot, so the automatic timer sees updates before a manual -Syu.
 rm "$tmp/bin/checkupdates"
 fake pacman 'printf "pacman-pkg 1.0 -> 1.1\n"'
+cat > "$tmp/bin/fakeroot" <<EOF
+#!/bin/sh
+echo "\$*" >> "$tmp/fakeroot.log"
+while [ "\${1:-}" != "--" ]; do shift; done
+shift
+exec "\$@"
+EOF
+chmod 755 "$tmp/bin/fakeroot"
 check_output 'arch lists pacman name' arch '^pacman-pkg 1.0'
 check_output 'arch marks pacman backend' arch '@@BACKEND:arch@@'
+if grep -q 'pacman -Sy' "$tmp/fakeroot.log"; then
+    ok 'arch refreshes a temporary database without checkupdates'
+else
+    fail 'arch refreshes a temporary database without checkupdates'
+fi
 
 # paru is accepted when yay is not installed.
 fake paru 'printf "paru-pkg 1.0 -> 1.1\n"'

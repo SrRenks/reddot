@@ -18,6 +18,8 @@ Item {
 
     property var pill: null
     property bool live: false
+    /** Keep this row (and its floating tray menu) alive after hover ends. */
+    property bool trayMenuOpen: false
 
     readonly property var statusOrder: {
         var base = BarLayout.statusOrder.slice();
@@ -177,6 +179,7 @@ Item {
         s: pill.s
         barWindow: pill.barWindow
         enabled: root.live
+        onMenuOpenChanged: root.trayMenuOpen = trayItem.menuOpen
     }
 
     Item {

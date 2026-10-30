@@ -46,6 +46,17 @@ if command -v node >/dev/null 2>&1; then
     done
 fi
 
+echo "== tlp precedence =="
+if out=$(sh "$here/check-tlp-conf.sh" 2>&1); then
+    if [ -n "$out" ]; then
+        printf '%s\n' "$out" | sed 's/^/  /'
+    else
+        ok "TLP drop-in precedence"
+    fi
+else
+    bad "TLP drop-in precedence"
+fi
+
 echo "== surfaces =="
 if command -v node >/dev/null 2>&1; then
     if node "$here/check-surfaces.mjs"; then ok "surface catalog"; else bad "surface catalog"; fi
